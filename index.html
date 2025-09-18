@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nibash - Make Your Home Yours</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="images/logo.png" alt="Nibash Logo" class="logo-img">
+            Nibash
+        </div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="header/designers.html">Interior Designers</a>
+            <a href="header/furniture.html">Furniture</a>
+            <a href="header/carpenters.html">Carpenters</a>
+            <a href="header/deshiMritshilpo.html">দেশীয় মৃৎশিল্প</a>
+            <a href="header/electrician.html">Electrician</a>
+            <a href="header/architect.html">Architect</a>
+            <a href="header/blog.html">Blogs</a>
+            <a href="header/contact.html">Contact Us</a>
+        </nav>
+    </header>
+
+
+    <!-- Hero -->
+    <section class="hero">
+        <div>
+            <h1>Make Your Home Yours</h1>
+            <button onclick="openModal()">Explore Your Dream Home</button>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal" id="popup">
+        <div class="modal-content">
+            <h3>Welcome to Nibash!</h3>
+            <a href="users/user.html" class="btn-primary">Sign Up / Log In as Customer</a>
+            <a href="users/vendor.html" class="btn-secondary">Sign Up / Log In as Vendor</a>
+            <p style="font-size:12px; color:gray;">By continuing, you agree to our Terms & Privacy Policy</p>
+            <span class="close-btn" onclick="closeModal()">Close</span>
+        </div>
+    </div>
+
+    <!-- Discover Your Style -->
+    <section>
+        <h2>Discover Your Style</h2>
+        <div class="styles">
+            <div class="style-card"><img src="images/minimalist.jpg" alt="">
+                <p>Minimalist Chic</p>
+            </div>
+            <div class="style-card"><img src="images/bohemian.jpg" alt="">
+                <p>Bohemian Rhapsody</p>
+            </div>
+            <div class="style-card"><img src="images/classic.jpg" alt="">
+                <p>Classic Comfort</p>
+            </div>
+            <div class="style-card"><img src="images/modern.jpg" alt="">
+                <p>Modern Industrial</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flash Sale -->
+    <section>
+        <h2>Flash Sale & Great Deals!</h2>
+        <div class="flash">
+            <div class="flash-card"><img src="images/indoorTree.jpg" alt="">
+                <p>Indoor Tree</p>
+                <p class="price">TK. 2,66,278</p>
+            </div>
+            <div class="flash-card"><img src="images/lamp.jpg" alt="">
+                <p>Lamp</p>
+                <p class="price">TK. 2,66,278</p>
+            </div>
+            <div class="flash-card"><img src="images/singleSofa.jpg" alt="">
+                <p>Single Seater Sofa</p>
+                <p class="price">TK. 2,66,278</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Curated Collections -->
+    <section>
+        <h2>Shop Our Curated Collections</h2>
+        <div class="collections">
+            <div class="designer-card">
+                <img src="images/artist.jpg" alt="">
+                <h4>Asyta Sharra</h4>
+                <p>Designer</p>
+                <div class="stars">★★★★★</div>
+                <button>View Offer</button>
+            </div>
+            <div class="designer-card">
+                <img src="images/artist2.jpg" alt="">
+                <h4>Pgled Taek Klomar</h4>
+                <p>Designer</p>
+                <div class="stars">★★★★☆</div>
+                <button>View Offer</button>
+            </div>
+        </div>
+        <div class="rooms">
+            <div class="room-card"><img src="images/livingroom.jpg">
+                <p>Living Room Furniture</p>
+            </div>
+            <div class="room-card"><img src="images/kitchen.jpg">
+                <p>Kitchen Furniture</p>
+            </div>
+            <div class="room-card"><img src="images/bedroom.jpg">
+                <p>Bedroom Furniture</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How Nibash Works -->
+    <section>
+        <h2>How Nibash Works</h2>
+        <div class="how">
+            <div class="how-card">
+                <img src="https://img.icons8.com/ios/100/search--v1.png" alt="Discover">
+                <p>Discover & Explore</p>
+            </div>
+            <div class="how-card">
+                <img src="https://img.icons8.com/ios/100/handshake--v1.png" alt="Connect">
+                <p>Connect Here</p>
+            </div>
+            <div class="how-card">
+                <img src="https://img.icons8.com/ios/100/home--v1.png" alt="Build">
+                <p>Build Your Home</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            <a href="footer/about.html">About Us</a> |
+            <a href="footer/careers.html">Careers</a> |
+            <a href="footer/privacy.html">Privacy Policy</a> |
+            <a href="footer/terms.html">Terms & Conditions</a> |
+            <a href="footer/faq.html">FAQ</a>
+        </p>
+        <p>©2023 Nibash. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function openModal() { document.getElementById("popup").classList.add("active"); }
+        function closeModal() { document.getElementById("popup").classList.remove("active"); }
+    </script>
+
+</body>
+
+</html>
