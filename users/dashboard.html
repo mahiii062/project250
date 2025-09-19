@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard - Nibash</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+
+<body>
+    <header>
+        <h2>Vendor Dashboard</h2>
+        <button class="logout-btn" onclick="location.href='vendor.html'">Log Out</button>
+    </header>
+
+    <div class="stats" id="statsContainer">
+        <!-- Stats will load here -->
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const isNew = urlParams.get("new") === "true";
+
+        const stats = isNew ? {
+            sales: 0,
+            orders: 0,
+            products: 0,
+            revenue: 0
+        } : {
+            sales: 120,
+            orders: 45,
+            products: 18,
+            revenue: 56000
+        };
+
+        const statsContainer = document.getElementById("statsContainer");
+
+        for (let key in stats) {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `<h2>${stats[key]}</h2><p>${key.charAt(0).toUpperCase() + key.slice(1)}</p>`;
+            statsContainer.appendChild(card);
+        }
+    </script>
+</body>
+
+</html>
