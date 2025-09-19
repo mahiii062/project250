@@ -43,6 +43,20 @@ nav a:hover {
     color: #E89C7C;
 }
 
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-left: 12px;
+  transition: transform 0.2s ease;
+}
+
+.profile-icon:hover {
+  transform: scale(1.1);
+}
+
+
 .hero {
     background: url('../images/login.png') no-repeat center/cover;
     height: 60vh;

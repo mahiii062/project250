@@ -41,12 +41,47 @@
         </form>
     </div>
 
+  
     <script>
-        function toggleForms() {
-            document.getElementById("signupForm").classList.toggle("active");
-            document.getElementById("signinForm").classList.toggle("active");
-        }
-    </script>
+function toggleForms() {
+    document.getElementById("signupForm").classList.toggle("active");
+    document.getElementById("signinForm").classList.toggle("active");
+}
+
+// Handle Sign Up
+document.getElementById("signupForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const name = this.querySelector('input[type="text"]').value;
+    const email = this.querySelector('input[type="email"]').value;
+    const password = this.querySelector('input[type="password"]').value;
+
+    // Save user info in localStorage
+    localStorage.setItem("customerName", name);
+    localStorage.setItem("customerEmail", email);
+    localStorage.setItem("customerPassword", password);
+
+    // Redirect to customer.html
+    window.location.href = "customer.html";
+});
+
+// Handle Sign In
+document.getElementById("signinForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const email = this.querySelector('input[type="email"]').value;
+    const password = this.querySelector('input[type="password"]').value;
+
+    const savedEmail = localStorage.getItem("customerEmail");
+    const savedPassword = localStorage.getItem("customerPassword");
+
+    if(email === savedEmail && password === savedPassword){
+        // Redirect to customer.html on successful login
+        window.location.href = "customer.html";
+    } else {
+        alert("Invalid email or password!");
+    }
+});
+</script>
+
 </body>
 
 </html>
