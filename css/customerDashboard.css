@@ -1,0 +1,349 @@
+/* General */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #faf9f7;
+  color: #333;
+}
+
+/* Header */
+header {
+  background: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+header .logo {
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 22px;
+    font-weight: 600;
+    gap: 10px;
+}
+
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+header nav a {
+  margin-left: 1rem;
+  text-decoration: none;
+  color: #333;
+}
+
+.logout-btn {
+  background: #b71c1c;
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+}
+
+/* Dashboard layout */
+.dashboard {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: white;
+  padding: 1.5rem;
+  border-right: 1px solid #eee;
+  position: relative;
+}
+
+.sidebar h3 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  margin: 0.3rem 0;
+  text-decoration: none;
+  color: #555;
+  border-radius: 6px;
+  position: relative;
+}
+
+.sidebar a:hover {
+  background: #f5efe6;
+  font-weight: 600;
+}
+
+.sidebar a::after {
+  content: "🍂";
+  font-size: 1rem;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Main content */
+.content {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* Cards */
+.card {
+  background: #f5efe6;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
+}
+
+.quick-access {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+/* Avatar */
+.avatar {
+  width: 90px;              
+  height: 90px;
+  background: #7B3F00;       /* inner chocolate circle */
+  color: white;               
+  font-size: 2.5rem;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  margin-left: 2rem;
+  margin-top: 0.8rem;
+  position: relative;
+  z-index: 3;
+}
+
+.avatar::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;              
+  height: 100px;
+  border: 5px solid #7B3F00; 
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;                 
+  background: transparent;
+}
+
+/* Profile info */
+.profile-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem; 
+}
+
+.profile-info p strong {
+  font-weight: 600;
+}
+
+.profile-info p {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+}
+
+/* Containers for avatar and info */
+.avatar-container {
+  display: flex;
+  flex-direction: column;   
+  align-items: center;
+}
+
+.info-container {
+  display: flex;
+  flex-direction: column;   
+}
+button {
+  border: none;       /* remove default border */
+  outline: none;      /* remove focus outline */
+}
+/* Buttons under avatar/info and general buttons row */
+.buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.upload-btn,
+.update-btn,
+.btn,
+.btn.secondary {
+  flex: 1;              
+  min-width: 130px;     
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.upload-btn {
+  background: #C68642;
+  color: white;
+}
+
+.update-btn {
+  background: #7B3F00;
+  color: white;
+}
+
+.btn {
+  background: #f4c797;
+  color: #2e1504df;
+}
+
+.btn.secondary {
+  background: #f3d2b0;
+  color: #2e1504df;
+}
+
+
+.wishlist-container {
+  display: flex;
+  gap: 1rem;                /* space between items */
+  overflow-x: auto;          /* enable horizontal scroll */
+  padding-bottom: 0.5rem;
+  scroll-behavior: smooth;   /* smooth scroll when using buttons */
+}
+
+.wishlist-item {
+  flex: 0 0 auto;            /* don’t shrink, fixed width */
+  width: 120px;              /* adjust width for image + text */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #f9f6f3;
+  padding: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.wishlist-item img {
+  width: 100px;               /* image size */
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+/* Optional: hide scrollbar for clean look */
+.wishlist-container::-webkit-scrollbar {
+  height: 6px;
+}
+.wishlist-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+.wishlist-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.orders-container {
+  display: flex;
+  gap: 1rem;                /* space between orders */
+  overflow-x: auto;          /* horizontal scroll */
+  padding-bottom: 0.5rem;
+  scroll-behavior: smooth;
+  
+}
+
+.order-item {
+  flex: 0 0 auto;           /* don’t shrink */
+  width: 140px;             /* width for image + info */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #f9f6f3;
+  padding: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.order-item img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.order-item p {
+  margin: 0.3rem 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.order-item span {
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+
+.delivered { color: green; }
+.processing { color: orange; }
+.shipped { color: #1E90FF; } /* optional shipped color */
+
+/* Optional: hide scrollbar */
+.orders-container::-webkit-scrollbar {
+  height: 6px;
+}
+.orders-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+.orders-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Grid for Wishlist + Orders */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 columns side by side */
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Activity Feed spans full width */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns of activities */
+  gap: 1rem;
+}
+
+.activity-card {
+  width: 96%;        /* full width of main content */
+  margin-top: 1rem;
+  flex-direction: column;
+
+}
+
+.activity {
+  background: #f9f6f3;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Status */
+.delivered { color: green; font-weight: bold; }
+.processing { color: orange; font-weight: bold; }
