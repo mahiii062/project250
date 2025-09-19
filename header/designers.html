@@ -6,157 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Designers - Nibash</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #f8f8f8;
-            color: #333;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 40px;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Logo + Text */
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            /* space between image and text */
-        }
-
-        .logo img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .logo-text {
-            font-size: 22px;
-            font-weight: 600;
-            color: #E89C7C;
-        }
-
-        .logout-btn {
-            background: #E89C7C;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .profile {
-            max-width: 800px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .designer-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .designer-card {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s;
-            position: relative;
-        }
-
-        .designer-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .designer-card img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            object-fit: cover;
-        }
-
-        .designer-card h3 {
-            margin: 10px 0 5px;
-        }
-
-        .designer-card p {
-            font-size: 14px;
-            color: #555;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .add-btn {
-            margin-top: 30px;
-            background: #4A90E2;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        form {
-            display: none;
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        form.active {
-            display: block;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        button.submit-btn {
-            width: 100%;
-            background: #4A90E2;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/designers.css">
 </head>
 
 <body>
     <header>
         <div class="logo">
-            <img src="../images/logo.png" alt="Nibash Logo">
+            <img src="../images/mainLogo.png" alt="Nibash Logo">
             <span class="logo-text">Nibash</span>
         </div>
         <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
@@ -212,7 +68,7 @@
         function addDesigner() {
             const name = document.getElementById("designerName").value;
             const specialty = document.getElementById("designerSpecialty").value;
-            const image = document.getElementById("designerImage").value || "../images/logo.png";
+            const image = document.getElementById("designerImage").value || "../images/logo2.png";
 
             if (name && specialty) {
                 let designers = JSON.parse(localStorage.getItem("designers")) || [];
