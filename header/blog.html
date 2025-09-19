@@ -6,61 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog - Nibash</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #f8f8f8;
-            color: #333;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 40px;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .logo img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .logo-text {
-            font-size: 22px;
-            font-weight: 600;
-            color: #E89C7C;
-        }
-
-        .logout-btn {
-            background: #E89C7C;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .content {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="../css/blog.css">
 </head>
 
 <body>
@@ -74,8 +20,85 @@
 
     <div class="content">
         <h2>Blog</h2>
-        <p>No blog posts yet.</p>
+        <form id="blogForm">
+            <div class="form-group">
+                <input type="text" id="author" placeholder="Author Name" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="title" placeholder="Blog Title" required>
+            </div>
+            <div class="form-group">
+                <textarea id="contentText" placeholder="Blog Content" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <input type="text" id="imageUrl" placeholder="Image URL (optional)">
+            </div>
+            <button type="submit" class="add-btn">Add Post</button>
+        </form>
+
+        <div class="blog-container" id="blogContainer">
+            <p id="noPosts">No blog posts yet.</p>
+        </div>
     </div>
+
+    <script>
+        const blogForm = document.getElementById("blogForm");
+        const blogContainer = document.getElementById("blogContainer");
+        const noPosts = document.getElementById("noPosts");
+        const defaultImage = "../images/mainLogo.png";
+
+        // Load posts from localStorage
+        let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+        function savePosts() {
+            localStorage.setItem("posts", JSON.stringify(posts));
+        }
+
+        function renderPosts() {
+            blogContainer.innerHTML = "";
+            if (posts.length === 0) {
+                blogContainer.appendChild(noPosts);
+                noPosts.style.display = "block";
+                return;
+            }
+            noPosts.style.display = "none";
+            posts.forEach((post, index) => {
+                const card = document.createElement("div");
+                card.className = "blog-card";
+                card.innerHTML = `
+          <img src="${post.image}" alt="Blog Image">
+          <h3>${post.title}</h3>
+          <p><strong>By:</strong> ${post.author}</p>
+          <p>${post.content}</p>
+          <button class="delete-btn">Delete</button>
+        `;
+                card.querySelector(".delete-btn").addEventListener("click", () => {
+                    posts.splice(index, 1);
+                    savePosts();
+                    renderPosts();
+                });
+                blogContainer.appendChild(card);
+            });
+        }
+
+        // Handle form submission
+        blogForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const author = document.getElementById("author").value;
+            const title = document.getElementById("title").value;
+            const content = document.getElementById("contentText").value;
+            const imageUrl = document.getElementById("imageUrl").value || defaultImage;
+
+            posts.push({ author, title, content, image: imageUrl });
+            savePosts();
+            renderPosts();
+            blogForm.reset();
+        });
+
+        // Initial render
+        renderPosts();
+    </script>
 </body>
 
 </html>

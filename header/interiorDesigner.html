@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Designers - Nibash</title>
+    <title>Interior Designers - Nibash</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/designers.css">
+    <link rel="stylesheet" href="../css/interiorDesigner.css">
 </head>
 
 <body>
@@ -19,15 +19,15 @@
     </header>
 
     <div class="profile">
-        <h2>Our Designers</h2>
-        <p>Meet the creative minds behind Nibash.</p>
+        <h2>Our Interior Designers</h2>
+        <p>Creative interior designers to make your home stylish and comfortable.</p>
 
         <div class="designer-list" id="designerList"></div>
 
         <button class="add-btn" onclick="toggleForm()">+ Add New Designer</button>
 
         <form id="designerForm">
-            <h3>Add Designer</h3>
+            <h3>Add Interior Designer</h3>
             <input type="text" id="designerName" placeholder="Full Name" required>
             <input type="text" id="designerSpecialty" placeholder="Specialty" required>
             <input type="text" id="designerImage" placeholder="Image URL (optional)">
@@ -38,9 +38,9 @@
     <script>
         function loadDesigners() {
             let designers = JSON.parse(localStorage.getItem("designers")) || [
-                { name: "John Doe", specialty: "Minimalist Interior Specialist", image: "../images/artist.jpg" },
-                { name: "Jane Smith", specialty: "Bohemian & Classic Interior Expert", image: "../images/artist2.jpg" },
-                { name: "Alex Johnson", specialty: "Modern & Luxury Space Designer", image: "../images/logo.png" }
+                { name: "Farhana Rahman", specialty: "Modern Interior", image: "../images/artist2.jpg" },
+                { name: "Sakib Hasan", specialty: "Luxury Interior", image: "../images/artist.jpg" },
+                { name: "Moumita Chowdhury", specialty: "Minimalist Interior", image: "../images/artist2.jpg" }
             ];
 
             const list = document.getElementById("designerList");

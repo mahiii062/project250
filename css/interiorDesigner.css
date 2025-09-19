@@ -95,7 +95,6 @@ header {
 .add-btn {
     display: block;
     margin: 20px auto;
-    /* centers the button */
     padding: 12px 20px;
     background: #4A90E2;
     color: white;
@@ -111,7 +110,6 @@ form {
     max-width: 400px;
     margin-left: auto;
     margin-right: auto;
-    /* center the form */
 }
 
 form.active {
