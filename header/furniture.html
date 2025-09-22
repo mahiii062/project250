@@ -56,44 +56,67 @@
             font-weight: 600;
         }
 
+        /* HERO SLIDER */
         .hero {
-            max-width: 1100px;
-            margin: 40px auto;
-            display: flex;
-            gap: 24px;
-            align-items: center;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            position: relative;
+            height: 450px;
+            width: 100%;
             overflow: hidden;
         }
 
-        .hero img {
-            width: 50%;
-            height: 400px;
-            object-fit: cover;
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: left 0.8s ease-in-out;
+        }
+
+        .slide.active {
+            left: 0;
+        }
+
+        .slide.prev {
+            left: -100%;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
         }
 
         .hero-text {
-            padding: 28px;
-            flex: 1;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            max-width: 700px;
         }
 
         .hero-text h1 {
-            font-size: 32px;
+            font-size: 36px;
             margin-bottom: 12px;
-            color: #E89C7C;
+            color: #fff;
         }
 
         .hero-text p {
-            font-size: 15px;
+            font-size: 16px;
             line-height: 1.6;
-            color: #555;
         }
 
         .cta {
             margin-top: 18px;
             display: flex;
+            justify-content: center;
             gap: 12px;
         }
 
@@ -116,10 +139,7 @@
             color: #E89C7C;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
+        /* SECTION */
         .section {
             max-width: 1100px;
             margin: 40px auto;
@@ -172,6 +192,36 @@
             font-weight: 600;
         }
 
+        /* NEW SELLERS SECTION */
+        .sellers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .seller-card {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            background: #fdfdfd;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .seller-card h3 {
+            margin: 8px 0;
+        }
+
+        .contact-btn {
+            margin-top: 8px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            background: #E89C7C;
+            color: white;
+            cursor: pointer;
+        }
+
         .footer {
             margin-top: 50px;
             padding: 20px;
@@ -192,22 +242,27 @@
         </div>
         <nav>
             <a href="../index.html">Home</a>
-            <a href="../users/customerDashboard.html">Dashboard</a>
             <a href="../users/vendor.html">Vendors</a>
             <button class="logout-btn" onclick="window.location.href='../index.html'">Log out</button>
         </nav>
     </header>
 
-    <!-- Hero Section -->
+    <!-- HERO SLIDER -->
     <section class="hero">
-        <img src="../images/furniture_hero.jpg" alt="Furniture Showcase">
+        <div class="slide active" style="background-image: url('../images/furn11.jpg');">
+            <div class="overlay"></div>
+        </div>
+        <div class="slide" style="background-image: url('../images/furn10.jpg');">
+            <div class="overlay"></div>
+        </div>
+        <div class="slide" style="background-image: url('../images/furn9.jpg');">
+            <div class="overlay"></div>
+        </div>
+
         <div class="hero-text">
             <h1>Elegant Handmade Furniture</h1>
-            <p>
-                Discover timeless pieces crafted with passion and precision.
-                Each furniture item tells a story of tradition and modern design,
-                bringing warmth and style to your home.
-            </p>
+            <p>Discover timeless pieces crafted with passion and precision. Each furniture item tells a story of
+                tradition and modern design.</p>
             <div class="cta">
                 <button class="btn primary">Shop Now</button>
                 <button class="btn secondary">Contact Support</button>
@@ -220,27 +275,46 @@
         <h2>Our Furniture Collection</h2>
         <div class="grid">
             <div class="product">
-                <img src="../images/chair.jpg" alt="Wooden Chair">
+                <img src="../images/furn8.jpg" alt="Wooden Chair">
                 <h3>Classic Wooden Chair</h3>
                 <div class="price">$85</div>
             </div>
-
             <div class="product">
-                <img src="../images/sofa.jpg" alt="Handmade Sofa">
+                <img src="../images/furn7.jpg" alt="Handmade Sofa">
                 <h3>Handmade Sofa</h3>
                 <div class="price">$450</div>
             </div>
-
             <div class="product">
-                <img src="../images/table.jpg" alt="Dining Table">
+                <img src="../images/furn6.jpg" alt="Dining Table">
                 <h3>Dining Table Set</h3>
                 <div class="price">$320</div>
             </div>
-
             <div class="product">
-                <img src="../images/shelf.jpg" alt="Wooden Shelf">
+                <img src="../images/furn5.jpg" alt="Wooden Shelf">
                 <h3>Rustic Wooden Shelf</h3>
                 <div class="price">$120</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sellers Section -->
+    <section class="section">
+        <h2>New Sellers Nearby</h2>
+        <div class="sellers">
+            <div class="seller-card">
+                <h3>WoodCraft Hub</h3>
+                <p>Uttara, Dhaka</p>
+                <button class="contact-btn">Message Seller</button>
+            </div>
+            <div class="seller-card">
+                <h3>Elegant Interiors</h3>
+                <p>Banani, Dhaka</p>
+                <button class="contact-btn">Message Seller</button>
+            </div>
+            <div class="seller-card">
+                <h3>Rustic Furniture BD</h3>
+                <p>Dhanmondi, Dhaka</p>
+                <button class="contact-btn">Message Seller</button>
             </div>
         </div>
     </section>
@@ -249,6 +323,29 @@
     <div class="footer">
         © 2025 Nibash. All rights reserved.
     </div>
+
+    <script>
+        // SIMPLE SLIDER AUTO & SWIPE
+        let slides = document.querySelectorAll(".slide");
+        let current = 0;
+
+        function showSlide(next) {
+            slides[current].classList.remove("active");
+            current = (next + slides.length) % slides.length;
+            slides[current].classList.add("active");
+        }
+
+        // Auto change every 5 sec
+        setInterval(() => showSlide(current + 1), 5000);
+
+        // Swipe control
+        let startX = 0;
+        document.querySelector(".hero").addEventListener("mousedown", e => startX = e.clientX);
+        document.querySelector(".hero").addEventListener("mouseup", e => {
+            if (startX - e.clientX > 50) showSlide(current + 1);
+            else if (e.clientX - startX > 50) showSlide(current - 1);
+        });
+    </script>
 </body>
 
 </html>
