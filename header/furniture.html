@@ -18,47 +18,168 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 40px;
+            padding: 12px 40px;
             background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 22px;
+            font-weight: 600;
+            color: #E89C7C;
         }
 
         .logo img {
-            width: 50px;
-            height: 50px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             object-fit: cover;
         }
 
-        .logo-text {
-            font-size: 22px;
-            font-weight: 600;
-            color: #E89C7C;
+        nav a {
+            margin-left: 1rem;
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
         }
 
         .logout-btn {
             background: #E89C7C;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
         }
 
-        .content {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
+        .hero {
+            max-width: 1100px;
+            margin: 40px auto;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            background: #fff;
             border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .hero img {
+            width: 50%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .hero-text {
+            padding: 28px;
+            flex: 1;
+        }
+
+        .hero-text h1 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: #E89C7C;
+        }
+
+        .hero-text p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .cta {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn.primary {
+            background: #E89C7C;
+            color: #fff;
+        }
+
+        .btn.secondary {
+            background: #f3e9e4;
+            color: #E89C7C;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .section {
+            max-width: 1100px;
+            margin: 40px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .section h2 {
+            margin: 0 0 16px;
+            font-size: 22px;
+            color: #444;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
+        }
+
+        .product {
+            background: #fffdfc;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 14px;
             text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: 0.2s;
+        }
+
+        .product:hover {
+            transform: translateY(-4px);
+        }
+
+        .product img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .product h3 {
+            font-size: 16px;
+            margin: 10px 0 4px;
+        }
+
+        .product .price {
+            color: #E89C7C;
+            font-weight: 600;
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            background: #fff;
+            border-top: 1px solid #eee;
         }
     </style>
 </head>
@@ -67,14 +188,66 @@
     <header>
         <div class="logo">
             <img src="../images/mainLogo.png" alt="Nibash Logo">
-            <span class="logo-text">Nibash</span>
+            Nibash
         </div>
-        <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../users/customerDashboard.html">Dashboard</a>
+            <a href="../users/vendor.html">Vendors</a>
+            <button class="logout-btn" onclick="window.location.href='../index.html'">Log out</button>
+        </nav>
     </header>
 
-    <div class="content">
-        <h2>Furniture</h2>
-        <p>No furniture listed yet.</p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <img src="../images/furniture_hero.jpg" alt="Furniture Showcase">
+        <div class="hero-text">
+            <h1>Elegant Handmade Furniture</h1>
+            <p>
+                Discover timeless pieces crafted with passion and precision.
+                Each furniture item tells a story of tradition and modern design,
+                bringing warmth and style to your home.
+            </p>
+            <div class="cta">
+                <button class="btn primary">Shop Now</button>
+                <button class="btn secondary">Contact Support</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Section -->
+    <section class="section">
+        <h2>Our Furniture Collection</h2>
+        <div class="grid">
+            <div class="product">
+                <img src="../images/chair.jpg" alt="Wooden Chair">
+                <h3>Classic Wooden Chair</h3>
+                <div class="price">$85</div>
+            </div>
+
+            <div class="product">
+                <img src="../images/sofa.jpg" alt="Handmade Sofa">
+                <h3>Handmade Sofa</h3>
+                <div class="price">$450</div>
+            </div>
+
+            <div class="product">
+                <img src="../images/table.jpg" alt="Dining Table">
+                <h3>Dining Table Set</h3>
+                <div class="price">$320</div>
+            </div>
+
+            <div class="product">
+                <img src="../images/shelf.jpg" alt="Wooden Shelf">
+                <h3>Rustic Wooden Shelf</h3>
+                <div class="price">$120</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer">
+        © 2025 Nibash. All rights reserved.
     </div>
 </body>
 
