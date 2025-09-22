@@ -1,96 +1,618 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architects - Nibash</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/architect.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Indoor Decoration Items — Nibash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #f0f7f7;
+      --card: #e6f2f2;
+      --accent: #6a9a8f;
+      --muted: #a8c3c0;
+      --soft: #d9ece9;
+      --shadow: rgba(20,20,20,0.06);
+    }
+    *{box-sizing:border-box;font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:#333;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+    }
+
+    /* Header */
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:600; font-size:22px; }
+    .logo-img { width:40px;height:40px;border-radius:50%;object-fit:cover; }
+    header nav a { margin-left: 1rem; text-decoration: none; color: #333; }
+    .logout-btn { background: #6a9a8f; color: white; padding: 0.4rem 1rem; border-radius: 6px; }
+
+    /* layout */
+    .dashboard { display: flex; min-height: calc(100vh - 60px); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: white;
+      padding: 1.5rem;
+      border-right: 1px solid #eee;
+      position: relative;
+    }
+    .sidebar h3 { margin-bottom: 1rem; font-weight: 600; }
+    .sidebar a {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 1rem; margin: 0.3rem 0; text-decoration: none; color: #555;
+      border-radius: 6px; position: relative;
+    }
+    .sidebar a:hover { background: var(--soft); font-weight: 600; }
+    .sidebar a::after { content: "🌿"; font-size: 1rem; opacity: 0.5; pointer-events: none; }
+
+    /* main content */
+    .content { flex: 1; padding: 2rem; }
+
+    /* HERO / SLIDER */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      min-height: 500px;
+      box-shadow: 0 8px 24px var(--shadow);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 28px;
+      gap: 24px;
+      background: #111; /* fallback while images load */
+    }
+    .hero-slider {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .hero-slider .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .hero-slider .slide.active { opacity: 1; transform: scale(1); }
+    /* soft overall tint so text stays readable but images are visible */
+    .hero-slider::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.20) 40%, rgba(0,0,0,0.45) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* hero text overlay (semi-transparent so slide shows through) */
+    .hero-text-overlay {
+      position: relative;
+      z-index: 3;
+      width: min(680px, 63%);
+      background: rgba(255,255,255,0.06); /* very low solid tint to hint image behind */
+      color: #fff;
+      padding: 28px;
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    .hero-text-overlay h1 {
+      margin:0 0 12px 0; font-size:32px; line-height:1.05; font-weight:700;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+    }
+    .hero-text-overlay p { margin:0; opacity:0.95; line-height:1.6; font-size:15px; color: #fff; }
+
+    .cta { margin-top: 18px; display:flex; gap:12px; flex-wrap:wrap; }
+    .btn { border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:600; transition:all .22s ease; }
+    .btn.white { background: rgba(255,255,255,0.95); color:#3a5a52; }
+    .btn.dark  { background: rgba(0,0,0,0.25); color:#fff; border:1px solid rgba(255,255,255,0.15); }
+    .btn.white:hover{ transform: translateY(-3px); }
+    .btn.dark:hover{ transform: translateY(-3px); }
+
+    /* right column thumbnails (optional small preview) */
+    .hero-right-previews {
+      position: relative;
+      z-index: 3;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      width:240px;
+      flex-shrink:0;
+    }
+    .preview-thumb { width:100%; height:120px; border-radius:10px; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,0.2); }
+    .preview-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* slider controls */
+    .hero-controls {
+      position:absolute;
+      z-index: 4;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .hero-controls .dot {
+      width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.4); cursor:pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .hero-controls .dot.active { background: white; transform:scale(1.1); }
+    .hero-arrow {
+      position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.25); color:white;
+      width:40px;height:40px;border-radius:8px; display:flex;align-items:center;justify-content:center; z-index:5; cursor:pointer;
+      border:none;
+    }
+    .hero-arrow:hover { background: rgba(0,0,0,0.4); }
+    .hero-arrow.prev { left:12px; }
+    .hero-arrow.next { right:12px; }
+
+    /* cards row */
+    .card-row { display:flex; gap:18px; margin-top: 18px; flex-wrap:wrap; }
+    .card {
+      background: var(--card);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px var(--shadow);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .card .avatar { width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;border:4px solid #fff;box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+    .progressWrap { height:10px; background:#eee; border-radius:999px; overflow:hidden; margin-top:8px; }
+    .progressFill { height:100%; width:62%; background:#7aa04b; display:block; border-radius:999px; }
+
+    .section { background:var(--card); padding:16px; border-radius:12px; box-shadow:0 6px 18px var(--shadow); margin-bottom:1rem; }
+    .section h3 { margin:0 0 10px 0; font-size:16px; }
+
+    .creationsGrid { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+    .product {
+      background: linear-gradient(180deg,#fff,#f5fafa);
+      padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(0,0,0,0.03);
+      display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; transition:transform .22s ease;
+    }
+    .product:hover { transform: translateY(-6px) }
+    .product img { width:100%; height:150px; object-fit:cover; border-radius:8px; }
+    .contact-seller { font-weight:700; color:white; background-color:var(--accent); padding:10px 20px; border-radius:8px; cursor:pointer; width:100%; border:none; }
+    .contact-seller:hover { background-color:#8ab8ac; }
+
+    /* activity feed */
+    .activity-card { width:100%; margin-top:1rem; }
+    .activity-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:1rem; margin-top:12px; }
+    .activity { background:#f0f7f7; padding:1rem; border-radius:8px; font-size:0.95rem; }
+
+    /* chat modal */
+    .chat-modal { position: fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); z-index: 9999; }
+    .chat-modal.active { display:flex; }
+    .chat-box { width:420px; max-width:94%; background:white; padding:18px; border-radius:10px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .chat-box h4 { margin:0 0 8px 0; }
+    .chat-box .meta { font-size:13px; color:#666; margin-bottom:8px; }
+    .chat-close { float:right; background:transparent; border:none; font-size:20px; cursor:pointer; }
+
+    /* responsive */
+    @media (max-width: 1024px) {
+      .sidebar { display:none; }
+      .content { padding:14px; }
+      .hero { padding:18px; flex-direction:column; gap:16px; min-height:420px; justify-content:flex-start; }
+      .hero-text-overlay { width:100%; }
+      .hero-right-previews { flex-direction:row; width:100%; }
+      .creationsGrid { grid-template-columns: repeat(2,1fr); }
+      .activity-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .creationsGrid { grid-template-columns: 1fr; }
+      .hero-text-overlay h1 { font-size:24px; }
+    }
+  </style>
 </head>
-
 <body>
-    <header>
-        <div class="logo">
-            <img src="../images/mainLogo.png" alt="Nibash Logo">
-            <span class="logo-text">Nibash</span>
+
+  <header>
+    <div class="logo"><img src="../images/mainLogo.png" alt="Nibash Logo" class="logo-img">Nibash</div>
+    <nav>
+      <a href="../users/customer.html">Home</a>
+      <a href="../users/vendor.html">Vendor</a>
+      <a href="../index.html" class="logout-btn">Log out</a>
+    </nav>
+  </header>
+
+  <div class="dashboard">
+    <!-- sidebar -->
+    <aside class="sidebar" aria-label="Account menu">
+      <a href="../users/customerDashboard.html"><h3>My Account</h3></a>
+      <a href="#" class="active">Profile</a>
+      <a href="#">Wishlist</a>
+      <a href="#">Orders</a>
+      <a href="#">Saved Collections</a>
+      <a href="#">Settings</a>
+    </aside>
+
+    <!-- main -->
+    <main class="content">
+
+      <!-- HERO -->
+      <section class="hero" role="banner" aria-label="hero">
+        <!-- slider images (cover entire hero) -->
+        <div class="hero-slider" aria-hidden="true">
+          <div class="slide active" style="background-image:url('../images/i11.jpg')"></div>
+          <div class="slide" style="background-image:url('../images/i13.jpg')"></div>
+          <div class="slide" style="background-image:url('../images/i1.jpg')"></div>
         </div>
-        <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
-    </header>
 
-    <div class="profile">
-        <h2>Our Architects</h2>
-        <p>Professional architects for innovative and functional home designs.</p>
+        <!-- arrows -->
+        <button class="hero-arrow prev" aria-label="Previous slide">‹</button>
+        <button class="hero-arrow next" aria-label="Next slide">›</button>
 
-        <div class="architect-list" id="architectList"></div>
+        <!-- main text overlay -->
+        <div class="hero-text-overlay" aria-live="polite">
+          <h1>Transform Your Space: <br> Elegant Indoor Decor</h1>
+          <p>
+            Discover beautifully crafted indoor decorations that bring harmony and style to your living space.
+            Each piece is thoughtfully designed to create a serene atmosphere that reflects your unique taste.
+            From minimalist accents to statement pieces, find the perfect decor to elevate your home.
+          </p>
+          <div class="cta">
+            <button class="btn white" id="contactSupportBtn">Contact Support</button>
+            <button class="btn dark" id="browseBtn">Browse New Arrivals</button>
+          </div>
+        </div>
 
-        <button class="add-btn" onclick="toggleForm()">+ Add New Architect</button>
+        <!-- optional small image previews on right -->
+        <div class="hero-right-previews" aria-hidden="true">
+          <div class="preview-thumb"><img src="../images/i5.jpg" alt="Wall Art Preview"></div>
+          <div class="preview-thumb"><img src="../images/i7.jpg" alt="Vase Preview"></div>
+          <div class="preview-thumb"><img src="../images/i8.jpg" alt="Candle Holder Preview"></div>
+        </div>
 
-        <form id="architectForm">
-            <h3>Add Architect</h3>
-            <input type="text" id="architectName" placeholder="Full Name" required>
-            <input type="text" id="architectSpecialty" placeholder="Specialty" required>
-            <input type="text" id="architectImage" placeholder="Image URL (optional)">
-            <button type="button" class="submit-btn" onclick="addArchitect()">Add Architect</button>
-        </form>
+        <!-- dots -->
+        <div class="hero-controls" aria-hidden="true"></div>
+      </section>
+
+
+      <!-- small cards row (restored) -->
+      <div class="card-row" style="margin-bottom:8px">
+        <div class="card" style="flex:1">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="avatar"><img src="../images/artist.jpg" alt="designer" style="width:100%;height:100%;object-fit:cover"></div>
+            <div>
+              <div style="font-weight:700">Lead Designer - Sophia Chen</div>
+              <div style="font-size:13px;color:#6a7a77">Known for Minimalist Aesthetics</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="width:360px;align-items:center;justify-content:space-between">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div class="avatar"><img src="../images/artist2.jpg" alt="seller" style="width:100%;height:100%;object-fit:cover"></div>
+            <div>
+              <div style="font-weight:700">Marcus Williams</div>
+              <div style="font-size:13px;color:#6a7a77">Bohemian & Eclectic styles</div>
+              <div class="progressWrap" style="width:260px"><span class="progressFill"></span></div>
+            </div>
+          </div>
+         </div>
+      </div>
+
+      <!-- Nearby Sellers -->
+      <section class="section">
+        <h3>New Sellers Nearby</h3>
+        <div class="card-row">
+          <div class="card" style="flex:1;justify-content:space-between">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="avatar"><img src="../images/artist.jpg" alt="seller"></div>
+              <div>
+                <div style="font-weight:700">Urban Decor Studio</div>
+                <div style="font-size:13px;color:#6a7a77">Dhaka • 2km away</div>
+              </div>
+            </div>
+            <button class="btn white message-btn" data-seller="Urban Decor Studio">Message</button>
+          </div>
+
+          <div class="card" style="flex:1;justify-content:space-between">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="avatar"><img src="../images/artist.jpg" alt="seller"></div>
+              <div>
+                <div style="font-weight:700">Serene Living Designs</div>
+                <div style="font-size:13px;color:#6a7a77">Narayanganj • 5km away</div>
+              </div>
+            </div>
+            <button class="btn white message-btn" data-seller="Serene Living Designs">Message</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Our creations (expanded examples) -->
+      <section class="section" aria-labelledby="our-creations">
+        <h3 id="our-creations">Our Creations</h3>
+        <div class="creationsGrid" style="margin-top:12px">
+          <div class="product">
+            <img src="../images/i2.jpg" alt="Macrame Wall Hanging">
+            <div class="txt">Wooden Rake</div>
+            <div style="font-weight:700;color:var(--accent)">$45</div>
+            <button class="contact-seller" data-product="Macrame Wall Hanging" data-seller="Urban Decor Studio">Contact the seller!</button>
+          </div>
+
+          <div class="product">
+            <img src="../images/i6.jpg" alt="Ceramic Vase">
+            <div class="txt">Curtains</div>
+            <div style="font-weight:700;color:var(--accent)">$30</div>
+            <button class="contact-seller" data-product="Handmade Ceramic Vase" data-seller="Serene Living Designs">Contact the seller!</button>
+          </div>
+
+          <div class="product">
+            <img src="../images/i9.jpg" alt="Wooden Shelf">
+            <div class="txt">Lamp Vase</div>
+            <div style="font-weight:700;color:var(--accent)">$38</div>
+            <button class="contact-seller" data-product="Floating Wooden Shelf" data-seller="Sophia Chen">Contact the seller!</button>
+          </div>
+
+          <div class="product">
+            <img src="../images/i3.jpg" alt="Pendant Light">
+            <div class="txt">Plushy</div>
+            <div style="font-weight:700;color:var(--accent)">$22</div>
+            <button class="contact-seller" data-product="Rattan Pendant Light" data-seller="Urban Decor Studio">Contact the seller!</button>
+          </div>
+
+          <div class="product">
+            <img src="../images/i14.jpg" alt="Candle Set">
+            <div class="txt">Hanging Rake</div>
+            <div style="font-weight:700;color:var(--accent)">$60</div>
+            <button class="contact-seller" data-product="Scented Candle Set" data-seller="Marcus Williams">Contact the seller!</button>
+          </div>
+
+          <div class="product">
+            <img src="../images/i7.jpg" alt="Plant Stand">
+            <div class="txt">Indoor Tree</div>
+            <div style="font-weight:700;color:var(--accent)">$18</div>
+            <button class="contact-seller" data-product="Geometric Plant Stand" data-seller="Serene Living Designs">Contact the seller!</button>
+          </div>
+        </div>
+        <!-- callout -->
+        <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
+          <div style="flex:1;min-width:220px;background:linear-gradient(180deg,#f0f7f7,#e6f2f2);padding:16px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;gap:8px">
+            <strong>Your review of 'Urban Decor Studio' the seller right now!</strong>
+            <small style="color:#6a7a77">Leave a quick star rating to help other buyers</small>
+            <div style="margin-top:8px"><button class="btn white" style="padding:8px 12px">Write a review</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Activity Feed (restored + styled) -->
+      <div class="activity-card card">
+        <h4>Activity Feed</h4>
+        <div class="activity-grid" style="margin-top:10px">
+          <div class="activity">🆕 New wall art collection available!</div>
+          <div class="activity">❤️ Wishlist item "Macrame Wall Hanging" on sale!</div>
+          <div class="activity">🏅 You earned designer badge for sales!</div>
+          <div class="activity">✍️ Your review of "Home Styling Workshop" was approved!</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Chat Modal (used by message and contact buttons) -->
+  <div class="chat-modal" id="chatModal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="chat-box" role="document">
+      <button class="chat-close" id="chatCloseBtn" aria-label="Close chat">✕</button>
+      <h4 id="chatTitle">Message Seller</h4>
+      <div class="meta" id="chatMeta">To: <strong id="chatSeller">—</strong> · Product: <span id="chatProduct">—</span></div>
+      <textarea id="chatMessage" placeholder="Write a short message..." style="width:100%;height:110px;padding:10px;border-radius:8px;border:1px solid #ddd;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+        <button class="btn white" id="chatCancel">Cancel</button>
+        <button class="btn dark" id="chatSend">Send Message</button>
+      </div>
+      <div id="chatStatus" style="margin-top:10px;font-size:13px;color:green;display:none">Message sent ✔</div>
     </div>
+  </div>
 
-    <script>
-        function loadArchitects() {
-            let architects = JSON.parse(localStorage.getItem("architects")) || [
-                { name: "Tanvir Ahmed", specialty: "Residential Architect", image: "../images/artist.jpg" },
-                { name: "Rumana Sultana", specialty: "Interior Architect", image: "../images/artist2.jpg" },
-                { name: "Iqbal Hossain", specialty: "Commercial Architect", image: "../images/artist.jpg" }
-            ];
+  <script>
+    /* ===== HERO SLIDER (touch + mouse drag + arrows + dots + pause) ===== */
+    (function(){
+      const hero = document.querySelector('.hero');
+      const slides = Array.from(document.querySelectorAll('.hero-slider .slide'));
+      const prevBtn = document.querySelector('.hero-arrow.prev');
+      const nextBtn = document.querySelector('.hero-arrow.next');
+      const controls = document.querySelector('.hero-controls');
+      let current = 0;
+      let autoplayInterval = 4000;
+      let timer = null;
+      let isDragging = false;
+      let startX = 0;
+      let moved = 0;
 
-            const list = document.getElementById("architectList");
-            list.innerHTML = "";
+      // create dots
+      slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.dataset.index = i;
+        dot.title = 'Go to slide ' + (i+1);
+        controls.appendChild(dot);
+      });
+      const dots = Array.from(controls.querySelectorAll('.dot'));
 
-            architects.forEach((a, index) => {
-                const card = `
-                    <div class="architect-card">
-                        <button class="delete-btn" onclick="deleteArchitect(${index})">Delete</button>
-                        <img src="${a.image}" alt="${a.name}">
-                        <h3>${a.name}</h3>
-                        <p>${a.specialty}</p>
-                    </div>
-                `;
-                list.innerHTML += card;
-            });
+      function showSlide(index) {
+        index = (index + slides.length) % slides.length;
+        slides.forEach((s,i) => s.classList.toggle('active', i === index));
+        dots.forEach((d,i) => d.classList.toggle('active', i === index));
+        current = index;
+      }
 
-            localStorage.setItem("architects", JSON.stringify(architects));
+      function next() { showSlide(current + 1); }
+      function prev() { showSlide(current - 1); }
+
+      // autoplay
+      function startAutoplay() {
+        stopAutoplay();
+        timer = setInterval(next, autoplayInterval);
+      }
+      function stopAutoplay() {
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+      startAutoplay();
+
+      // arrows
+      nextBtn.addEventListener('click', () => { next(); resetAutoplay(); });
+      prevBtn.addEventListener('click', () => { prev(); resetAutoplay(); });
+
+      // dots click
+      dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          showSlide(Number(dot.dataset.index));
+          resetAutoplay();
+        });
+      });
+
+      // pause on hover/focus
+      hero.addEventListener('mouseenter', stopAutoplay);
+      hero.addEventListener('mouseleave', startAutoplay);
+      hero.addEventListener('focusin', stopAutoplay);
+      hero.addEventListener('focusout', startAutoplay);
+
+      function resetAutoplay() { stopAutoplay(); setTimeout(startAutoplay, 2000); }
+
+      // touch support
+      hero.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        moved = 0;
+      }, {passive:true});
+      hero.addEventListener('touchmove', e => {
+        const dx = e.touches[0].clientX - startX;
+        moved = dx;
+      }, {passive:true});
+      hero.addEventListener('touchend', e => {
+        if (Math.abs(moved) > 50) {
+          if (moved > 0) prev(); else next();
+          resetAutoplay();
         }
+      });
 
-        function toggleForm() {
-            document.getElementById("architectForm").classList.toggle("active");
+      // mouse drag for desktop
+      hero.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        hero.classList.add('dragging');
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        moved = e.clientX - startX;
+      });
+      window.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        hero.classList.remove('dragging');
+        if (Math.abs(moved) > 60) {
+          if (moved > 0) prev(); else next();
+          resetAutoplay();
         }
+        moved = 0;
+      });
 
-        function addArchitect() {
-            const name = document.getElementById("architectName").value;
-            const specialty = document.getElementById("architectSpecialty").value;
-            const image = document.getElementById("architectImage").value || "../images/logo2.png";
+      // keyboard arrows
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') { prev(); resetAutoplay(); }
+        if (e.key === 'ArrowRight') { next(); resetAutoplay(); }
+        if (e.key === 'Escape') closeChat();
+      });
 
-            if (name && specialty) {
-                let architects = JSON.parse(localStorage.getItem("architects")) || [];
-                architects.push({ name, specialty, image });
-                localStorage.setItem("architects", JSON.stringify(architects));
-                loadArchitects();
-                document.getElementById("architectForm").reset();
-                toggleForm();
-            } else {
-                alert("Please fill out all fields.");
-            }
+      // pre-load images (non-blocking)
+      slides.forEach(s => {
+        const url = (s.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+        if (url) {
+          const img = new Image(); img.src = url;
         }
+      });
+    })();
 
-        function deleteArchitect(index) {
-            let architects = JSON.parse(localStorage.getItem("architects")) || [];
-            architects.splice(index, 1);
-            localStorage.setItem("architects", JSON.stringify(architects));
-            loadArchitects();
-        }
+    /* ===== Chat modal logic (used by both 'Message' and 'Contact the seller!') ===== */
+    (function(){
+      const chatModal = document.getElementById('chatModal');
+      const chatSeller = document.getElementById('chatSeller');
+      const chatProduct = document.getElementById('chatProduct');
+      const chatMessage = document.getElementById('chatMessage');
+      const chatStatus = document.getElementById('chatStatus');
+      const chatCloseBtn = document.getElementById('chatCloseBtn');
+      const chatSend = document.getElementById('chatSend');
+      const chatCancel = document.getElementById('chatCancel');
 
-        loadArchitects();
-    </script>
+      // open chat helper
+      function openChat({ seller = '—', product = '—' } = {}) {
+        chatSeller.textContent = seller;
+        chatProduct.textContent = product;
+        chatMessage.value = `Hi ${seller}, I'm interested in "${product}". Can I know more?`;
+        chatStatus.style.display = 'none';
+        chatModal.classList.add('active');
+        chatMessage.focus();
+      }
+
+      // close
+      function closeChat() {
+        chatModal.classList.remove('active');
+      }
+
+      // wire message buttons (nearby sellers)
+      document.querySelectorAll('.message-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const seller = btn.dataset.seller || btn.textContent.trim() || 'Seller';
+          openChat({ seller, product: 'General Inquiry' });
+        });
+      });
+
+      // wire product contact buttons
+      document.querySelectorAll('.contact-seller').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const seller = btn.dataset.seller || 'Seller';
+          const product = btn.dataset.product || 'Product';
+          openChat({ seller, product });
+        });
+      });
+
+      // support header contact support button
+      document.getElementById('contactSupportBtn').addEventListener('click', () => {
+        openChat({ seller: 'Nibash Support', product: 'Support' });
+      });
+
+      // modal actions
+      chatCloseBtn.addEventListener('click', closeChat);
+      chatCancel.addEventListener('click', closeChat);
+
+      chatSend.addEventListener('click', () => {
+        // simulate sending
+        chatStatus.textContent = 'Message sent ✔';
+        chatStatus.style.display = 'block';
+        // small delay then close
+        setTimeout(() => {
+          closeChat();
+        }, 900);
+      });
+
+      // close when clicking outside content
+      chatModal.addEventListener('click', (e) => {
+        if (e.target === chatModal) closeChat();
+      });
+
+      // make closeChat available globally for keyboard ESC used earlier
+      window.closeChat = closeChat;
+    })();
+  </script>
 </body>
-
 </html>
