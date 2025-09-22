@@ -11,6 +11,7 @@
 
 <body>
 
+    <!-- Header -->
     <header>
         <div class="logo">
             <img src="images/mainLogo.png" alt="Nibash Logo" class="logo-img">
@@ -29,8 +30,7 @@
         </nav>
     </header>
 
-
-    <!-- Hero -->
+    <!-- Hero Section -->
     <section class="hero">
         <div>
             <h1>Make Your Home Yours</h1>
@@ -38,7 +38,7 @@
         </div>
     </section>
 
-    <!-- Modal -->
+    <!-- Modal Popup -->
     <div class="modal" id="popup">
         <div class="modal-content">
             <h3>Welcome to Nibash!</h3>
@@ -53,16 +53,20 @@
     <section>
         <h2>Discover Your Style</h2>
         <div class="styles">
-            <div class="style-card"><img src="images/minimalist.jpg" alt="">
+            <div class="style-card">
+                <img src="images/bohemian.jpg" alt="Minimalist Chic">
                 <p>Minimalist Chic</p>
             </div>
-            <div class="style-card"><img src="images/bohemian.jpg" alt="">
+            <div class="style-card">
+                <img src="images/minimalist.jpg" alt="Bohemian Rhapsody">
                 <p>Bohemian Rhapsody</p>
             </div>
-            <div class="style-card"><img src="images/classic.jpg" alt="">
+            <div class="style-card">
+                <img src="images/classic.jpg" alt="Classic Comfort">
                 <p>Classic Comfort</p>
             </div>
-            <div class="style-card"><img src="images/modern.jpg" alt="">
+            <div class="style-card">
+                <img src="images/modern.jpg" alt="Modern Industrial">
                 <p>Modern Industrial</p>
             </div>
         </div>
@@ -72,17 +76,20 @@
     <section>
         <h2>Flash Sale & Great Deals!</h2>
         <div class="flash">
-            <div class="flash-card"><img src="images/indoorTree.jpg" alt="">
+            <div class="flash-card">
+                <img src="images/indoorTree.jpg" alt="Indoor Tree">
                 <p>Indoor Tree</p>
-                <p class="price">TK. 2,66,278</p>
+                <p class="price">TK. 2,66,27</p>
             </div>
-            <div class="flash-card"><img src="images/lamp.jpg" alt="">
+            <div class="flash-card">
+                <img src="images/lamp.jpg" alt="Lamp">
                 <p>Lamp</p>
-                <p class="price">TK. 2,66,278</p>
+                <p class="price">TK. 2,66,27</p>
             </div>
-            <div class="flash-card"><img src="images/singleSofa.jpg" alt="">
+            <div class="flash-card">
+                <img src="images/singleSofa.jpg" alt="Single Seater Sofa">
                 <p>Single Seater Sofa</p>
-                <p class="price">TK. 2,66,278</p>
+                <p class="price">TK. 2,66,27</p>
             </div>
         </div>
     </section>
@@ -92,28 +99,32 @@
         <h2>Shop Our Curated Collections</h2>
         <div class="collections">
             <div class="designer-card">
-                <img src="images/artist.jpg" alt="">
+                <img src="images/artist.jpg" alt="Asyta Sharra">
                 <h4>Asyta Sharra</h4>
                 <p>Designer</p>
                 <div class="stars">★★★★★</div>
                 <button>View Offer</button>
             </div>
             <div class="designer-card">
-                <img src="images/artist2.jpg" alt="">
+                <img src="images/artist2.jpg" alt="Pgled Taek Klomar">
                 <h4>Pgled Taek Klomar</h4>
                 <p>Designer</p>
                 <div class="stars">★★★★☆</div>
                 <button>View Offer</button>
             </div>
         </div>
+
         <div class="rooms">
-            <div class="room-card"><img src="images/livingroom.jpg">
+            <div class="room-card">
+                <img src="images/livingroom.jpg" alt="Living Room Furniture">
                 <p>Living Room Furniture</p>
             </div>
-            <div class="room-card"><img src="images/kitchen.jpg">
+            <div class="room-card">
+                <img src="images/kitchen.jpg" alt="Kitchen Furniture">
                 <p>Kitchen Furniture</p>
             </div>
-            <div class="room-card"><img src="images/bedroom.jpg">
+            <div class="room-card">
+                <img src="images/bedroom.jpg" alt="Bedroom Furniture">
                 <p>Bedroom Furniture</p>
             </div>
         </div>
@@ -124,15 +135,15 @@
         <h2>How Nibash Works</h2>
         <div class="how">
             <div class="how-card">
-                <img src="https://img.icons8.com/ios/100/search--v1.png" alt="Discover">
+                <img src="https://img.icons8.com/ios/100/search--v1.png" alt="Discover & Explore">
                 <p>Discover & Explore</p>
             </div>
             <div class="how-card">
-                <img src="https://img.icons8.com/ios/100/handshake--v1.png" alt="Connect">
+                <img src="https://img.icons8.com/ios/100/handshake--v1.png" alt="Connect Here">
                 <p>Connect Here</p>
             </div>
             <div class="how-card">
-                <img src="https://img.icons8.com/ios/100/home--v1.png" alt="Build">
+                <img src="https://img.icons8.com/ios/100/home--v1.png" alt="Build Your Home">
                 <p>Build Your Home</p>
             </div>
         </div>
@@ -150,6 +161,22 @@
         <p>©2023 Nibash. All Rights Reserved.</p>
     </footer>
 
+    <!-- Chatbot -->
+    <div id="chatbot-button">💬</div>
+    <div id="chatbot-box">
+        <div class="chat-header">Nibash Assistant <span id="close-chat">✖</span></div>
+        <div class="chat-body" id="chat-body">
+            <div class="message assistant">Hi! 👋 I am Nibash Assistant. I can help you with furniture, designers, and
+                home services.</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your question...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/chatbot.js"></script>
     <script>
         function openModal() { document.getElementById("popup").classList.add("active"); }
         function closeModal() { document.getElementById("popup").classList.remove("active"); }
