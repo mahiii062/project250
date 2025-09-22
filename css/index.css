@@ -1,3 +1,4 @@
+/* ================== General Styles ================== */
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
@@ -5,6 +6,12 @@ body {
     color: #333;
 }
 
+h2 {
+    font-size: 28px;
+    margin-bottom: 25px;
+}
+
+/* ================== Header ================== */
 header {
     display: flex;
     justify-content: space-between;
@@ -43,6 +50,7 @@ nav a:hover {
     color: #E89C7C;
 }
 
+/* ================== Hero Section ================== */
 .hero {
     background: url('../images/login.png') no-repeat center/cover;
     height: 60vh;
@@ -69,6 +77,7 @@ nav a:hover {
     font-size: 16px;
 }
 
+/* ================== Sections ================== */
 section {
     padding: 60px 80px;
     background: #fff;
@@ -76,12 +85,7 @@ section {
     border-radius: 12px;
 }
 
-h2 {
-    font-size: 28px;
-    margin-bottom: 25px;
-}
-
-/* Discover Your Style */
+/* ================== Discover Your Style ================== */
 .styles {
     display: flex;
     justify-content: center;
@@ -112,7 +116,7 @@ h2 {
     font-weight: 500;
 }
 
-/* Flash Sale */
+/* ================== Flash Sale ================== */
 .flash {
     display: flex;
     gap: 20px;
@@ -147,7 +151,7 @@ h2 {
     font-weight: bold;
 }
 
-/* Curated Collections */
+/* ================== Curated Collections ================== */
 .collections {
     display: flex;
     gap: 20px;
@@ -220,7 +224,7 @@ h2 {
     margin-bottom: 8px;
 }
 
-/* How Nibash Works */
+/* ================== How Nibash Works ================== */
 .how {
     display: flex;
     justify-content: space-around;
@@ -253,6 +257,7 @@ h2 {
     margin-top: 8px;
 }
 
+/* ================== Footer ================== */
 footer {
     background: #222;
     color: #ddd;
@@ -267,7 +272,7 @@ footer a {
     text-decoration: none;
 }
 
-/* Popup Modal */
+/* ================== Modal Popup ================== */
 .modal {
     position: fixed;
     top: 0;
@@ -322,22 +327,196 @@ footer a {
     cursor: pointer;
 }
 
-/* Responsive Logo */
+/* ================== Chatbot ================== */
+#chatbot-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #6c63ff;
+    color: #fff;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 24px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: 0.3s;
+}
+
+#chatbot-button:hover {
+    transform: scale(1.1);
+}
+
+#chatbot-box {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 350px;
+    max-height: 450px;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.chat-header {
+    background: #6c63ff;
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-body {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background: #f0f0f0;
+}
+
+.chat-input {
+    display: flex;
+    border-top: 1px solid #ccc;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    border-radius: 0 0 0 12px;
+}
+
+.chat-input button {
+    background: #6c63ff;
+    color: #fff;
+    border: none;
+    padding: 0 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+    border-radius: 0 0 12px 0;
+}
+
+.chat-input button:hover {
+    background: #574fd6;
+}
+
+/* ================== Chatbot Messages ================== */
+.message {
+    padding: 10px 14px;
+    margin: 6px 0;
+    border-radius: 12px;
+    max-width: 75%;
+    line-height: 1.4;
+    word-wrap: break-word;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.3s forwards;
+    font-size: 14px;
+}
+
+.message.user {
+    background: #6c63ff;
+    color: white;
+    align-self: flex-end;
+}
+
+.message.assistant {
+    background: #e0e0e0;
+    color: #333;
+    align-self: flex-start;
+}
+
+.message.typing::after {
+    content: "…";
+    animation: blink 1s infinite;
+}
+
+.message .timestamp {
+    display: block;
+    font-size: 10px;
+    color: #666;
+    margin-top: 4px;
+    text-align: right;
+}
+
+/* ================== Quick Suggestion Buttons ================== */
+.suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-start;
+    margin-top: 5px;
+}
+
+.suggestion-btn {
+    background: #6c63ff;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.3s;
+}
+
+.suggestion-btn:hover {
+    background: #574fd6;
+}
+
+/* ================== Animations ================== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blink {
+
+    0%,
+    50%,
+    100% {
+        opacity: 0;
+    }
+
+    25%,
+    75% {
+        opacity: 1;
+    }
+}
+
+/* ================== Scrollbar ================== */
+.chat-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-body::-webkit-scrollbar-thumb {
+    background: rgba(108, 99, 255, 0.5);
+    border-radius: 3px;
+}
+
+.chat-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ================== Responsive ================== */
 @media (max-width: 768px) {
-    .logo-img {
-        width: 30px;
-        height: 30px;
-    }
-
-    .logo {
-        font-size: 18px;
-    }
-
-    nav a {
-        margin: 0 10px;
-        font-size: 14px;
-    }
-
     .hero h1 {
         font-size: 36px;
     }
@@ -345,6 +524,20 @@ footer a {
     .hero button {
         padding: 10px 20px;
         font-size: 14px;
+    }
+
+    nav a {
+        margin: 0 10px;
+        font-size: 14px;
+    }
+
+    .logo {
+        font-size: 18px;
+    }
+
+    .logo-img {
+        width: 30px;
+        height: 30px;
     }
 }
 
@@ -369,5 +562,10 @@ footer a {
     .hero button {
         padding: 8px 16px;
         font-size: 12px;
+    }
+
+    #chatbot-box {
+        width: 90%;
+        bottom: 70px;
     }
 }
