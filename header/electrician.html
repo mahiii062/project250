@@ -5,79 +5,446 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Services - Nibash</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/electrician.css">
+  <style>
+    :root{
+      --bg: #faf9f7;
+      --card: #f5efe6;
+      --accent: #8a5a3a;
+      --muted: #bfb6ad;
+      --soft: #f1e8dd;
+      --shadow: rgba(20,20,20,0.06);
+    }
+    *{box-sizing:border-box;font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:#333;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+    }
+
+    /* Header */
+    header {
+      background: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .logo { display:flex; align-items:center; gap:10px; font-weight:600; font-size:22px; }
+    .logo-img { width:40px;height:40px;border-radius:50%;object-fit:cover; }
+    header nav a { margin-left: 1rem; text-decoration: none; color: #333; }
+    .logout-btn { background: #b71c1c; color: white; padding: 0.4rem 1rem; border-radius: 6px; }
+
+    /* layout */
+    .dashboard { display: flex; min-height: calc(100vh - 60px); }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: white;
+      padding: 1.5rem;
+      border-right: 1px solid #eee;
+      position: relative;
+    }
+    .sidebar h3 { margin-bottom: 1rem; font-weight: 600; }
+    .sidebar a {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.6rem 1rem; margin: 0.3rem 0; text-decoration: none; color: #555;
+      border-radius: 6px; position: relative;
+    }
+    .sidebar a:hover { background: #f5efe6; font-weight: 600; }
+    .sidebar a::after { content: "🍂"; font-size: 1rem; opacity: 0.5; pointer-events: none; }
+
+    /* main content */
+    .content { flex: 1; padding: 2rem; }
+
+    /* HERO / SLIDER */
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      min-height: 400px;
+      box-shadow: 0 8px 24px var(--shadow);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 28px;
+      gap: 24px;
+      background: linear-gradient(135deg, #2c3e50, #4a2c18);
+    }
+    .hero-text-overlay {
+      position: relative;
+      z-index: 3;
+      width: min(680px, 63%);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      padding: 28px;
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    }
+    .hero-text-overlay h1 {
+      margin:0 0 12px 0; font-size:32px; line-height:1.05; font-weight:700;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+    }
+    .hero-text-overlay p { margin:0; opacity:0.95; line-height:1.6; font-size:15px; color: #fff; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+      background: white;
+      padding: 8px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .tab {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Controls */
+    .controls {
+      background: var(--card);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px var(--shadow);
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+    .search {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex: 1;
+      min-width: 300px;
+    }
+    .search input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--muted);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .filters {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .filters label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .filters select, .filters input {
+      padding: 8px 12px;
+      border: 1px solid var(--muted);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .add-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .add-btn:hover {
+      background: #d38b5f;
+      transform: translateY(-2px);
+    }
+
+    /* Service Cards */
+    .services {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .sub-section h2 {
+      margin: 0 0 1rem 0;
+      font-size: 1.5rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .service-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+    .service-card {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px var(--shadow);
+      transition: transform 0.2s ease;
+    }
+    .service-card:hover {
+      transform: translateY(-4px);
+    }
+    .card-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .card-top img {
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 3px solid white;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    .card-info h3 {
+      margin: 0 0 4px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .meta {
+      margin: 0 0 6px 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: #ffa500;
+    }
+    .rating-num {
+      color: #666;
+      font-weight: 600;
+    }
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      flex: 1;
+    }
+    .btn.small {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--muted);
+      color: #666;
+    }
+    .btn.danger {
+      background: #dc3545;
+      color: white;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Modals */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-card {
+      width: 420px;
+      max-width: 94%;
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .modal-close {
+      float: right;
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #666;
+    }
+    .modal-card h3 {
+      margin: 0 0 16px 0;
+      font-size: 1.3rem;
+      color: var(--accent);
+    }
+    .modal-card label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .modal-card input, .modal-card textarea, .modal-card select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--muted);
+      border-radius: 6px;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+    .empty {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 2rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar { display: none; }
+      .content { padding: 1rem; }
+      .hero { min-height: 300px; padding: 1.5rem; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search { min-width: auto; }
+    }
+    @media (max-width: 600px) {
+      .service-list { grid-template-columns: 1fr; }
+      .hero-text-overlay h1 { font-size: 24px; }
+      .card-actions { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="logo">
-      <img src="../images/mainLogo.png" alt="Nibash Logo" />
-      <span class="logo-text">Nibash</span>
-    </div>
-    <div class="header-actions">
-      <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
-    </div>
+
+  <header>
+    <div class="logo"><img src="../images/mainLogo.png" alt="Nibash Logo" class="logo-img">Nibash</div>
+    <nav>
+      <a href="../users/customer.html">Home</a>
+      <a href="../users/vendor.html">Vendor</a>
+      <a href="../index.html" class="logout-btn">Log out</a>
+    </nav>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Find Trusted Home Service Professionals</h1>
-      <p>Electricians & Plumbers — highest rated, near you, and easy to contact.</p>
-    </section>
+  <div class="dashboard">
+    <!-- sidebar -->
+    <aside class="sidebar" aria-label="Account menu">
+      <a href="../users/customerDashboard.html"><h3>My Account</h3></a>
+      <a href="#" class="active">Profile</a>
+      <a href="#">Wishlist</a>
+      <a href="#">Orders</a>
+      <a href="#">Saved Collections</a>
+      <a href="#">Settings</a>
+    </aside>
 
-    <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="electrician">Electricians</button>
-      <button class="tab" data-tab="plumber">Plumbers</button>
-       <button class="tab" data-tab="painter">Painters</button>
-    </nav>
+    <!-- main -->
+    <main class="content">
 
-    <section class="controls">
-      <div class="search">
-        <input id="searchInput" type="text" placeholder="Search by name or location..." />
-        <button id="searchBtn">Search</button>
-        <button id="clearSearchBtn" title="Clear search">✕</button>
-      </div>
+      <!-- HERO -->
+      <section class="hero" role="banner" aria-label="hero">
+        <div class="hero-text-overlay" aria-live="polite">
+          <h1>Find Trusted Home Service Professionals</h1>
+          <p>
+            Electricians, Plumbers & Painters — highest rated, near you, and easy to contact. 
+            Connect with skilled professionals for all your home service needs.
+          </p>
+        </div>
+      </section>
 
-      <div class="filters">
-        <label>
-          Sort:
-          <select id="sortSelect">
-            <option value="recommended">Recommended</option>
-            <option value="rating-desc">Rating: High → Low</option>
-            <option value="rating-asc">Rating: Low → High</option>
-            <option value="name-asc">Name A → Z</option>
-          </select>
-        </label>
+      <!-- Tabs -->
+      <nav class="tabs" role="tablist">
+        <button class="tab active" data-tab="electrician">Electricians</button>
+        <button class="tab" data-tab="plumber">Plumbers</button>
+        <button class="tab" data-tab="painter">Painters</button>
+      </nav>
 
-        <label>
-          "Near you" location:
-          <input id="userLocation" type="text" placeholder="e.g., Dhaka" />
-        </label>
+      <!-- Controls -->
+      <section class="controls">
+        <div class="search">
+          <input id="searchInput" type="text" placeholder="Search by name or location..." />
+          <button class="btn primary" id="searchBtn">Search</button>
+          <button class="btn ghost" id="clearSearchBtn" title="Clear search">✕</button>
+        </div>
 
-        <button id="addBtn" class="add-btn">+ Add New</button>
-      </div>
-    </section>
+        <div class="filters">
+          <label>
+            Sort:
+            <select id="sortSelect">
+              <option value="recommended">Recommended</option>
+              <option value="rating-desc">Rating: High → Low</option>
+              <option value="rating-asc">Rating: Low → High</option>
+              <option value="name-asc">Name A → Z</option>
+            </select>
+          </label>
 
-    <section id="serviceArea" class="services">
-      <!-- dynamic content: Highest rated and Near you lists -->
-      <div class="sub-section">
-        <h2 id="highestTitle">Highest Rated</h2>
-        <div id="highestList" class="service-list"></div>
-      </div>
+          <label>
+            "Near you" location:
+            <input id="userLocation" type="text" placeholder="e.g., Dhaka" />
+          </label>
 
-      <div class="sub-section">
-        <h2 id="nearTitle">Near You</h2>
-        <div id="nearList" class="service-list"></div>
-      </div>
+          <button id="addBtn" class="add-btn">+ Add New</button>
+        </div>
+      </section>
 
-      <div class="sub-section">
-        <h2 id="allTitle">All Professionals</h2>
-        <div id="allList" class="service-list"></div>
-      </div>
-    </section>
-  </main>
+      <!-- Services Sections -->
+      <section id="serviceArea" class="services">
+        <div class="sub-section">
+          <h2 id="highestTitle">Highest Rated</h2>
+          <div id="highestList" class="service-list"></div>
+        </div>
 
-  <!-- Add / Edit Form Modal -->
-  <div id="formModal" class="modal hidden" role="dialog" aria-modal="true">
+        <div class="sub-section">
+          <h2 id="nearTitle">Near You</h2>
+          <div id="nearList" class="service-list"></div>
+        </div>
+
+        <div class="sub-section">
+          <h2 id="allTitle">All Professionals</h2>
+          <div id="allList" class="service-list"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Add/Edit Form Modal -->
+  <div id="formModal" class="modal" role="dialog" aria-modal="true">
     <div class="modal-card">
       <button class="modal-close" onclick="closeForm()">✕</button>
       <h3 id="formTitle">Add Professional</h3>
@@ -105,7 +472,7 @@
         </label>
 
         <div class="modal-actions">
-          <button type="button" class="btn" onclick="submitForm()">Save</button>
+          <button type="button" class="btn primary" onclick="submitForm()">Save</button>
           <button type="button" class="btn ghost" onclick="closeForm()">Cancel</button>
         </div>
       </form>
@@ -113,7 +480,7 @@
   </div>
 
   <!-- Contact Modal -->
-  <div id="contactModal" class="modal hidden" role="dialog" aria-modal="true">
+  <div id="contactModal" class="modal" role="dialog" aria-modal="true">
     <div class="modal-card">
       <button class="modal-close" onclick="closeContact()">✕</button>
       <h3>Contact <span id="contactName"></span></h3>
@@ -129,11 +496,13 @@
         </label>
 
         <div class="modal-actions">
-          <button type="submit" class="btn">Send Message</button>
+          <button type="submit" class="btn primary">Send Message</button>
           <button type="button" class="btn ghost" onclick="closeContact()">Cancel</button>
         </div>
 
-        <p class="contact-note">Tip: you can wire this to an email/WhatsApp or an API to actually send messages.</p>
+        <p class="contact-note" style="font-size: 0.8rem; color: #666; margin-top: 1rem;">
+          Tip: you can wire this to an email/WhatsApp or an API to actually send messages.
+        </p>
       </form>
     </div>
   </div>
@@ -143,36 +512,34 @@
        Data model and persistence
        ---------------------------- */
     const defaultElectricians = [
-      { name: "Rashid Karim", location: "Dhaka", rating: 5, image: "../images/.jpg" },
+      { name: "Rashid Karim", location: "Dhaka", rating: 5, image: "../images/artist.jpg" },
       { name: "Aminul Haque", location: "Chattogram", rating: 4.5, image: "../images/artist2.jpg" }
     ];
     const defaultPlumbers = [
       { name: "Jamal Uddin", location: "Dhaka", rating: 5, image: "../images/artist.jpg" },
       { name: "Kamal Hossain", location: "Sylhet", rating: 4, image: "../images/artist2.jpg" }
     ];
-    /* Default demo data for painters */
     const defaultPainters = [
-        { name: "Sadia Akter", location: "Dhaka", rating: 5, image: "../images/artist1.jpg" },
-  { name: "Tariq Islam", location: "Chattogram", rating: 4.5, image: "../images/artist1.jpg" },
-  { name: "Farzana Rahman", location: "Sylhet", rating: 4, image: "../images/artist1.jpg" },
-  { name: "Rafiq Ahmed", location: "Dhaka", rating: 4.5, image: "../images/artist1.jpg" } // near you example
-];
-
+      { name: "Sadia Akter", location: "Dhaka", rating: 5, image: "../images/artist1.jpg" },
+      { name: "Tariq Islam", location: "Chattogram", rating: 4.5, image: "../images/artist1.jpg" },
+      { name: "Farzana Rahman", location: "Sylhet", rating: 4, image: "../images/artist1.jpg" },
+      { name: "Rafiq Ahmed", location: "Dhaka", rating: 4.5, image: "../images/artist1.jpg" }
+    ];
 
     function getKey(type) { return type + "s"; }
-  /* Update storage functions to include painters */
-function loadFromStorage(type) {
-  const raw = localStorage.getItem(getKey(type));
-  if (!raw) {
-    let initial;
-    if (type === "electrician") initial = defaultElectricians;
-    else if (type === "plumber") initial = defaultPlumbers;
-    else if (type === "painter") initial = defaultPainters;
-    localStorage.setItem(getKey(type), JSON.stringify(initial));
-    return initial.slice();
-  }
-  try { return JSON.parse(raw); } catch { return []; }
-}
+    
+    function loadFromStorage(type) {
+      const raw = localStorage.getItem(getKey(type));
+      if (!raw) {
+        let initial;
+        if (type === "electrician") initial = defaultElectricians;
+        else if (type === "plumber") initial = defaultPlumbers;
+        else if (type === "painter") initial = defaultPainters;
+        localStorage.setItem(getKey(type), JSON.stringify(initial));
+        return initial.slice();
+      }
+      try { return JSON.parse(raw); } catch { return []; }
+    }
 
     function saveToStorage(type, arr) { localStorage.setItem(getKey(type), JSON.stringify(arr)); }
 
@@ -209,7 +576,6 @@ function loadFromStorage(type) {
     function switchTab(tab) {
       activeTab = tab;
       tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
-      // update add button target
       document.getElementById("formTitle").textContent = `Add ${capitalize(tab)}`;
       document.getElementById("serviceType").value = tab;
       render();
@@ -242,13 +608,12 @@ function loadFromStorage(type) {
       if (sort === "rating-desc") all.sort((a,b)=>b.rating - a.rating);
       else if (sort === "rating-asc") all.sort((a,b)=>a.rating - b.rating);
       else if (sort === "name-asc") all.sort((a,b)=> a.name.localeCompare(b.name));
-      // "recommended" default: sort by rating desc then name
       else if (sort === "recommended") all.sort((a,b)=> b.rating - a.rating || a.name.localeCompare(b.name));
 
       document.getElementById("highestList").innerHTML = renderCards(highest, type);
       document.getElementById("nearList").innerHTML = renderCards(near, type);
       document.getElementById("allList").innerHTML = renderCards(all, type, true);
-      // Titles reflect active tab
+      
       document.getElementById("highestTitle").textContent = `Highest Rated ${capitalize(type)}s`;
       document.getElementById("nearTitle").textContent = `${capitalize(type)}s Near "${userLocation.value || '...' }"`;
       document.getElementById("allTitle").textContent = `All ${capitalize(type)}s`;
@@ -256,10 +621,8 @@ function loadFromStorage(type) {
 
     function renderCards(list, type, includeIndex = false) {
       if (!list || list.length === 0) return `<p class="empty">No results.</p>`;
-      // generate HTML; index used for delete/edit actions uses index from full storage
       const storage = loadFromStorage(type);
       return list.map(item => {
-        // find first matching index in storage (works even if filtered)
         const index = storage.findIndex(s => s.name === item.name && s.location === item.location && String(s.rating) === String(item.rating));
         return cardHtml(item, type, index);
       }).join("");
@@ -280,7 +643,7 @@ function loadFromStorage(type) {
           </div>
 
           <div class="card-actions">
-            <button class="btn small" onclick="openContact('${escapeJs(item.name)}')">Message</button>
+            <button class="btn primary small" onclick="openContact('${escapeJs(item.name)}')">Message</button>
             <button class="btn ghost small" onclick="openForm('edit', '${type}', ${index})">Edit</button>
             <button class="btn danger small" onclick="deleteItem('${type}', ${index})">Delete</button>
           </div>
@@ -300,18 +663,16 @@ function loadFromStorage(type) {
        ---------------------------- */
     function openForm(mode='add', type = null, index = -1) {
       const modal = document.getElementById("formModal");
-      modal.classList.remove("hidden");
-      const formTitle = document.getElementById("formTitle");
+      modal.classList.add("active");
       document.getElementById("serviceType").value = type || activeTab;
       document.getElementById("editIndex").value = index;
 
       if (mode === "add") {
-        formTitle.textContent = `Add ${capitalize(type || activeTab)}`;
+        document.getElementById("formTitle").textContent = `Add ${capitalize(type || activeTab)}`;
         document.getElementById("serviceForm").reset();
         document.getElementById("ratingInput").value = 5;
       } else {
-        // edit: populate fields
-        formTitle.textContent = `Edit ${capitalize(type)}`;
+        document.getElementById("formTitle").textContent = `Edit ${capitalize(type)}`;
         const arr = loadFromStorage(type);
         const item = arr[index];
         if (item) {
@@ -322,7 +683,8 @@ function loadFromStorage(type) {
         }
       }
     }
-    function closeForm() { document.getElementById("formModal").classList.add("hidden"); }
+
+    function closeForm() { document.getElementById("formModal").classList.remove("active"); }
 
     function submitForm() {
       const type = document.getElementById("serviceType").value;
@@ -357,22 +719,23 @@ function loadFromStorage(type) {
     }
 
     /* ----------------------------
-       Contact modal (simulated send)
+       Contact modal
        ---------------------------- */
     function openContact(name) {
       document.getElementById("contactName").textContent = name;
       document.getElementById("contacterName").value = "";
       document.getElementById("contactMessage").value = "";
-      document.getElementById("contactModal").classList.remove("hidden");
+      document.getElementById("contactModal").classList.add("active");
     }
-    function closeContact() { document.getElementById("contactModal").classList.add("hidden"); }
+
+    function closeContact() { document.getElementById("contactModal").classList.remove("active"); }
+
     function sendContact(e) {
       e.preventDefault();
       const to = document.getElementById("contactName").textContent;
       const sender = document.getElementById("contacterName").value.trim();
       const msg = document.getElementById("contactMessage").value.trim();
       if (!sender || !msg) { alert("Please fill name and message."); return; }
-      // Simulate sending — replace with API call or mailto/WhatsApp link if desired
       alert(`Message sent to ${to}:\n\nFrom: ${sender}\n\n${msg}`);
       closeContact();
     }
@@ -387,14 +750,13 @@ function loadFromStorage(type) {
     }
     function escapeJs(s) { return s.replace(/'/g, "\\'"); }
 
-    // wire form open when clicking "Add New"
+    // Initialize
     document.getElementById("addBtn").addEventListener("click", () => {
       document.getElementById("serviceType").value = activeTab;
       document.getElementById("editIndex").value = -1;
       openForm("add", activeTab, -1);
     });
 
-    // start
     init();
   </script>
 </body>
