@@ -34,30 +34,30 @@
     </nav>
   </header>
 
- <!-- Hero -->
-<section class="hero">
-  <div>
-    <h1 id="welcomeMessage">Welcome Back, Customer</h1>
-    <button onclick="openModal()">Explore Your Dashboard</button>
-  </div>
-</section>
+  <!-- Hero -->
+  <section class="hero">
+    <div>
+      <h1 id="welcomeMessage">Welcome Back, Customer</h1>
+      <button onclick="openModal()">Explore Your Dashboard</button>
+    </div>
+  </section>
 
-<script>
-  function openModal() { document.getElementById("popup").classList.add("active"); }
-  function closeModal() { document.getElementById("popup").classList.remove("active"); }
+  <script>
+    function openModal() { document.getElementById("popup").classList.add("active"); }
+    function closeModal() { document.getElementById("popup").classList.remove("active"); }
 
-  // Show logged-in customer's name
-  const customerName = localStorage.getItem("customerName");
-  if(customerName){
+    // Show logged-in customer's name
+    const customerName = localStorage.getItem("customerName");
+    if (customerName) {
       document.getElementById("welcomeMessage").textContent = `Welcome Back, ${customerName}`;
-  }
-</script>
+    }
+  </script>
 
   <!-- Modal -->
   <div class="modal" id="popup">
     <div class="modal-content">
       <h3>Welcome to Nibash!</h3>
-      <a href="vendor.html" class="btn-secondary">Sign Up / Log In as Vendor</a>
+      <a href="vendorAuth.html" class="btn-secondary">Sign Up / Log In as Vendor</a>
       <a href="customerDashboard.html" class="btn-primary">Continue as Customer</a>
       <p style="font-size:12px; color:gray;">By continuing, you agree to our Terms & Privacy Policy</p>
       <span class="close-btn" onclick="closeModal()">Close</span>
@@ -171,4 +171,5 @@
   </script>
 
 </body>
+
 </html>
