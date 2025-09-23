@@ -1,92 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Electrician - Nibash</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #f8f8f8;
-            color: #333;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 40px;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 22px;
-            font-weight: 600;
-        }
-
-        .logo img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-        }
-
-        .logout-btn {
-            background: #E89C7C;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .profile {
-            max-width: 800px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .card {
-            background: #f9f9f9;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 10px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Services - Nibash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/electrician.css">
 </head>
-
 <body>
-    <header>
-        <div class="logo">
-            <img src="../images/mainLogo.png" alt="Nibash Logo">
-            Nibash
-        </div>
-        <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
-    </header>
-
-    <div class="profile">
-        <h2>Electricians</h2>
-        <p>No electricians registered yet.</p>
-
-        <!-- Example Card -->
-        <!--
-        <div class="card">
-            <h3>Electrician Name</h3>
-            <p>Specialty: Wiring & Electrical Maintenance</p>
-        </div>
-        -->
+  <header class="site-header">
+    <div class="logo">
+      <img src="../images/mainLogo.png" alt="Nibash Logo" />
+      <span class="logo-text">Nibash</span>
     </div>
-</body>
+    <div class="header-actions">
+      <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
+    </div>
+  </header>
 
+  <main class="container">
+    <section class="hero">
+      <h1>Find Trusted Home Service Professionals</h1>
+      <p>Electricians & Plumbers — highest rated, near you, and easy to contact.</p>
+    </section>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="electrician">Electricians</button>
+      <button class="tab" data-tab="plumber">Plumbers</button>
+       <button class="tab" data-tab="painter">Painters</button>
+    </nav>
+
+    <section class="controls">
+      <div class="search">
+        <input id="searchInput" type="text" placeholder="Search by name or location..." />
+        <button id="searchBtn">Search</button>
+        <button id="clearSearchBtn" title="Clear search">✕</button>
+      </div>
+
+      <div class="filters">
+        <label>
+          Sort:
+          <select id="sortSelect">
+            <option value="recommended">Recommended</option>
+            <option value="rating-desc">Rating: High → Low</option>
+            <option value="rating-asc">Rating: Low → High</option>
+            <option value="name-asc">Name A → Z</option>
+          </select>
+        </label>
+
+        <label>
+          "Near you" location:
+          <input id="userLocation" type="text" placeholder="e.g., Dhaka" />
+        </label>
+
+        <button id="addBtn" class="add-btn">+ Add New</button>
+      </div>
+    </section>
+
+    <section id="serviceArea" class="services">
+      <!-- dynamic content: Highest rated and Near you lists -->
+      <div class="sub-section">
+        <h2 id="highestTitle">Highest Rated</h2>
+        <div id="highestList" class="service-list"></div>
+      </div>
+
+      <div class="sub-section">
+        <h2 id="nearTitle">Near You</h2>
+        <div id="nearList" class="service-list"></div>
+      </div>
+
+      <div class="sub-section">
+        <h2 id="allTitle">All Professionals</h2>
+        <div id="allList" class="service-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add / Edit Form Modal -->
+  <div id="formModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeForm()">✕</button>
+      <h3 id="formTitle">Add Professional</h3>
+      <form id="serviceForm">
+        <input type="hidden" id="serviceType" value="electrician">
+        <input type="hidden" id="editIndex" value="-1">
+        <label>
+          Full name
+          <input id="nameInput" type="text" required />
+        </label>
+
+        <label>
+          Location
+          <input id="locationInput" type="text" required />
+        </label>
+
+        <label>
+          Rating (1-5)
+          <input id="ratingInput" type="number" min="1" max="5" step="0.5" value="5" required />
+        </label>
+
+        <label>
+          Image URL (optional)
+          <input id="imageInput" type="text" placeholder="../images/logo2.png" />
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="submitForm()">Save</button>
+          <button type="button" class="btn ghost" onclick="closeForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contact Modal -->
+  <div id="contactModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeContact()">✕</button>
+      <h3>Contact <span id="contactName"></span></h3>
+      <form id="contactForm" onsubmit="sendContact(event)">
+        <label>
+          Your name
+          <input id="contacterName" type="text" required />
+        </label>
+
+        <label>
+          Message
+          <textarea id="contactMessage" rows="4" placeholder="Describe the problem or request..." required></textarea>
+        </label>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn">Send Message</button>
+          <button type="button" class="btn ghost" onclick="closeContact()">Cancel</button>
+        </div>
+
+        <p class="contact-note">Tip: you can wire this to an email/WhatsApp or an API to actually send messages.</p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* ----------------------------
+       Data model and persistence
+       ---------------------------- */
+    const defaultElectricians = [
+      { name: "Rashid Karim", location: "Dhaka", rating: 5, image: "../images/artist.jpg" },
+      { name: "Aminul Haque", location: "Chattogram", rating: 4.5, image: "../images/artist2.jpg" }
+    ];
+    const defaultPlumbers = [
+      { name: "Jamal Uddin", location: "Dhaka", rating: 5, image: "../images/artist.jpg" },
+      { name: "Kamal Hossain", location: "Sylhet", rating: 4, image: "../images/artist2.jpg" }
+    ];
+    /* Default demo data for painters */
+    const defaultPainters = [
+        { name: "Sadia Akter", location: "Dhaka", rating: 5, image: "../images/artist1.jpg" },
+  { name: "Tariq Islam", location: "Chattogram", rating: 4.5, image: "../images/artist1.jpg" },
+  { name: "Farzana Rahman", location: "Sylhet", rating: 4, image: "../images/artist1.jpg" },
+  { name: "Rafiq Ahmed", location: "Dhaka", rating: 4.5, image: "../images/artist1.jpg" } // near you example
+];
+
+
+    function getKey(type) { return type + "s"; }
+  /* Update storage functions to include painters */
+function loadFromStorage(type) {
+  const raw = localStorage.getItem(getKey(type));
+  if (!raw) {
+    let initial;
+    if (type === "electrician") initial = defaultElectricians;
+    else if (type === "plumber") initial = defaultPlumbers;
+    else if (type === "painter") initial = defaultPainters;
+    localStorage.setItem(getKey(type), JSON.stringify(initial));
+    return initial.slice();
+  }
+  try { return JSON.parse(raw); } catch { return []; }
+}
+
+    function saveToStorage(type, arr) { localStorage.setItem(getKey(type), JSON.stringify(arr)); }
+
+    /* ----------------------------
+       UI state
+       ---------------------------- */
+    let activeTab = "electrician";
+    const tabs = document.querySelectorAll(".tab");
+    const searchInput = document.getElementById("searchInput");
+    const sortSelect = document.getElementById("sortSelect");
+    const userLocation = document.getElementById("userLocation");
+
+    // initial load
+    function init() {
+      document.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+      });
+
+      document.getElementById("addBtn").addEventListener("click", () => openForm("add"));
+
+      document.getElementById("searchBtn").addEventListener("click", render);
+      document.getElementById("clearSearchBtn").addEventListener("click", () => { searchInput.value = ""; render(); });
+      document.getElementById("sortSelect").addEventListener("change", render);
+      document.getElementById("userLocation").addEventListener("input", render);
+
+      // pre-create storage if missing
+      loadFromStorage("electrician");
+      loadFromStorage("plumber");
+      loadFromStorage("painter");
+
+      render();
+    }
+
+    function switchTab(tab) {
+      activeTab = tab;
+      tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+      // update add button target
+      document.getElementById("formTitle").textContent = `Add ${capitalize(tab)}`;
+      document.getElementById("serviceType").value = tab;
+      render();
+    }
+
+    /* ----------------------------
+       Rendering helpers
+       ---------------------------- */
+    function render() {
+      const type = activeTab;
+      const services = loadFromStorage(type);
+      const query = searchInput.value.trim().toLowerCase();
+      const loc = userLocation.value.trim().toLowerCase();
+
+      // Filter by search
+      let filtered = services.filter(s => {
+        if (!query) return true;
+        return s.name.toLowerCase().includes(query) || s.location.toLowerCase().includes(query);
+      });
+
+      // Highest rated: rating >= 4.5
+      const highest = filtered.filter(s => parseFloat(s.rating) >= 4.5);
+
+      // Near you: if user provided location, match; else default empty
+      const near = loc ? filtered.filter(s => s.location.toLowerCase() === loc) : [];
+
+      // All list sorted by selected sort
+      const sort = sortSelect.value;
+      let all = filtered.slice();
+      if (sort === "rating-desc") all.sort((a,b)=>b.rating - a.rating);
+      else if (sort === "rating-asc") all.sort((a,b)=>a.rating - b.rating);
+      else if (sort === "name-asc") all.sort((a,b)=> a.name.localeCompare(b.name));
+      // "recommended" default: sort by rating desc then name
+      else if (sort === "recommended") all.sort((a,b)=> b.rating - a.rating || a.name.localeCompare(b.name));
+
+      document.getElementById("highestList").innerHTML = renderCards(highest, type);
+      document.getElementById("nearList").innerHTML = renderCards(near, type);
+      document.getElementById("allList").innerHTML = renderCards(all, type, true);
+      // Titles reflect active tab
+      document.getElementById("highestTitle").textContent = `Highest Rated ${capitalize(type)}s`;
+      document.getElementById("nearTitle").textContent = `${capitalize(type)}s Near "${userLocation.value || '...' }"`;
+      document.getElementById("allTitle").textContent = `All ${capitalize(type)}s`;
+    }
+
+    function renderCards(list, type, includeIndex = false) {
+      if (!list || list.length === 0) return `<p class="empty">No results.</p>`;
+      // generate HTML; index used for delete/edit actions uses index from full storage
+      const storage = loadFromStorage(type);
+      return list.map(item => {
+        // find first matching index in storage (works even if filtered)
+        const index = storage.findIndex(s => s.name === item.name && s.location === item.location && String(s.rating) === String(item.rating));
+        return cardHtml(item, type, index);
+      }).join("");
+    }
+
+    function cardHtml(item, type, index) {
+      const img = item.image || "../images/logo2.png";
+      const ratingStars = renderStars(item.rating);
+      return `
+        <div class="service-card">
+          <div class="card-top">
+            <img src="${img}" alt="${escapeHtml(item.name)}" />
+            <div class="card-info">
+              <h3>${escapeHtml(item.name)}</h3>
+              <p class="meta">📍 ${escapeHtml(item.location)}</p>
+              <p class="rating"> ${ratingStars} <span class="rating-num">${item.rating}</span></p>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn small" onclick="openContact('${escapeJs(item.name)}')">Message</button>
+            <button class="btn ghost small" onclick="openForm('edit', '${type}', ${index})">Edit</button>
+            <button class="btn danger small" onclick="deleteItem('${type}', ${index})">Delete</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStars(rating) {
+      const full = Math.floor(rating);
+      const half = (rating - full) >= 0.5 ? 1 : 0;
+      const empty = 5 - full - half;
+      return "★".repeat(full) + (half ? "☆" : "") + "✩".repeat(empty);
+    }
+
+    /* ----------------------------
+       CRUD operations
+       ---------------------------- */
+    function openForm(mode='add', type = null, index = -1) {
+      const modal = document.getElementById("formModal");
+      modal.classList.remove("hidden");
+      const formTitle = document.getElementById("formTitle");
+      document.getElementById("serviceType").value = type || activeTab;
+      document.getElementById("editIndex").value = index;
+
+      if (mode === "add") {
+        formTitle.textContent = `Add ${capitalize(type || activeTab)}`;
+        document.getElementById("serviceForm").reset();
+        document.getElementById("ratingInput").value = 5;
+      } else {
+        // edit: populate fields
+        formTitle.textContent = `Edit ${capitalize(type)}`;
+        const arr = loadFromStorage(type);
+        const item = arr[index];
+        if (item) {
+          document.getElementById("nameInput").value = item.name;
+          document.getElementById("locationInput").value = item.location;
+          document.getElementById("ratingInput").value = item.rating;
+          document.getElementById("imageInput").value = item.image || "";
+        }
+      }
+    }
+    function closeForm() { document.getElementById("formModal").classList.add("hidden"); }
+
+    function submitForm() {
+      const type = document.getElementById("serviceType").value;
+      const index = parseInt(document.getElementById("editIndex").value, 10);
+      const name = document.getElementById("nameInput").value.trim();
+      const location = document.getElementById("locationInput").value.trim();
+      const rating = parseFloat(document.getElementById("ratingInput").value);
+      const image = document.getElementById("imageInput").value.trim() || "../images/logo2.png";
+
+      if (!name || !location || !rating) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      const arr = loadFromStorage(type);
+      if (index >= 0) {
+        arr[index] = { name, location, rating, image };
+      } else {
+        arr.push({ name, location, rating, image });
+      }
+      saveToStorage(type, arr);
+      closeForm();
+      render();
+    }
+
+    function deleteItem(type, index) {
+      if (!confirm("Delete this profile?")) return;
+      const arr = loadFromStorage(type);
+      arr.splice(index, 1);
+      saveToStorage(type, arr);
+      render();
+    }
+
+    /* ----------------------------
+       Contact modal (simulated send)
+       ---------------------------- */
+    function openContact(name) {
+      document.getElementById("contactName").textContent = name;
+      document.getElementById("contacterName").value = "";
+      document.getElementById("contactMessage").value = "";
+      document.getElementById("contactModal").classList.remove("hidden");
+    }
+    function closeContact() { document.getElementById("contactModal").classList.add("hidden"); }
+    function sendContact(e) {
+      e.preventDefault();
+      const to = document.getElementById("contactName").textContent;
+      const sender = document.getElementById("contacterName").value.trim();
+      const msg = document.getElementById("contactMessage").value.trim();
+      if (!sender || !msg) { alert("Please fill name and message."); return; }
+      // Simulate sending — replace with API call or mailto/WhatsApp link if desired
+      alert(`Message sent to ${to}:\n\nFrom: ${sender}\n\n${msg}`);
+      closeContact();
+    }
+
+    /* ----------------------------
+       Utilities
+       ---------------------------- */
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function escapeHtml(s) {
+      if (!s) return "";
+      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+    }
+    function escapeJs(s) { return s.replace(/'/g, "\\'"); }
+
+    // wire form open when clicking "Add New"
+    document.getElementById("addBtn").addEventListener("click", () => {
+      document.getElementById("serviceType").value = activeTab;
+      document.getElementById("editIndex").value = -1;
+      openForm("add", activeTab, -1);
+    });
+
+    // start
+    init();
+  </script>
+</body>
 </html>
