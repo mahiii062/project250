@@ -7,6 +7,7 @@
     <title>Nibash - Make Your Home Yours</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
@@ -27,8 +28,23 @@
             <a href="header/architect.html">Decoration Items</a>
             <a href="header/blog.html">Blogs</a>
             <a href="header/contact.html">Contact Us</a>
+
+            <!-- Search icon + input -->
+            <div class="search-container">
+                <span class="search-icon" onclick="toggleSearch()">
+                    <i class="fas fa-search"></i>
+                </span>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search..." onkeyup="showSuggestions(this.value)"
+                        onkeypress="handleSearch(event)" />
+                    <div class="suggestions" id="suggestions"></div>
+                </div>
+            </div>
+
+
         </nav>
     </header>
+
 
     <!-- Hero Section -->
     <section class="hero">
@@ -175,11 +191,85 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="js/chatbot.js"></script>
     <script>
-        function openModal() { document.getElementById("popup").classList.add("active"); }
-        function closeModal() { document.getElementById("popup").classList.remove("active"); }
+        function openModal() {
+            document.getElementById("popup").classList.add("active");
+        }
+        function closeModal() {
+            document.getElementById("popup").classList.remove("active");
+        }
+
+        function toggleSearch() {
+            document.querySelector(".search-box").classList.toggle("active");
+            document.getElementById("searchInput").focus();
+        }
+
+        // Search mapping
+        const searchPages = {
+            "furniture": "header/furniture.html",
+            "painting": "header/painting.html",
+            "interior designers": "header/interiorDesigner.html",
+            "interior designer": "header/interiorDesigner.html",
+            "electrician": "header/electrician.html",
+            "decoration items": "header/architect.html",
+            "blogs": "header/blog.html",
+            "contact": "header/contact.html",
+            "deshi mritshilpo": "header/deshiMritshilpo.html"
+        };
+
+        // Show suggestions
+        function showSuggestions(query) {
+            const suggestionBox = document.getElementById("suggestions");
+            suggestionBox.innerHTML = "";
+            if (query.length === 0) {
+                suggestionBox.style.display = "none";
+                return;
+            }
+
+            const filtered = Object.keys(searchPages).filter(item =>
+                item.toLowerCase().includes(query.toLowerCase())
+            );
+
+            if (filtered.length > 0) {
+                suggestionBox.style.display = "block";
+                filtered.forEach(item => {
+                    const div = document.createElement("div");
+                    div.textContent = item;
+                    div.onclick = () => selectSuggestion(item);
+                    suggestionBox.appendChild(div);
+                });
+            } else {
+                suggestionBox.style.display = "block";
+                const div = document.createElement("div");
+                div.textContent = "No results found";
+                suggestionBox.appendChild(div);
+            }
+        }
+
+        // Select suggestion
+        function selectSuggestion(item) {
+            document.getElementById("searchInput").value = item;
+            document.getElementById("suggestions").style.display = "none";
+            redirectSearch(item);
+        }
+
+        // Handle Enter key
+        function handleSearch(event) {
+            if (event.key === "Enter") {
+                const query = event.target.value.trim();
+                redirectSearch(query);
+            }
+        }
+
+        // Redirect function
+        function redirectSearch(query) {
+            const lowerQuery = query.toLowerCase();
+            if (searchPages[lowerQuery]) {
+                window.location.href = searchPages[lowerQuery];
+            } else {
+                alert("No page found for: " + query);
+            }
+        }
     </script>
 
 </body>
