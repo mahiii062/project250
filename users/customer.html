@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nibash - Customer</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <!-- Correct path from users/ to css folder -->
+  <title>Nibash - Customer Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="../css/customer.css">
 </head>
 
@@ -27,39 +27,74 @@
       <a href="../header/architect.html">Architect</a>
       <a href="../header/blog.html">Blogs</a>
       <a href="../header/contact.html">Contact Us</a>
-      <!-- Profile icon -->
       <a href="customerDashboard.html" class="profile">
-        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Profile" class="profile-icon">
+        <i class="fas fa-user-circle"></i>
       </a>
     </nav>
   </header>
 
-  <!-- Hero -->
+  <!-- Hero Section -->
   <section class="hero">
     <div>
       <h1 id="welcomeMessage">Welcome Back, Customer</h1>
-      <button onclick="openModal()">Explore Your Dashboard</button>
+      <p>Transform your living space with our curated designs and expert services</p>
+      <button class="btn btn-primary" onclick="openModal()">Explore Your Dashboard</button>
     </div>
   </section>
 
-  <script>
-    function openModal() { document.getElementById("popup").classList.add("active"); }
-    function closeModal() { document.getElementById("popup").classList.remove("active"); }
+  <!-- Dashboard Stats -->
+  <section>
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <i class="fas fa-heart"></i>
+        <h4>12</h4>
+        <p>Saved Items</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-shopping-cart"></i>
+        <h4>3</h4>
+        <p>Active Orders</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-star"></i>
+        <h4>24</h4>
+        <p>Reviews Given</p>
+      </div>
+      <div class="stat-card">
+        <i class="fas fa-tags"></i>
+        <h4>5</h4>
+        <p>Active Offers</p>
+      </div>
+    </div>
 
-    // Show logged-in customer's name
-    const customerName = localStorage.getItem("customerName");
-    if (customerName) {
-      document.getElementById("welcomeMessage").textContent = `Welcome Back, ${customerName}`;
-    }
-  </script>
+    <div class="quick-actions">
+      <div class="action-btn" onclick="location.href='../header/furniture.html'">
+        <i class="fas fa-couch"></i>
+        <p>Shop Furniture</p>
+      </div>
+      <div class="action-btn" onclick="location.href='../header/interiorDesigner.html'">
+        <i class="fas fa-palette"></i>
+        <p>Find Designers</p>
+      </div>
+      <div class="action-btn" onclick="location.href='customerDashboard.html'">
+        <i class="fas fa-history"></i>
+        <p>Order History</p>
+      </div>
+      <div class="action-btn" onclick="location.href='../header/blog.html'">
+        <i class="fas fa-book-open"></i>
+        <p>Read Blogs</p>
+      </div>
+    </div>
+  </section>
 
   <!-- Modal -->
   <div class="modal" id="popup">
     <div class="modal-content">
       <h3>Welcome to Nibash!</h3>
-      <a href="vendorAuth.html" class="btn-secondary">Sign Up / Log In as Vendor</a>
-      <a href="customerDashboard.html" class="btn-primary">Continue as Customer</a>
-      <p style="font-size:12px; color:gray;">By continuing, you agree to our Terms & Privacy Policy</p>
+      <p>How would you like to continue?</p>
+      <a href="vendorAuth.html" class="btn btn-secondary">Sign Up / Log In as Vendor</a>
+      <a href="customerDashboard.html" class="btn btn-primary">Continue as Customer</a>
+      <p class="modal-small">By continuing, you agree to our Terms & Privacy Policy</p>
       <span class="close-btn" onclick="closeModal()">Close</span>
     </div>
   </div>
@@ -68,16 +103,20 @@
   <section>
     <h2>Discover Your Style</h2>
     <div class="styles">
-      <div class="style-card"><img src="../images/minimalist.jpg" alt="">
+      <div class="style-card">
+        <img src="../images/minimalist.jpg" alt="Minimalist Style">
         <p>Minimalist Chic</p>
       </div>
-      <div class="style-card"><img src="../images/bohemian.jpg" alt="">
+      <div class="style-card">
+        <img src="../images/bohemian.jpg" alt="Bohemian Style">
         <p>Bohemian Rhapsody</p>
       </div>
-      <div class="style-card"><img src="../images/classic.jpg" alt="">
+      <div class="style-card">
+        <img src="../images/classic.jpg" alt="Classic Style">
         <p>Classic Comfort</p>
       </div>
-      <div class="style-card"><img src="../images/modern.jpg" alt="">
+      <div class="style-card">
+        <img src="../images/modern.jpg" alt="Modern Style">
         <p>Modern Industrial</p>
       </div>
     </div>
@@ -87,50 +126,80 @@
   <section>
     <h2>Flash Sale & Great Deals!</h2>
     <div class="flash">
-      <div class="flash-card"><img src="../images/indoorTree.jpg" alt="">
+      <div class="flash-card">
+        <img src="../images/indoorTree.jpg" alt="Indoor Tree">
         <p>Indoor Tree</p>
         <p class="price">TK. 2,66,278</p>
       </div>
-      <div class="flash-card"><img src="../images/lamp.jpg" alt="">
+      <div class="flash-card">
+        <img src="../images/lamp.jpg" alt="Lamp">
         <p>Lamp</p>
         <p class="price">TK. 2,66,278</p>
       </div>
-      <div class="flash-card"><img src="../images/singleSofa.jpg" alt="">
+      <div class="flash-card">
+        <img src="../images/singleSofa.jpg" alt="Single Seater Sofa">
         <p>Single Seater Sofa</p>
         <p class="price">TK. 2,66,278</p>
       </div>
     </div>
   </section>
 
-  <!-- Curated Collections -->
+  <!-- Shop Our Curated Collections -->
   <section>
     <h2>Shop Our Curated Collections</h2>
     <div class="collections">
       <div class="designer-card">
-        <img src="../images/artist.jpg" alt="">
+        <img src="../images/artist.jpg" alt="Designer Asyta Sharra">
         <h4>Asyta Sharra</h4>
         <p>Designer</p>
         <div class="stars">★★★★★</div>
-        <button>View Offer</button>
+        <button class="btn btn-primary">View Offer</button>
       </div>
       <div class="designer-card">
-        <img src="../images/artist2.jpg" alt="">
+        <img src="../images/artist2.jpg" alt="Designer Pgled Taek Klomar">
         <h4>Pgled Taek Klomar</h4>
         <p>Designer</p>
         <div class="stars">★★★★☆</div>
-        <button>View Offer</button>
+        <button class="btn btn-primary">View Offer</button>
       </div>
     </div>
     <div class="rooms">
-      <div class="room-card"><img src="../images/livingroom.jpg">
+      <div class="room-card">
+        <img src="../images/livingroom.jpg" alt="Living Room">
         <p>Living Room Furniture</p>
       </div>
-      <div class="room-card"><img src="../images/kitchen.jpg">
+      <div class="room-card">
+        <img src="../images/kitchen.jpg" alt="Kitchen">
         <p>Kitchen Furniture</p>
       </div>
-      <div class="room-card"><img src="../images/bedroom.jpg">
+      <div class="room-card">
+        <img src="../images/bedroom.jpg" alt="Bedroom">
         <p>Bedroom Furniture</p>
       </div>
+    </div>
+  </section>
+
+  <!-- Recommendations -->
+  <section>
+    <div class="card">
+      <h3>Recommended For You</h3>
+      <div class="recommend-container" id="recommendations"></div>
+    </div>
+  </section>
+
+  <!-- Recently Viewed -->
+  <section>
+    <div class="card">
+      <h3>Your Recently Viewed</h3>
+      <div class="recent-container" id="recentlyViewed"></div>
+    </div>
+  </section>
+
+  <!-- Discounts -->
+  <section>
+    <div class="card">
+      <h3>Exclusive Offers for You</h3>
+      <ul class="discounts" id="discounts"></ul>
     </div>
   </section>
 
@@ -153,7 +222,6 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
     <p>
       <a href="../footer/about.html">About Us</a> |
@@ -165,11 +233,6 @@
     <p>©2023 Nibash. All Rights Reserved.</p>
   </footer>
 
-  <script>
-    function openModal() { document.getElementById("popup").classList.add("active"); }
-    function closeModal() { document.getElementById("popup").classList.remove("active"); }
-  </script>
-
+  <script src="../js/customer.js"></script>
 </body>
-
 </html>
