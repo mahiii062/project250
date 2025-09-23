@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Login / Sign Up - Nibash</title>
+    <link rel="stylesheet" href="../css/vendorAuth.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="../images/mainLogo.png" alt="Nibash Logo">
+            <span class="logo-text">Nibash</span>
+        </div>
+        <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
+    </header>
+
+    <!-- Auth Box -->
+    <main class="auth-wrapper">
+        <div class="auth-box">
+            <!-- Login Form -->
+            <div id="loginForm" class="form-container">
+                <h2>Vendor Account</h2>
+                <h3>Sign In</h3>
+                <div class="form-group">
+                    <input type="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Password" required>
+                </div>
+                <button class="primary-btn" onclick="login()">Sign In</button>
+                <p class="toggle-link">
+                    Don’t have an account? <a href="javascript:void(0)" onclick="toggleForms()">Sign Up</a>
+                </p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="form-container" style="display:none;">
+                <h2>Vendor Account</h2>
+                <h3>Sign Up</h3>
+                <div class="form-group">
+                    <input type="text" placeholder="Company Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Password" required>
+                </div>
+                <button class="primary-btn" onclick="signup()">Sign Up</button>
+                <p class="toggle-link">
+                    Already have an account? <a href="javascript:void(0)" onclick="toggleForms()">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function toggleForms() {
+            const loginForm = document.getElementById("loginForm");
+            const signupForm = document.getElementById("signupForm");
+
+            if (loginForm.style.display === "none") {
+                loginForm.style.display = "block";
+                signupForm.style.display = "none";
+            } else {
+                loginForm.style.display = "none";
+                signupForm.style.display = "block";
+            }
+        }
+
+        function login() {
+            window.location.href = "vendorDashboard.html";
+        }
+
+        function signup() {
+            window.location.href = "vendorDashboard.html";
+        }
+    </script>
+</body>
+
+</html>
