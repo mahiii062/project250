@@ -1,351 +1,569 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Furniture - Nibash</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #f8f8f8;
-            color: #333;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Furniture — Nibash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="../css/dashb.css" rel="stylesheet">
+  <style>
+    /* Plain Pastel Yellow Theme */
+    .theme-furniture {
+      --bg: #fffef0;
+      --card: #fff9e6;
+      --accent: #e6c25c;
+      --muted: #f0e2a8;
+      --soft: #f8f2d9;
+      --shadow: rgba(230, 194, 92, 0.1);
+    }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 40px;
-            background: white;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 22px;
-            font-weight: 600;
-            color: #E89C7C;
-        }
-
-        .logo img {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        nav a {
-            margin-left: 1rem;
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            background: #E89C7C;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* HERO SLIDER */
-        .hero {
-            position: relative;
-            height: 450px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .slide {
-            position: absolute;
-            top: 0;
-            left: 100%;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            transition: left 0.8s ease-in-out;
-        }
-
-        .slide.active {
-            left: 0;
-        }
-
-        .slide.prev {
-            left: -100%;
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-        }
-
-        .hero-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            text-align: center;
-            max-width: 700px;
-        }
-
-        .hero-text h1 {
-            font-size: 36px;
-            margin-bottom: 12px;
-            color: #fff;
-        }
-
-        .hero-text p {
-            font-size: 16px;
-            line-height: 1.6;
-        }
-
-        .cta {
-            margin-top: 18px;
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn.primary {
-            background: #E89C7C;
-            color: #fff;
-        }
-
-        .btn.secondary {
-            background: #f3e9e4;
-            color: #E89C7C;
-        }
-
-        /* SECTION */
-        .section {
-            max-width: 1100px;
-            margin: 40px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .section h2 {
-            margin: 0 0 16px;
-            font-size: 22px;
-            color: #444;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 18px;
-        }
-
-        .product {
-            background: #fffdfc;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 14px;
-            text-align: center;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-            transition: 0.2s;
-        }
-
-        .product:hover {
-            transform: translateY(-4px);
-        }
-
-        .product img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .product h3 {
-            font-size: 16px;
-            margin: 10px 0 4px;
-        }
-
-        .product .price {
-            color: #E89C7C;
-            font-weight: 600;
-        }
-
-        /* NEW SELLERS SECTION */
-        .sellers {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .seller-card {
-            border: 1px solid #eee;
-            border-radius: 10px;
-            padding: 16px;
-            text-align: center;
-            background: #fdfdfd;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .seller-card h3 {
-            margin: 8px 0;
-        }
-
-        .contact-btn {
-            margin-top: 8px;
-            padding: 8px 14px;
-            border: none;
-            border-radius: 6px;
-            background: #E89C7C;
-            color: white;
-            cursor: pointer;
-        }
-
-        .footer {
-            margin-top: 50px;
-            padding: 20px;
-            text-align: center;
-            font-size: 14px;
-            color: #777;
-            background: #fff;
-            border-top: 1px solid #eee;
-        }
-    </style>
+    /* Override sidebar emoji */
+    .theme-furniture .sidebar a::after { content: "🪑"; }
+  </style>
 </head>
+<body class="theme-furniture">
 
-<body>
-    <header>
-        <div class="logo">
-            <img src="../images/mainLogo.png" alt="Nibash Logo">
-            Nibash
-        </div>
-        <nav>
-            <a href="../index.html">Home</a>
-            <a href="../users/vendor.html">Vendor </a>
-            <button class="logout-btn" onclick="window.location.href='../index.html'">Log out</button>
-        </nav>
-    </header>
+  <header>
+    <div class="logo"><img src="../images/mainLogo.png" alt="Nibash Logo" class="logo-img">Nibash</div>
+    <nav>
+      <a href="../users/customer.html">Home</a>
+      <button class="logout-btn" onclick="location.href='../index.html'">Log out</button>
+    </nav>
+  </header>
 
-    <!-- HERO SLIDER -->
-    <section class="hero">
-        <div class="slide active" style="background-image: url('../images/furn11.jpg');">
-            <div class="overlay"></div>
-        </div>
-        <div class="slide" style="background-image: url('../images/furn10.jpg');">
-            <div class="overlay"></div>
-        </div>
-        <div class="slide" style="background-image: url('../images/furn9.jpg');">
-            <div class="overlay"></div>
+  <div class="dashboard">
+    <!-- sidebar -->
+    <aside class="sidebar" aria-label="Account menu">
+      <a href="../users/customerDashboard.html"><h3>My Account</h3></a>
+      <a href="#" class="active">Profile</a>
+      <a href="#">Wishlist</a>
+      <a href="#">Orders</a>
+      <a href="#">Saved Collections</a>
+      <a href="#">Settings</a>
+    </aside>
+
+    <!-- main -->
+    <main class="content">
+
+      <!-- HERO -->
+      <section class="hero" role="banner" aria-label="hero">
+        <!-- slider images (cover entire hero) -->
+        <div class="hero-slider" aria-hidden="true">
+          <div class="slide active" style="background-image:url('../images/furn11.jpg')"></div>
+          <div class="slide" style="background-image:url('../images/furn10.jpg')"></div>
+          <div class="slide" style="background-image:url('../images/furn9.jpg')"></div>
         </div>
 
-        <div class="hero-text">
-            <h1>Elegant Handmade Furniture</h1>
-            <p>Discover timeless pieces crafted with passion and precision. Each furniture item tells a story of
-                tradition and modern design.</p>
-            <div class="cta">
-                <button class="btn primary">Shop Now</button>
-                <button class="btn secondary">Contact Support</button>
-            </div>
-        </div>
-    </section>
+        <!-- arrows -->
+        <button class="hero-arrow prev" aria-label="Previous slide">‹</button>
+        <button class="hero-arrow next" aria-label="Next slide">›</button>
 
-    <!-- Product Section -->
-    <section class="section">
-        <h2>Our Furniture Collection</h2>
-        <div class="grid">
-            <div class="product">
-                <img src="../images/furn8.jpg" alt="Wooden Chair">
-                <h3>Classic Wooden Chair</h3>
-                <div class="price">$85</div>
-            </div>
-            <div class="product">
-                <img src="../images/furn7.jpg" alt="Handmade Sofa">
-                <h3>Handmade Sofa</h3>
-                <div class="price">$450</div>
-            </div>
-            <div class="product">
-                <img src="../images/furn6.jpg" alt="Dining Table">
-                <h3>Dining Table Set</h3>
-                <div class="price">$320</div>
-            </div>
-            <div class="product">
-                <img src="../images/furn5.jpg" alt="Wooden Shelf">
-                <h3>Rustic Wooden Shelf</h3>
-                <div class="price">$120</div>
-            </div>
+        <!-- main text overlay -->
+        <div class="hero-text-overlay" aria-live="polite">
+          <h1>Elegant Handmade Furniture</h1>
+          <p>
+            Discover timeless pieces crafted with passion and precision. Each furniture item tells a story of
+            tradition and modern design. From classic wooden chairs to contemporary sofas, find the perfect
+            furniture to transform your living space.
+          </p>
+          <div class="cta">
+            <button class="btn white" id="contactSupportBtn">Contact Support</button>
+            <button class="btn dark" id="browseBtn">Browse Collection</button>
+          </div>
         </div>
-    </section>
 
-    <!-- Sellers Section -->
-    <section class="section">
-        <h2>New Sellers Nearby</h2>
-        <div class="sellers">
-            <div class="seller-card">
-                <h3>WoodCraft Hub</h3>
-                <p>Uttara, Dhaka</p>
-                <button class="contact-btn">Message Seller</button>
-            </div>
-            <div class="seller-card">
-                <h3>Elegant Interiors</h3>
-                <p>Banani, Dhaka</p>
-                <button class="contact-btn">Message Seller</button>
-            </div>
-            <div class="seller-card">
-                <h3>Rustic Furniture BD</h3>
-                <p>Dhanmondi, Dhaka</p>
-                <button class="contact-btn">Message Seller</button>
-            </div>
+        <!-- optional small image previews on right -->
+        <div class="hero-right-previews" aria-hidden="true">
+          <div class="preview-thumb"><img src="../images/furn8.jpg" alt="Wooden Chair Preview"></div>
+          <div class="preview-thumb"><img src="../images/furn7.jpg" alt="Sofa Preview"></div>
+          <div class="preview-thumb"><img src="../images/furn6.jpg" alt="Dining Table Preview"></div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <div class="footer">
-        © 2025 Nibash. All rights reserved.
+        <!-- dots -->
+        <div class="hero-controls" aria-hidden="true"></div>
+      </section>
+
+      <!-- small cards row -->
+      <div class="card-row" style="margin-bottom:8px">
+        <div class="card" style="flex:1">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="avatar"><img src="../images/artist.jpg" alt="artisan" style="width:100%;height:100%;object-fit:cover"></div>
+            <div>
+              <div style="font-weight:700">Master Woodworker - Rafiqul Islam</div>
+              <div style="font-size:13px;color:#6a7a77">Known for Traditional Joinery</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="width:360px;align-items:center;justify-content:space-between">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div class="avatar"><img src="../images/artist2.jpg" alt="artisan" style="width:100%;height:100%;object-fit:cover"></div>
+            <div>
+              <div style="font-weight:700">Ayesha Begum</div>
+              <div style="font-size:13px;color:#6a7a77">Modern Furniture Designs</div>
+              <div class="progressWrap" style="width:260px"><span class="progressFill"></span></div>
+            </div>
+          </div>
+         </div>
+      </div>
+
+      <!-- Furniture Artisans Nearby -->
+      <section class="section">
+        <h3>Furniture Artisans Nearby</h3>
+        <div class="card-row">
+          <div class="card" style="flex:1;justify-content:space-between">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="avatar"><img src="../images/artist.jpg" alt="artisan"></div>
+              <div>
+                <div style="font-weight:700">WoodCraft Hub</div>
+                <div style="font-size:13px;color:#6a7a8a">Uttara, Dhaka • 2km away</div>
+              </div>
+            </div>
+            <button class="btn white message-btn" data-seller="WoodCraft Hub">Message</button>
+          </div>
+
+          <div class="card" style="flex:1;justify-content:space-between">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="avatar"><img src="../images/artist.jpg" alt="artisan"></div>
+              <div>
+                <div style="font-weight:700">Elegant Interiors</div>
+                <div style="font-size:13px;color:#6a7a8a">Banani, Dhaka • 5km away</div>
+              </div>
+            </div>
+            <button class="btn white message-btn" data-seller="Elegant Interiors">Message</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Furniture Profile Section -->
+      <section class="section">
+        <h3>Featured Furniture Artisan</h3>
+        <div class="profile-section">
+          <img src="../images/artisan1.jpg" alt="Featured Artisan" class="profile-image">
+          <div class="profile-details">
+            <div class="profile-name">Rafiqul Islam</div>
+            <div class="profile-specialty">Master Woodworker & Furniture Designer</div>
+            <div class="profile-bio">
+              Rafiqul comes from a long line of traditional woodworkers and has been crafting furniture for over 15 years.
+              His expertise lies in combining traditional Bangladeshi woodworking techniques with contemporary designs,
+              creating pieces that are both functional and artistic.
+            </div>
+            <div class="profile-stats">
+              <div class="stat">
+                <div class="stat-value">120</div>
+                <div class="stat-label">Pieces Created</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">15</div>
+                <div class="stat-label">Years Experience</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">4.9</div>
+                <div class="stat-label">Rating</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">98%</div>
+                <div class="stat-label">Satisfaction</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top Rated Furniture Section -->
+      <section class="section">
+        <h3>Top Rated Furniture Pieces</h3>
+        <div class="top-rated">
+          <div class="top-rated-item">
+            <div class="top-rated-rank">1</div>
+            <img src="../images/furn8.jpg" alt="Top Furniture" class="top-rated-avatar">
+            <div>
+              <div style="font-weight:600">Classic Wooden Chair</div>
+              <div style="font-size:13px;color:#6a7a8a">Handcrafted Teak Wood</div>
+              <div class="rating">★★★★★ 4.9</div>
+            </div>
+          </div>
+          <div class="top-rated-item">
+            <div class="top-rated-rank">2</div>
+            <img src="../images/furn7.jpg" alt="Top Furniture" class="top-rated-avatar">
+            <div>
+              <div style="font-weight:600">Handmade Sofa</div>
+              <div style="font-size:13px;color:#6a7a8a">Premium Cotton Upholstery</div>
+              <div class="rating">★★★★☆ 4.7</div>
+            </div>
+          </div>
+          <div class="top-rated-item">
+            <div class="top-rated-rank">3</div>
+            <img src="../images/furn6.jpg" alt="Top Furniture" class="top-rated-avatar">
+            <div>
+              <div style="font-weight:600">Dining Table Set</div>
+              <div style="font-size:13px;color:#6a7a8a">Solid Sheesham Wood</div>
+              <div class="rating">★★★★☆ 4.6</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured Furniture Section -->
+      <section class="section">
+        <h3>Featured Furniture</h3>
+        <div class="featured-grid">
+          <div class="featured-card">
+            <img src="../images/furn8.jpg" alt="Furniture" class="featured-card-img">
+            <div class="featured-card-content">
+              <div class="featured-card-name">Classic Wooden Chair</div>
+              <div class="featured-card-specialty">Handcrafted Teak Wood</div>
+              <div class="featured-card-bio">Elegant chair made from sustainably sourced teak wood with traditional joinery techniques.</div>
+              <div class="featured-card-stats">
+                <div>$85</div>
+                <div>4.9★</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="featured-card">
+            <img src="../images/furn7.jpg" alt="Furniture" class="featured-card-img">
+            <div class="featured-card-content">
+              <div class="featured-card-name">Handmade Sofa</div>
+              <div class="featured-card-specialty">Premium Cotton Upholstery</div>
+              <div class="featured-card-bio">Comfortable three-seater sofa with hand-carved wooden frame and premium fabric.</div>
+              <div class="featured-card-stats">
+                <div>$450</div>
+                <div>4.7★</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="featured-card">
+            <img src="../images/furn6.jpg" alt="Furniture" class="featured-card-img">
+            <div class="featured-card-content">
+              <div class="featured-card-name">Dining Table Set</div>
+              <div class="featured-card-specialty">Solid Sheesham Wood</div>
+              <div class="featured-card-bio">6-seater dining table with matching chairs, perfect for family gatherings.</div>
+              <div class="featured-card-stats">
+                <div>$320</div>
+                <div>4.6★</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Furniture Collection -->
+      <section class="section" aria-labelledby="portfolio">
+        <h3 id="portfolio">Furniture Collection</h3>
+        <div class="creationsGrid" style="margin-top:12px">
+         
+
+
+          <div class="product">
+            <img src="../images/furn5.jpg" alt="Wooden Shelf">
+            <div class="txt">Rustic Wooden Shelf</div>
+            <div style="font-weight:700;color:var(--accent)">$120</div>
+            <button class="contact-seller" data-product="Rustic Wooden Shelf" data-seller="WoodCraft Hub">Contact Artisan</button>
+          </div>
+
+          <div class="product">
+            <img src="../images/furn4.jpg" alt="Coffee Table">
+            <div class="txt">Handcrafted Coffee Table</div>
+            <div style="font-weight:700;color:var(--accent)">$180</div>
+            <button class="contact-seller" data-product="Small Cabinet" data-seller="Elegant Interiors">Contact Artisan</button>
+          </div>
+
+          <div class="product">
+            <img src="../images/furn3.jpg" alt="Bookshelf">
+            <div class="txt">Traditional Bookshelf</div>
+            <div style="font-weight:700;color:var(--accent)">$220</div>
+            <button class="contact-seller" data-product="Traditional Bookshelf" data-seller="Rafiqul Islam">Contact Artisan</button>
+          </div>
+        </div>
+        <!-- callout -->
+        <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
+          <div style="flex:1;min-width:220px;background:linear-gradient(180deg,var(--bg),var(--card));padding:16px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;gap:8px">
+            <strong>Your review of 'WoodCraft Hub' the artisan right now!</strong>
+            <small style="color:#6a7a77">Leave a quick star rating to help other buyers</small>
+            <div style="margin-top:8px"><button class="btn white" style="padding:8px 12px">Write a review</button></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Add Furniture Form -->
+      <section class="add-form" id="furnitureForm">
+        <h3>Add Furniture Piece</h3>
+        <div class="form-group">
+          <label for="furnitureName">Item Name</label>
+          <input type="text" id="furnitureName" placeholder="Enter furniture item name">
+        </div>
+        <div class="form-group">
+          <label for="furnitureType">Furniture Type</label>
+          <input type="text" id="furnitureType" placeholder="e.g., Chair, Table, Sofa">
+        </div>
+        <div class="form-group">
+          <label for="furniturePrice">Price ($)</label>
+          <input type="number" id="furniturePrice" placeholder="Enter price">
+        </div>
+        <div class="form-group">
+          <label for="furnitureImage">Image URL</label>
+          <input type="text" id="furnitureImage" placeholder="Enter image URL (optional)">
+        </div>
+        <div class="form-group">
+          <label for="furnitureDescription">Description</label>
+          <textarea id="furnitureDescription" placeholder="Enter furniture description"></textarea>
+        </div>
+        <button class="submit-btn" onclick="addFurniture()">Add Furniture</button>
+      </section>
+
+      <!-- Activity Feed -->
+      <div class="activity-card card">
+        <h4>Activity Feed</h4>
+        <div class="activity-grid" style="margin-top:10px">
+          <div class="activity">🆕 New furniture collection added!</div>
+          <div class="activity">⭐ WoodCraft Hub received a 5-star review!</div>
+          <div class="activity">🏆 Rafiqul Islam is now a top-rated artisan!</div>
+          <div class="activity">📦 Your furniture order is being crafted!</div>
+        </div>
+      </div>
+
+      <button class="btn dark" style="margin-top: 20px;" onclick="toggleForm()">+ Add New Furniture</button>
+
+    </main>
+  </div>
+
+  <!-- Chat Modal (used by message and contact buttons) -->
+  <div class="chat-modal" id="chatModal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="chat-box" role="document">
+      <button class="chat-close" id="chatCloseBtn" aria-label="Close chat">✕</button>
+      <h4 id="chatTitle">Message Artisan</h4>
+      <div class="meta" id="chatMeta">To: <strong id="chatSeller">—</strong> · Item: <span id="chatProduct">—</span></div>
+      <textarea id="chatMessage" placeholder="Write a short message..." style="width:100%;height:110px;padding:10px;border-radius:8px;border:1px solid #ddd;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end">
+        <button class="btn white" id="chatCancel">Cancel</button>
+        <button class="btn dark" id="chatSend">Send Message</button>
+      </div>
+      <div id="chatStatus" style="margin-top:10px;font-size:13px;color:green;display:none">Message sent ✔</div>
     </div>
+  </div>
 
-    <script>
-        // SIMPLE SLIDER AUTO & SWIPE
-        let slides = document.querySelectorAll(".slide");
-        let current = 0;
+  <script>
+    /* ===== HERO SLIDER (touch + mouse drag + arrows + dots + pause) ===== */
+    (function(){
+      const hero = document.querySelector('.hero');
+      const slides = Array.from(document.querySelectorAll('.hero-slider .slide'));
+      const prevBtn = document.querySelector('.hero-arrow.prev');
+      const nextBtn = document.querySelector('.hero-arrow.next');
+      const controls = document.querySelector('.hero-controls');
+      let current = 0;
+      let autoplayInterval = 4000;
+      let timer = null;
+      let isDragging = false;
+      let startX = 0;
+      let moved = 0;
 
-        function showSlide(next) {
-            slides[current].classList.remove("active");
-            current = (next + slides.length) % slides.length;
-            slides[current].classList.add("active");
-        }
+      // create dots
+      slides.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'dot' + (i === 0 ? ' active' : '');
+        dot.dataset.index = i;
+        dot.title = 'Go to slide ' + (i+1);
+        controls.appendChild(dot);
+      });
+      const dots = Array.from(controls.querySelectorAll('.dot'));
 
-        // Auto change every 5 sec
-        setInterval(() => showSlide(current + 1), 5000);
+      function showSlide(index) {
+        index = (index + slides.length) % slides.length;
+        slides.forEach((s,i) => s.classList.toggle('active', i === index));
+        dots.forEach((d,i) => d.classList.toggle('active', i === index));
+        current = index;
+      }
 
-        // Swipe control
-        let startX = 0;
-        document.querySelector(".hero").addEventListener("mousedown", e => startX = e.clientX);
-        document.querySelector(".hero").addEventListener("mouseup", e => {
-            if (startX - e.clientX > 50) showSlide(current + 1);
-            else if (e.clientX - startX > 50) showSlide(current - 1);
+      function next() { showSlide(current + 1); }
+      function prev() { showSlide(current - 1); }
+
+      // autoplay
+      function startAutoplay() {
+        stopAutoplay();
+        timer = setInterval(next, autoplayInterval);
+      }
+      function stopAutoplay() {
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+      startAutoplay();
+
+      // arrows
+      nextBtn.addEventListener('click', () => { next(); resetAutoplay(); });
+      prevBtn.addEventListener('click', () => { prev(); resetAutoplay(); });
+
+      // dots click
+      dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          showSlide(Number(dot.dataset.index));
+          resetAutoplay();
         });
-    </script>
-</body>
+      });
 
+      // pause on hover/focus
+      hero.addEventListener('mouseenter', stopAutoplay);
+      hero.addEventListener('mouseleave', startAutoplay);
+      hero.addEventListener('focusin', stopAutoplay);
+      hero.addEventListener('focusout', startAutoplay);
+
+      function resetAutoplay() { stopAutoplay(); setTimeout(startAutoplay, 2000); }
+
+      // touch support
+      hero.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        moved = 0;
+      }, {passive:true});
+      hero.addEventListener('touchmove', e => {
+        const dx = e.touches[0].clientX - startX;
+        moved = dx;
+      }, {passive:true});
+      hero.addEventListener('touchend', e => {
+        if (Math.abs(moved) > 50) {
+          if (moved > 0) prev(); else next();
+          resetAutoplay();
+        }
+      });
+
+      // mouse drag for desktop
+      hero.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+        hero.classList.add('dragging');
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        moved = e.clientX - startX;
+      });
+      window.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        hero.classList.remove('dragging');
+        if (Math.abs(moved) > 60) {
+          if (moved > 0) prev(); else next();
+          resetAutoplay();
+        }
+        moved = 0;
+      });
+
+      // keyboard arrows
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') { prev(); resetAutoplay(); }
+        if (e.key === 'ArrowRight') { next(); resetAutoplay(); }
+        if (e.key === 'Escape') closeChat();
+      });
+
+      // pre-load images (non-blocking)
+      slides.forEach(s => {
+        const url = (s.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+        if (url) {
+          const img = new Image(); img.src = url;
+        }
+      });
+    })();
+
+    /* ===== Chat modal logic (used by both 'Message' and 'Contact Artisan') ===== */
+    (function(){
+      const chatModal = document.getElementById('chatModal');
+      const chatSeller = document.getElementById('chatSeller');
+      const chatProduct = document.getElementById('chatProduct');
+      const chatMessage = document.getElementById('chatMessage');
+      const chatStatus = document.getElementById('chatStatus');
+      const chatCloseBtn = document.getElementById('chatCloseBtn');
+      const chatSend = document.getElementById('chatSend');
+      const chatCancel = document.getElementById('chatCancel');
+
+      // open chat helper
+      function openChat({ seller = '—', product = '—' } = {}) {
+        chatSeller.textContent = seller;
+        chatProduct.textContent = product;
+        chatMessage.value = `Hi ${seller}, I'm interested in your "${product}". Can I know more about it?`;
+        chatStatus.style.display = 'none';
+        chatModal.classList.add('active');
+        chatMessage.focus();
+      }
+
+      // close
+      function closeChat() {
+        chatModal.classList.remove('active');
+      }
+
+      // wire message buttons (nearby artisans)
+      document.querySelectorAll('.message-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const seller = btn.dataset.seller || btn.textContent.trim() || 'Artisan';
+          openChat({ seller, product: 'Furniture Inquiry' });
+        });
+      });
+
+      // wire product contact buttons
+      document.querySelectorAll('.contact-seller').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const seller = btn.dataset.seller || 'Artisan';
+          const product = btn.dataset.product || 'Furniture Item';
+          openChat({ seller, product });
+        });
+      });
+
+      // support header contact support button
+      document.getElementById('contactSupportBtn').addEventListener('click', () => {
+        openChat({ seller: 'Nibash Support', product: 'Support' });
+      });
+
+      // modal actions
+      chatCloseBtn.addEventListener('click', closeChat);
+      chatCancel.addEventListener('click', closeChat);
+
+      chatSend.addEventListener('click', () => {
+        // simulate sending
+        chatStatus.textContent = 'Message sent ✔';
+        chatStatus.style.display = 'block';
+        // small delay then close
+        setTimeout(() => {
+          closeChat();
+        }, 900);
+      });
+
+      // close when clicking outside content
+      chatModal.addEventListener('click', (e) => {
+        if (e.target === chatModal) closeChat();
+      });
+
+      // make closeChat available globally for keyboard ESC used earlier
+      window.closeChat = closeChat;
+    })();
+
+    /* ===== Add Furniture Form Functions ===== */
+    function toggleForm() {
+      const form = document.getElementById('furnitureForm');
+      form.classList.toggle('active');
+    }
+
+    function addFurniture() {
+      const name = document.getElementById('furnitureName').value;
+      const type = document.getElementById('furnitureType').value;
+      const price = document.getElementById('furniturePrice').value;
+      const image = document.getElementById('furnitureImage').value;
+      const description = document.getElementById('furnitureDescription').value;
+
+      if (!name || !type || !price || !description) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      // In a real application, you would send this data to a server
+      alert(`Furniture "${name}" added successfully!`);
+      
+      // Reset form
+      document.getElementById('furnitureName').value = '';
+      document.getElementById('furnitureType').value = '';
+      document.getElementById('furniturePrice').value = '';
+      document.getElementById('furnitureImage').value = '';
+      document.getElementById('furnitureDescription').value = '';
+      
+      // Hide form
+      toggleForm();
+    }
+  </script>
+</body>
 </html>
