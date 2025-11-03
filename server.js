@@ -4,6 +4,11 @@ import cors from "cors";
 import db from './config/db.js';
 import authRouter from './routes/auth.js';
 import vendorAuthRouter from "./routes/vendorAuth.js";
+import lookupsRouter from "./routes/lookups.js";
+import vendorsRouter from "./routes/vendors.js";
+import productsRouter from "./routes/products.js";
+import servicesRouter from "./routes/services.js";
+
 
 
 
@@ -12,7 +17,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRouter);
-app.use("/api/vendor", vendorAuthRouter); 
+app.use("/api/vendor", vendorAuthRouter);    
+
+app.use("/api/lookups", lookupsRouter);
+app.use("/api/vendors", vendorsRouter);
+app.use("/api/products", productsRouter);
+app.use("/api/services", servicesRouter);
+
+ 
 
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;

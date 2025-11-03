@@ -88,7 +88,7 @@
             </div>
           </label>
 
-          <label class="type-card">
+        <label class="type-card">
             <input type="radio" name="vendorType" value="service" />
             <div>
               <strong>Service Provider</strong>
@@ -256,6 +256,12 @@
   </div>
 
   <script>
+    // =========================
+    // CONFIG
+    // =========================
+    const API_BASE = "http://localhost:5000"; // <-- change if your server runs elsewhere
+    const VENDOR_ID = 1;                      // <-- set this from your real session/login
+
     // ===== Sidebar "active" toggling (unchanged) =====
     const items = document.querySelectorAll('.sidebar ul li');
     items.forEach((item) => {
@@ -280,7 +286,6 @@
         if (!el) return;
         if (show) {
           el.classList.remove('hidden');
-          // slight delay to allow transition
           requestAnimationFrame(() => el.classList.add('ready'));
         } else {
           el.classList.add('hidden');
@@ -302,25 +307,51 @@
     const myListingsSection = document.getElementById('myListingsSection');
     const categoryFilter = document.getElementById('categoryFilter');
 
-    // Load saved type
-    const savedType = localStorage.getItem('vendorType') || '';
-    if (savedType) {
-      const radio = document.querySelector(`input[name="vendorType"][value="${savedType}"]`);
-      if (radio) radio.checked = true;
-      updateFormForType(savedType);
+    // Form selects
+    const productCategorySel = document.getElementById('productCategory');
+    const serviceCategorySel = document.getElementById('serviceCategory');
+
+    // ===== API helpers =====
+    async function apiGET(path) {
+      const res = await fetch(`${API_BASE}${path}`);
+      const json = await res.json();
+      if (!res.ok || json.ok === false) throw new Error(json.error || `GET ${path} failed`);
+      return json.data ?? json;
     }
-    setGateVisibility(savedType);
-
-    typeRadios.forEach((r) => {
-      r.addEventListener('change', () => {
-        updateFormForType(r.value);
-        setGateVisibility(r.value);
-        // On type switch, update filter + re-render listings
-        buildCategoryFilter();
-        renderListings();
+    async function apiJSON(path, method, body) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
       });
-    });
+      const json = await res.json();
+      if (!res.ok || json.ok === false) throw new Error(json.error || `${method} ${path} failed`);
+      return json.data ?? json;
+    }
 
+    // ===== Lookups (categories) =====
+    async function loadLookups() {
+      // Load product categories
+      const prodCats = await apiGET("/api/lookups/product-categories");
+      productCategorySel.innerHTML = `<option value="">Select a category</option>` +
+        prodCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+
+      // Load service categories
+      const servCats = await apiGET("/api/lookups/service-categories");
+      serviceCategorySel.innerHTML = `<option value="">Select a service</option>` +
+        servCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+    }
+
+    // ===== Vendor type (DB-backed) =====
+    async function loadVendorTypeFromDB() {
+      try {
+        if (!VENDOR_ID) return "";
+        const data = await apiGET(`/api/vendors/${VENDOR_ID}/type`);
+        return data?.vendor_type || "";
+      } catch {
+        return "";
+      }
+    }
     function updateFormForType(type) {
       if (type === 'seller') {
         sellerFields.classList.remove('hidden');
@@ -337,7 +368,8 @@
       }
     }
 
-    saveTypeBtn.addEventListener('click', () => {
+    // Save vendor type -> DB
+    saveTypeBtn.addEventListener('click', async () => {
       const selected = document.querySelector('input[name="vendorType"]:checked');
       if (!selected) {
         typeStatus.textContent = 'Select a type first.';
@@ -345,36 +377,41 @@
         setGateVisibility('');
         return;
       }
-      localStorage.setItem('vendorType', selected.value);
-      typeStatus.textContent = 'Saved!';
-      typeStatus.style.color = 'green';
-      setGateVisibility(selected.value);
-      buildCategoryFilter();
-      renderListings();
-      // Focus first input for quick flow
-      const first = document.getElementById('listingTitle');
-      if (first) first.focus();
+      try {
+        await apiJSON(`/api/vendors/${VENDOR_ID}/type`, "PATCH", { vendor_type: selected.value });
+        localStorage.setItem('vendorType', selected.value);
+        typeStatus.textContent = 'Saved!';
+        typeStatus.style.color = 'green';
+        setGateVisibility(selected.value);
+        await buildCategoryFilter();
+        await renderListingsFromAPI();
+        const first = document.getElementById('listingTitle');
+        if (first) first.focus();
+      } catch (e) {
+        typeStatus.textContent = e.message;
+        typeStatus.style.color = 'crimson';
+      }
     });
 
-    // ===== Create Listing (local only) =====
+    // ===== Create Listing -> DB =====
     const createBtn = document.getElementById('createListingBtn');
     const clearBtn = document.getElementById('clearFormBtn');
     const createStatus = document.getElementById('createStatus');
     const listingsContainer = document.getElementById('listingsContainer');
     const noListings = document.getElementById('noListings');
 
-    createBtn.addEventListener('click', () => {
+    createBtn.addEventListener('click', async () => {
       try {
         createStatus.textContent = 'Saving...';
         createStatus.style.color = 'inherit';
 
         const listing = readListingForm();
-        saveListingLocal(listing);
-        buildCategoryFilter();
-        renderListings();
+        await saveListingToAPI(listing);    // persists to DB
+        await buildCategoryFilter();         // ensure filter has latest categories in use
+        await renderListingsFromAPI();       // renders from DB
         clearForm();
 
-        createStatus.textContent = 'Saved locally!';
+        createStatus.textContent = 'Saved!';
         createStatus.style.color = 'green';
         listingsContainer.scrollIntoView({ behavior: 'smooth' });
       } catch (e) {
@@ -397,7 +434,7 @@
       if (!title || !description) throw new Error('Title and Description are required.');
 
       if (type === 'seller') {
-        const category = document.getElementById('productCategory').value;
+        const category = productCategorySel.value;
         const price = document.getElementById('productPrice').value;
         const stock = document.getElementById('productStock').value;
         const image_url = document.getElementById('productImage').value.trim();
@@ -407,17 +444,16 @@
         }
 
         return {
-          id: Date.now(),
           type,
           title,
           description,
-          category,
+          category,                       // slug from lookups
           price: parseInt(price, 10),
           stock: parseInt(stock, 10),
           image_url: image_url || null,
         };
       } else {
-        const service_type = document.getElementById('serviceCategory').value;
+        const service_type = serviceCategorySel.value; // slug from lookups
         const rate = document.getElementById('serviceRate').value;
         const billing = document.getElementById('serviceBilling').value;
         const area = document.getElementById('serviceArea').value.trim();
@@ -427,7 +463,6 @@
         }
 
         return {
-          id: Date.now(),
           type,
           title,
           description,
@@ -439,58 +474,61 @@
       }
     }
 
-    function saveListingLocal(listing) {
-      const raw = localStorage.getItem('vendorListings');
-      const arr = raw ? JSON.parse(raw) : [];
-      arr.unshift(listing);
-      localStorage.setItem('vendorListings', JSON.stringify(arr));
+    async function saveListingToAPI(listing) {
+      if (!VENDOR_ID) throw new Error("Missing vendor id (not logged in?)");
+
+      if (listing.type === "seller") {
+        const payload = {
+          vendor_id: VENDOR_ID,
+          title: listing.title,
+          description: listing.description,
+          category_slug: listing.category,   // e.g. furniture
+          price_bdt: listing.price,
+          stock: listing.stock,
+          image_url: listing.image_url || null,
+        };
+        await apiJSON("/api/products", "POST", payload);
+      } else {
+        const payload = {
+          vendor_id: VENDOR_ID,
+          title: listing.title,
+          description: listing.description,
+          service_category_slug: listing.service_type, // e.g. plumber
+          rate_bdt: listing.rate,
+          billing: listing.billing,      // only stored if your DB has columns for it
+          service_area: listing.area,    // only stored if your DB has columns for it
+          image_url: null,               // or include one if you add UI
+        };
+        await apiJSON("/api/services", "POST", payload);
+      }
     }
 
-    // Build category filter options based on vendor type + existing listings
-    function buildCategoryFilter() {
+    // ===== Category filter (from lookups) =====
+    async function buildCategoryFilter() {
       const type = localStorage.getItem('vendorType') || '';
       if (!type) {
         categoryFilter.innerHTML = '';
         return;
       }
-      const raw = localStorage.getItem('vendorListings');
-      const arr = raw ? JSON.parse(raw) : [];
-      const typeArr = arr.filter((x) => x.type === type);
 
-      // Base options per type
-      const BASE = type === 'seller'
-        ? [
-            { v: '', t: 'All product categories' },
-            { v: 'furniture', t: 'Furniture' },
-            { v: 'painting', t: 'Painting' },
-            { v: 'decoration', t: 'Decoration' },
-            { v: 'deshi_mritshilpo', t: 'দেশীয় মৃতশিল্প' },
-          ]
-        : [
-            { v: '', t: 'All service types' },
-            { v: 'interior_design', t: 'Interior Designer' },
-            { v: 'electrician', t: 'Electrician' },
-            { v: 'plumber', t: 'Plumber' },
-            { v: 'painter', t: 'Painter' },
-          ];
-
-      // Ensure any custom categories present in data are included
-      const customSet = new Set();
-      typeArr.forEach((x) => {
-        const key = type === 'seller' ? x.category : x.service_type;
-        if (key && !BASE.find((b) => b.v === key)) customSet.add(key);
-      });
-
-      const options = [...BASE, ...Array.from(customSet).map((k) => ({ v: k, t: k }))];
-      categoryFilter.innerHTML = options.map((o) => `<option value="${o.v}">${o.t}</option>`).join('');
+      if (type === 'seller') {
+        const cats = await apiGET("/api/lookups/product-categories");
+        categoryFilter.innerHTML =
+          `<option value="">All product categories</option>` +
+          cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+      } else {
+        const cats = await apiGET("/api/lookups/service-categories");
+        categoryFilter.innerHTML =
+          `<option value="">All service types</option>` +
+          cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+      }
     }
 
-    function renderListings() {
-      const raw = localStorage.getItem('vendorListings');
-      const arr = raw ? JSON.parse(raw) : [];
+    // ===== Render from DB (Products/Services) =====
+    async function renderListingsFromAPI() {
       const type = localStorage.getItem('vendorType');
-
       listingsContainer.innerHTML = '';
+
       if (!type) {
         noListings.style.display = 'block';
         noListings.textContent = 'Choose a vendor type to view or create listings.';
@@ -498,36 +536,41 @@
       }
 
       const selectedFilter = (categoryFilter && categoryFilter.value) || '';
-      let list = arr.filter((x) => x.type === type);
-      if (selectedFilter) {
-        list = list.filter((x) => {
-          const key = type === 'seller' ? x.category : x.service_type;
-          return key === selectedFilter;
-        });
-      }
+      let url = type === 'seller' ? `/api/products?vendor_id=${VENDOR_ID}` 
+                                  : `/api/services?vendor_id=${VENDOR_ID}`;
+      if (selectedFilter) url += `&category_slug=${encodeURIComponent(selectedFilter)}`;
 
-      if (!list.length) {
-        noListings.style.display = 'block';
-        noListings.textContent = 'No listings yet. Create one above.';
-        return;
-      }
-      noListings.style.display = 'none';
-
-      list.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        if (item.image_url) {
-          const img = document.createElement('img');
-          img.src = item.image_url;
-          img.alt = item.title;
-          card.appendChild(img);
+      try {
+        const rows = await apiGET(url);
+        if (!rows.length) {
+          noListings.style.display = 'block';
+          noListings.textContent = 'No listings yet. Create one above.';
+          return;
         }
-        const p = document.createElement('p');
-        const sub = item.type === 'seller' ? (item.category || 'Product') : (item.service_type || 'Service');
-        p.innerHTML = `<strong>${item.title}</strong><br><span class="muted">${sub}</span>`;
-        card.appendChild(p);
-        listingsContainer.appendChild(card);
-      });
+        noListings.style.display = 'none';
+
+        rows.forEach((item) => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+
+          const imgUrl = item.image_url || item.primary_image_url;
+          if (imgUrl) {
+            const img = document.createElement('img');
+            img.src = imgUrl;
+            img.alt = item.title;
+            card.appendChild(img);
+          }
+
+          const p = document.createElement('p');
+          const sub = item.category_slug || item.category_name || (type === 'seller' ? 'Product' : 'Service');
+          p.innerHTML = `<strong>${item.title}</strong><br><span class="muted">${sub}</span>`;
+          card.appendChild(p);
+          listingsContainer.appendChild(card);
+        });
+      } catch (err) {
+        noListings.style.display = 'block';
+        noListings.textContent = `Failed to load listings: ${err.message}`;
+      }
     }
 
     function clearForm() {
@@ -549,14 +592,46 @@
       });
     }
 
-    // Init: build filter + render
-    buildCategoryFilter();
-    renderListings();
+    // ===== Init =====
+    (async function init() {
+      try {
+        await loadLookups(); // populate form selects from API
+
+        // Load vendor type from DB; fall back to localStorage if DB empty
+        let vt = await loadVendorTypeFromDB();
+        if (!vt) vt = localStorage.getItem('vendorType') || '';
+
+        if (vt) {
+          const radio = document.querySelector(`input[name="vendorType"][value="${vt}"]`);
+          if (radio) radio.checked = true;
+          localStorage.setItem('vendorType', vt);
+        }
+        updateFormForType(vt);
+        setGateVisibility(vt);
+
+        await buildCategoryFilter();
+        await renderListingsFromAPI();
+      } catch (e) {
+        console.error(e);
+      }
+    })();
 
     // React to filter changes
     if (categoryFilter) {
-      categoryFilter.addEventListener('change', renderListings);
+      categoryFilter.addEventListener("change", renderListingsFromAPI);
     }
+
+    // Update UI when type radio changes (before saving to DB)
+    const typeRadios2 = document.querySelectorAll('input[name="vendorType"]');
+    typeRadios2.forEach((r) => {
+      r.addEventListener('change', async () => {
+        updateFormForType(r.value);
+        setGateVisibility(r.value);
+        localStorage.setItem('vendorType', r.value); // temp until user clicks Save
+        await buildCategoryFilter();
+        await renderListingsFromAPI();
+      });
+    });
   </script>
 </body>
 </html>
