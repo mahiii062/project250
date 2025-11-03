@@ -4,7 +4,7 @@ import mysql from 'mysql2';
 const db = mysql.createConnection({
   host: 'localhost',      // or your WSL IP if localhost fails
   user: 'root',
-  password: 'Mishti',
+  password: 'Mishtikutum@17',
   database: 'nibashDB'
 });
 
@@ -17,4 +17,4 @@ db.connect((err) => {
 });
 
 // ES module export
-export default db;
+export default db.promise();  

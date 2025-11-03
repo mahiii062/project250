@@ -2,11 +2,13 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import db from './config/db.js';
+import authRouter from './routes/auth.js'; 
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/api/auth', authRouter); 
 
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;
