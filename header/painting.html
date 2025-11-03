@@ -5,335 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Artist Dashboard — Nibash</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg: #f5f9ff;
-      --card: #e8f0fe;
-      --accent: #5a7db8;
-      --muted: #a0b8d8;
-      --soft: #d6e4ff;
-      --shadow: rgba(20,20,20,0.06);
-    }
-    *{box-sizing:border-box;font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:#333;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      min-height:100vh;
-    }
-
-    /* Header */
-    header {
-      background: white;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .logo { display:flex; align-items:center; gap:10px; font-weight:600; font-size:22px; }
-    .logo-img { width:40px;height:40px;border-radius:50%;object-fit:cover; }
-    header nav a { margin-left: 1rem; text-decoration: none; color: #333; }
-    .logout-btn { background: #5a7db8; color: white; padding: 0.4rem 1rem; border-radius: 6px; }
-
-    /* layout */
-    .dashboard { display: flex; min-height: calc(100vh - 60px); }
-
-    /* Sidebar */
-    .sidebar {
-      width: 220px;
-      background: white;
-      padding: 1.5rem;
-      border-right: 1px solid #eee;
-      position: relative;
-    }
-    .sidebar h3 { margin-bottom: 1rem; font-weight: 600; }
-    .sidebar a {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.6rem 1rem; margin: 0.3rem 0; text-decoration: none; color: #555;
-      border-radius: 6px; position: relative;
-    }
-    .sidebar a:hover { background: var(--soft); font-weight: 600; }
-    .sidebar a::after { content: "🎨"; font-size: 1rem; opacity: 0.5; pointer-events: none; }
-
-    /* main content */
-    .content { flex: 1; padding: 2rem; }
-
-    /* HERO / SLIDER */
-    .hero {
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px;
-      min-height: 500px;
-      box-shadow: 0 8px 24px var(--shadow);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 28px;
-      gap: 24px;
-      background: #111; /* fallback while images load */
-    }
-    .hero-slider {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-    .hero-slider .slide {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-      opacity: 0;
-      transform: scale(1.02);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .hero-slider .slide.active { opacity: 1; transform: scale(1); }
-    /* soft overall tint so text stays readable but images are visible */
-    .hero-slider::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.20) 40%, rgba(0,0,0,0.45) 100%);
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    /* hero text overlay (semi-transparent so slide shows through) */
-    .hero-text-overlay {
-      position: relative;
-      z-index: 3;
-      width: min(680px, 63%);
-      background: rgba(255,255,255,0.06); /* very low solid tint to hint image behind */
-      color: #fff;
-      padding: 28px;
-      border-radius: 12px;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    }
-    .hero-text-overlay h1 {
-      margin:0 0 12px 0; font-size:32px; line-height:1.05; font-weight:700;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
-    }
-    .hero-text-overlay p { margin:0; opacity:0.95; line-height:1.6; font-size:15px; color: #fff; }
-
-    .cta { margin-top: 18px; display:flex; gap:12px; flex-wrap:wrap; }
-    .btn { border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:600; transition:all .22s ease; }
-    .btn.white { background: rgba(255,255,255,0.95); color:#3a4c75; }
-    .btn.dark  { background: rgba(0,0,0,0.25); color:#fff; border:1px solid rgba(255,255,255,0.15); }
-    .btn.white:hover{ transform: translateY(-3px); }
-    .btn.dark:hover{ transform: translateY(-3px); }
-
-    /* right column thumbnails (optional small preview) */
-    .hero-right-previews {
-      position: relative;
-      z-index: 3;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      width:240px;
-      flex-shrink:0;
-    }
-    .preview-thumb { width:100%; height:120px; border-radius:10px; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,0.2); }
-    .preview-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
-
-    /* slider controls */
-    .hero-controls {
-      position:absolute;
-      z-index: 4;
-      bottom: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    .hero-controls .dot {
-      width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,0.4); cursor:pointer;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-    .hero-controls .dot.active { background: white; transform:scale(1.1); }
-    .hero-arrow {
-      position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.25); color:white;
-      width:40px;height:40px;border-radius:8px; display:flex;align-items:center;justify-content:center; z-index:5; cursor:pointer;
-      border:none;
-    }
-    .hero-arrow:hover { background: rgba(0,0,0,0.4); }
-    .hero-arrow.prev { left:12px; }
-    .hero-arrow.next { right:12px; }
-
-    /* cards row */
-    .card-row { display:flex; gap:18px; margin-top: 18px; flex-wrap:wrap; }
-    .card {
-      background: var(--card);
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px var(--shadow);
-      display: flex; align-items: center; gap: 14px;
-    }
-    .card .avatar { width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;border:4px solid #fff;box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
-    .progressWrap { height:10px; background:#eee; border-radius:999px; overflow:hidden; margin-top:8px; }
-    .progressFill { height:100%; width:62%; background:#7aa04b; display:block; border-radius:999px; }
-
-    .section { background:var(--card); padding:16px; border-radius:12px; box-shadow:0 6px 18px var(--shadow); margin-bottom:1rem; }
-    .section h3 { margin:0 0 10px 0; font-size:16px; }
-
-    .creationsGrid { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
-    .product {
-      background: linear-gradient(180deg,#fff,#f5f9ff);
-      padding:12px; border-radius:10px; text-align:center; border:1px solid rgba(0,0,0,0.03);
-      display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; transition:transform .22s ease;
-    }
-    .product:hover { transform: translateY(-6px) }
-    .product img { width:100%; height:150px; object-fit:cover; border-radius:8px; }
-    .contact-seller { font-weight:700; color:white; background-color:var(--accent); padding:10px 20px; border-radius:8px; cursor:pointer; width:100%; border:none; }
-    .contact-seller:hover { background-color:#7a9bd8; }
-
-    /* activity feed */
-    .activity-card { width:100%; margin-top:1rem; }
-    .activity-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:1rem; margin-top:12px; }
-    .activity { background:#f0f5ff; padding:1rem; border-radius:8px; font-size:0.95rem; }
-
-    /* chat modal */
-    .chat-modal { position: fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.5); z-index: 9999; }
-    .chat-modal.active { display:flex; }
-    .chat-box { width:420px; max-width:94%; background:white; padding:18px; border-radius:10px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-    .chat-box h4 { margin:0 0 8px 0; }
-    .chat-box .meta { font-size:13px; color:#666; margin-bottom:8px; }
-    .chat-close { float:right; background:transparent; border:none; font-size:20px; cursor:pointer; }
-
-    /* Artist Profile Section */
-    .artist-profile {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px var(--shadow);
-    }
-    .artist-image {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid var(--soft);
-    }
-    .artist-details {
-      flex: 1;
-    }
-    .artist-name {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--accent);
-    }
-    .artist-specialty {
-      font-size: 16px;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-    .artist-bio {
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-    .artist-stats {
-      display: flex;
-      gap: 20px;
-    }
-    .stat {
-      text-align: center;
-    }
-    .stat-value {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-    .stat-label {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    /* Featured Artists Section */
-    .featured-artists {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .artist-card {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 6px 18px var(--shadow);
-      transition: transform 0.3s ease;
-    }
-    .artist-card:hover {
-      transform: translateY(-5px);
-    }
-    .artist-card-img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
-    .artist-card-content {
-      padding: 15px;
-    }
-    .artist-card-name {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-    .artist-card-specialty {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    .artist-card-bio {
-      font-size: 13px;
-      line-height: 1.4;
-      margin-bottom: 15px;
-    }
-    .artist-card-stats {
-      display: flex;
-      justify-content: space-between;
-      border-top: 1px solid #eee;
-      padding-top: 10px;
-    }
-
-    /* responsive */
-    @media (max-width: 1024px) {
-      .sidebar { display:none; }
-      .content { padding:14px; }
-      .hero { padding:18px; flex-direction:column; gap:16px; min-height:420px; justify-content:flex-start; }
-      .hero-text-overlay { width:100%; }
-      .hero-right-previews { flex-direction:row; width:100%; }
-      .creationsGrid { grid-template-columns: repeat(2,1fr); }
-      .activity-grid { grid-template-columns: 1fr; }
-      .artist-profile { flex-direction: column; text-align: center; }
-      .artist-stats { justify-content: center; }
-      .featured-artists { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 600px) {
-      .creationsGrid { grid-template-columns: 1fr; }
-      .hero-text-overlay h1 { font-size:24px; }
-      .featured-artists { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link href="../css/dashb.css" rel="stylesheet">
 </head>
-<body>
+<body class="theme-artist">
 
   <header>
     <div class="logo"><img src="../images/mainLogo.png" alt="Nibash Logo" class="logo-img">Nibash</div>
     <nav>
       <a href="../users/customer.html">Home</a>
-      
       <a href="../index.html" class="logout-btn">Log out</a>
     </nav>
   </header>
@@ -390,20 +69,20 @@
         <div class="hero-controls" aria-hidden="true"></div>
       </section>
 
-      <!-- Artist Profile Section -->
+      <!-- Artist Profile Section - FIXED -->
       <section class="section">
         <h3>Featured Artist</h3>
-        <div class="artist-profile">
-          <img src="../images/artist2.jpg" alt="Featured Artist" class="artist-image">
-          <div class="artist-details">
-            <div class="artist-name">Elena Rodriguez</div>
-            <div class="artist-specialty">Contemporary Abstract Painter</div>
-            <div class="artist-bio">
+        <div class="profile-section">
+          <img src="../images/artist2.jpg" alt="Featured Artist" class="profile-image">
+          <div class="profile-details">
+            <div class="profile-name">Elena Rodriguez</div>
+            <div class="profile-specialty">Contemporary Abstract Painter</div>
+            <div class="profile-bio">
               Elena is known for her vibrant abstract compositions that explore the relationship between color and emotion. 
               With over 15 years of experience, her work has been exhibited in galleries across Europe and North America. 
               She finds inspiration in nature, music, and urban landscapes.
             </div>
-            <div class="artist-stats">
+            <div class="profile-stats">
               <div class="stat">
                 <div class="stat-value">127</div>
                 <div class="stat-label">Artworks</div>
@@ -425,7 +104,7 @@
         </div>
       </section>
 
-      <!-- small cards row (restored) -->
+      <!-- small cards row -->
       <div class="card-row" style="margin-bottom:8px">
         <div class="card" style="flex:1">
           <div style="display:flex;align-items:center;gap:12px">
@@ -449,43 +128,43 @@
          </div>
       </div>
 
-      <!-- Featured Artists Section -->
+      <!-- Featured Artists Section - FIXED -->
       <section class="section">
         <h3>Featured Artists</h3>
-        <div class="featured-artists">
-          <div class="artist-card">
-            <img src="../images/artist.jpg" alt="Artist" class="artist-card-img">
-            <div class="artist-card-content">
-              <div class="artist-card-name">Marcus Johnson</div>
-              <div class="artist-card-specialty">Urban & Street Art</div>
-              <div class="artist-card-bio">Creating vibrant murals that reflect city life and cultural diversity. Based in Brooklyn, NY.</div>
-              <div class="artist-card-stats">
+        <div class="featured-grid">
+          <div class="featured-card">
+            <img src="../images/artist.jpg" alt="Artist" class="featured-card-img">
+            <div class="featured-card-content">
+              <div class="featured-card-name">Marcus Johnson</div>
+              <div class="featured-card-specialty">Urban & Street Art</div>
+              <div class="featured-card-bio">Creating vibrant murals that reflect city life and cultural diversity. Based in Brooklyn, NY.</div>
+              <div class="featured-card-stats">
                 <div>86 Artworks</div>
                 <div>4.7★</div>
               </div>
             </div>
           </div>
           
-          <div class="artist-card">
-            <img src="../images/artist.jpg" alt="Artist" class="artist-card-img">
-            <div class="artist-card-content">
-              <div class="artist-card-name">Isabella Rossi</div>
-              <div class="artist-card-specialty">Oil Paintings & Classical Art</div>
-              <div class="artist-card-bio">Trained in Florence, specializing in Renaissance-inspired portraiture and still life.</div>
-              <div class="artist-card-stats">
+          <div class="featured-card">
+            <img src="../images/artist.jpg" alt="Artist" class="featured-card-img">
+            <div class="featured-card-content">
+              <div class="featured-card-name">Isabella Rossi</div>
+              <div class="featured-card-specialty">Oil Paintings & Classical Art</div>
+              <div class="featured-card-bio">Trained in Florence, specializing in Renaissance-inspired portraiture and still life.</div>
+              <div class="featured-card-stats">
                 <div>64 Artworks</div>
                 <div>4.9★</div>
               </div>
             </div>
           </div>
           
-          <div class="artist-card">
-            <img src="../images/artist.jpg" alt="Artist" class="artist-card-img">
-            <div class="artist-card-content">
-              <div class="artist-card-name">Ahmed Hassan</div>
-              <div class="artist-card-specialty">Calligraphy & Islamic Art</div>
-              <div class="artist-card-bio">Blending traditional Arabic calligraphy with contemporary design elements.</div>
-              <div class="artist-card-stats">
+          <div class="featured-card">
+            <img src="../images/artist.jpg" alt="Artist" class="featured-card-img">
+            <div class="featured-card-content">
+              <div class="featured-card-name">Ahmed Hassan</div>
+              <div class="featured-card-specialty">Calligraphy & Islamic Art</div>
+              <div class="featured-card-bio">Blending traditional Arabic calligraphy with contemporary design elements.</div>
+              <div class="featured-card-stats">
                 <div>112 Artworks</div>
                 <div>4.8★</div>
               </div>
@@ -522,7 +201,7 @@
         </div>
       </section>
 
-      <!-- Our creations (expanded examples) -->
+      <!-- Featured Artworks -->
       <section class="section" aria-labelledby="our-creations">
         <h3 id="our-creations">Featured Artworks</h3>
         <div class="creationsGrid" style="margin-top:12px">
@@ -570,7 +249,7 @@
         </div>
         <!-- callout -->
         <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
-          <div style="flex:1;min-width:220px;background:linear-gradient(180deg,#f0f5ff,#e8f0fe);padding:16px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;gap:8px">
+          <div style="flex:1;min-width:220px;background:linear-gradient(180deg,var(--bg),var(--card));padding:16px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;gap:8px">
             <strong>Your review of 'Elena Rodriguez' the artist right now!</strong>
             <small style="color:#6a7a8a">Leave a quick star rating to help other collectors</small>
             <div style="margin-top:8px"><button class="btn white" style="padding:8px 12px">Write a review</button></div>
@@ -578,7 +257,7 @@
         </div>
       </section>
 
-      <!-- Activity Feed (restored + styled) -->
+      <!-- Activity Feed -->
       <div class="activity-card card">
         <h4>Activity Feed</h4>
         <div class="activity-grid" style="margin-top:10px">
@@ -592,7 +271,7 @@
     </main>
   </div>
 
-  <!-- Chat Modal (used by message and contact buttons) -->
+  <!-- Chat Modal -->
   <div class="chat-modal" id="chatModal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
     <div class="chat-box" role="document">
       <button class="chat-close" id="chatCloseBtn" aria-label="Close chat">✕</button>
@@ -781,18 +460,16 @@
         // simulate sending
         chatStatus.textContent = 'Message sent ✔';
         chatStatus.style.display = 'block';
-        // small delay then close
+        
         setTimeout(() => {
           closeChat();
         }, 900);
       });
 
-      // close when clicking outside content
       chatModal.addEventListener('click', (e) => {
         if (e.target === chatModal) closeChat();
       });
 
-      // make closeChat available globally for keyboard ESC used earlier
       window.closeChat = closeChat;
     })();
   </script>

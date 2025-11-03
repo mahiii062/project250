@@ -11,7 +11,6 @@
 </head>
 
 <body>
-
     <!-- Header -->
     <header>
         <div class="logo">
@@ -40,11 +39,8 @@
                     <div class="suggestions" id="suggestions"></div>
                 </div>
             </div>
-
-
         </nav>
     </header>
-
 
     <!-- Hero Section -->
     <section class="hero">
@@ -183,7 +179,8 @@
         <div class="chat-header">Nibash Assistant <span id="close-chat">✖</span></div>
         <div class="chat-body" id="chat-body">
             <div class="message assistant">Hi! 👋 I am Nibash Assistant. I can help you with furniture, designers, and
-                home services.</div>
+                home
+                services.</div>
         </div>
         <div class="chat-input">
             <input type="text" id="user-input" placeholder="Type your question...">
@@ -191,20 +188,15 @@
         </div>
     </div>
 
+    <!-- Existing site logic -->
     <script>
-        function openModal() {
-            document.getElementById("popup").classList.add("active");
-        }
-        function closeModal() {
-            document.getElementById("popup").classList.remove("active");
-        }
-
+        function openModal() { document.getElementById("popup").classList.add("active"); }
+        function closeModal() { document.getElementById("popup").classList.remove("active"); }
         function toggleSearch() {
             document.querySelector(".search-box").classList.toggle("active");
             document.getElementById("searchInput").focus();
         }
 
-        // Search mapping
         const searchPages = {
             "furniture": "header/furniture.html",
             "painting": "header/painting.html",
@@ -217,7 +209,6 @@
             "deshi mritshilpo": "header/deshiMritshilpo.html"
         };
 
-        // Show suggestions
         function showSuggestions(query) {
             const suggestionBox = document.getElementById("suggestions");
             suggestionBox.innerHTML = "";
@@ -246,14 +237,12 @@
             }
         }
 
-        // Select suggestion
         function selectSuggestion(item) {
             document.getElementById("searchInput").value = item;
             document.getElementById("suggestions").style.display = "none";
             redirectSearch(item);
         }
 
-        // Handle Enter key
         function handleSearch(event) {
             if (event.key === "Enter") {
                 const query = event.target.value.trim();
@@ -261,7 +250,6 @@
             }
         }
 
-        // Redirect function
         function redirectSearch(query) {
             const lowerQuery = query.toLowerCase();
             if (searchPages[lowerQuery]) {
@@ -272,6 +260,8 @@
         }
     </script>
 
+    <!-- Chatbot connection script -->
+    <script src="js/chatbot.js"></script>
 </body>
 
 </html>

@@ -1,39 +1,47 @@
 import express from "express";
-import fetch from "node-fetch";
 import dotenv from "dotenv";
 import cors from "cors";
 import db from './config/db.js';
 
 dotenv.config();
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-app.post("/chat", async (req, res) => {
-    try {
-        const userMessage = req.body.message;
+app.post("/api/chat", async (req, res) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ reply: "No message provided." });
 
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [
-                    { role: "system", content: "You are a friendly AI assistant. Answer any question the user asks politely and clearly." },
-                    { role: "user", content: userMessage }
-                ]
-            })
-        });
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are Nibash Assistant, a friendly expert on furniture, interior design, and home improvement." },
+          { role: "user", content: message }
+        ]
+      })
+    });
 
-        const data = await response.json();
-        res.json({ reply: data.choices[0].message.content });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ reply: "Sorry! Something went wrong. 😢" });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("OpenAI error response:", errText);
+      return res.status(500).json({ reply: "OpenAI API returned an error." });
     }
+
+    const data = await response.json();
+    console.log("✅ OpenAI reply:", data.choices[0].message.content);
+    res.json({ reply: data.choices[0].message.content });
+  } catch (error) {
+    console.error("🚨 Server error:", error);
+    res.status(500).json({ reply: "Sorry, something went wrong on the server." });
+  }
 });
 
-app.listen(3000, () => console.log("Server running at http://localhost:3000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
