@@ -1,10 +1,12 @@
 // config/db.js
 import mysql from 'mysql2';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const db = mysql.createConnection({
   host: 'localhost',      // or your WSL IP if localhost fails
   user: 'root',
-  password: '',
+  password: process.env.DB_PASSWORD ,
   database: 'nibashDB'
 });
 
