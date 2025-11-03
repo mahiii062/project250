@@ -4,7 +4,7 @@ import mysql from 'mysql2';
 const db = mysql.createConnection({
   host: 'localhost',      // or your WSL IP if localhost fails
   user: 'root',
-  password: 'Mishtikutum@17',
+  password: 'Mishti',
   database: 'nibashDB'
 });
 
