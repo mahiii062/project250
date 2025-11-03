@@ -1,110 +1,165 @@
-// ================== Chatbot Open/Close ==================
-const chatbotButton = document.getElementById("chatbot-button");
-const chatbotBox = document.getElementById("chatbot-box");
+const chatBtn = document.getElementById("chatbot-button");
+const chatBox = document.getElementById("chatbot-box");
 const closeChat = document.getElementById("close-chat");
 const sendBtn = document.getElementById("send-btn");
-const userInput = document.getElementById("user-input");
+const input = document.getElementById("user-input");
 const chatBody = document.getElementById("chat-body");
 
-// Open chatbot
-chatbotButton.addEventListener("click", () => {
-    chatbotBox.style.display = "flex";
-    userInput.focus();
+/* ---------------- New Message Badge ---------------- */
+let newMsgBadge = document.createElement("div");
+newMsgBadge.id = "new-msg-badge";
+newMsgBadge.textContent = "New Messages ↓";
+Object.assign(newMsgBadge.style, {
+  position: "absolute",
+  bottom: "10px",
+  left: "50%",
+  transform: "translateX(-50%)",
+  background: "#ffdd57",
+  padding: "5px 12px",
+  borderRadius: "16px",
+  cursor: "pointer",
+  display: "none",
+  fontSize: "13px",
+  fontWeight: "600",
+  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+  transition: "opacity 0.3s"
+});
+chatBox.appendChild(newMsgBadge);
+
+/* ---------------- Chatbox Toggle ---------------- */
+chatBtn.onclick = () => {
+  chatBox.style.display = "flex";
+  input.focus();
+  scrollToBottomSmooth();
+};
+
+closeChat.onclick = () => {
+  chatBox.style.display = "none";
+};
+
+/* ---------------- Badge Click Scroll ---------------- */
+newMsgBadge.onclick = () => {
+  scrollToBottomSmooth();
+  newMsgBadge.style.display = "none";
+};
+
+/* ---------------- Send Button & Enter ---------------- */
+sendBtn.onclick = sendMessage;
+input.addEventListener("keypress", e => {
+  if (e.key === "Enter") sendMessage();
 });
 
-// Close chatbot
-closeChat.addEventListener("click", () => {
-    chatbotBox.style.display = "none";
-});
+/* ---------------- Message Append Function ---------------- */
+function appendMessage(sender, text) {
+  const atBottom = isAtBottom();
 
-// ================== Send Message ==================
-sendBtn.addEventListener("click", sendMessage);
+  const msgDiv = document.createElement("div");
+  msgDiv.classList.add("message", sender);
+  msgDiv.innerHTML = text
+    .replace(/\n/g, "<br>")
+    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+  msgDiv.style.opacity = "0";
+  msgDiv.style.transition = "opacity 0.4s ease";
 
-// Send message on Enter key
-userInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
+  chatBody.appendChild(msgDiv);
 
-// ================== Helper: Add message ==================
-function addMessage(text, sender, isTyping = false) {
-    const messageDiv = document.createElement("div");
-    messageDiv.classList.add("message", sender);
-    if (isTyping) messageDiv.classList.add("typing");
-    messageDiv.innerHTML = text;
+  requestAnimationFrame(() => (msgDiv.style.opacity = "1"));
 
-    // Timestamp
-    const timestamp = document.createElement("span");
-    timestamp.classList.add("timestamp");
-    const now = new Date();
-    timestamp.textContent =
-        now.getHours().toString().padStart(2, "0") + ":" +
-        now.getMinutes().toString().padStart(2, "0");
-    messageDiv.appendChild(timestamp);
+  // Add timestamp
+  const time = document.createElement("span");
+  time.classList.add("timestamp");
+  time.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  msgDiv.appendChild(time);
 
-    chatBody.appendChild(messageDiv);
-    chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
-    return messageDiv;
+  if (atBottom) {
+    scrollToBottomSmooth();
+  } else {
+    highlightNewMessage(msgDiv);
+  }
+
+  playSound(sender);
 }
 
-// ================== Quick Suggestions ==================
-const suggestions = ["Show furniture deals", "Find interior designer", "Home services", "Contact support"];
+/* ---------------- Highlight New Message ---------------- */
+function highlightNewMessage(msgDiv) {
+  msgDiv.style.background = "#fff8c2"; // soft yellow
+  setTimeout(() => (msgDiv.style.background = ""), 1500);
+  newMsgBadge.style.display = "block";
+}
 
-function addSuggestions() {
-    const sugContainer = document.createElement("div");
-    sugContainer.classList.add("message", "assistant", "suggestions");
+/* ---------------- Typing Indicator ---------------- */
+function appendTyping() {
+  const typing = document.createElement("div");
+  typing.classList.add("message", "assistant", "typing");
+  typing.innerHTML = `
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  `;
+  chatBody.appendChild(typing);
+  if (isAtBottom()) scrollToBottomSmooth();
+  return typing;
+}
 
-    suggestions.forEach(text => {
-        const btn = document.createElement("button");
-        btn.classList.add("suggestion-btn");
-        btn.textContent = text;
-        btn.addEventListener("click", () => {
-            userInput.value = text;
-            sendMessage();
-            sugContainer.remove();
-        });
-        sugContainer.appendChild(btn);
+function removeTyping(el) {
+  if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+/* ---------------- Smooth Scroll ---------------- */
+function scrollToBottomSmooth() {
+  chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+}
+
+function isAtBottom() {
+  return chatBody.scrollTop + chatBody.clientHeight >= chatBody.scrollHeight - 10;
+}
+
+/* ---------------- Message Sending ---------------- */
+let isSending = false;
+
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text || isSending) return;
+
+  appendMessage("user", text);
+  input.value = "";
+
+  isSending = true;
+  const typingEl = appendTyping();
+
+  try {
+    const res = await fetch("http://localhost:5000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
     });
 
-    chatBody.appendChild(sugContainer);
-    chatBody.scrollTo({ top: chatBody.scrollHeight, behavior: "smooth" });
+    const data = await res.json();
+    removeTyping(typingEl);
+    appendMessage("assistant", data.reply || "⚠️ No response from server.");
+  } catch (err) {
+    removeTyping(typingEl);
+    appendMessage("assistant", "⚠️ Connection issue, please try again.");
+    console.error(err);
+  } finally {
+    isSending = false;
+    input.focus();
+  }
 }
 
-// ================== Send Message Function ==================
-async function sendMessage() {
-    const input = userInput.value.trim();
-    if (!input) return;
+/* ---------------- Hide Badge on Scroll ---------------- */
+chatBody.addEventListener("scroll", () => {
+  if (isAtBottom()) newMsgBadge.style.display = "none";
+});
 
-    // Add user message
-    addMessage(`💬 ${input}`, "user");
-
-    userInput.value = "";
-    userInput.disabled = true;
-
-    // Typing indicator
-    const typingIndicator = addMessage("🤖 Typing...", "assistant", true);
-
-    try {
-        const response = await fetch("http://localhost:3000/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: input })
-        });
-        const data = await response.json();
-
-        // Remove typing
-        typingIndicator.remove();
-
-        // Add AI reply
-        addMessage(`🤖 ${data.reply}`, "assistant");
-
-        // Show quick suggestions after reply
-        addSuggestions();
-    } catch (err) {
-        typingIndicator.remove();
-        addMessage("⚠️Sorry! Something went wrong.", "assistant");
-        console.error(err);
-    } finally {
-        userInput.disabled = false;
-        userInput.focus();
-    }
+/* ---------------- Optional Sound Effect ---------------- */
+function playSound(sender) {
+  // Light "pop" sound when receiving a message
+  if (sender === "assistant") {
+    const audio = new Audio(
+      "https://cdn.pixabay.com/download/audio/2022/03/15/audio_7e0f6bff48.mp3?filename=message-pop-alert-35843.mp3"
+    );
+    audio.volume = 0.2;
+    audio.play().catch(() => { }); // Ignore autoplay errors
+  }
 }
