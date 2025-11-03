@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vendor Dashboard - Nibash</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/vendorDashboard.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendor Dashboard - Nibash (Gated)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/vendorDashboard.css" />
+  <style>
+    /* Minimal helpers so we don't rely on external CSS for visibility */
+    .hidden { display: none !important; }
+    .muted { color: #6b7280; }
+    .row-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .status { font-size: 0.9rem; }
+    .products-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); gap:16px; }
+    .product-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; overflow: hidden; }
+    .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
+    .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; background:#fff; }
+    .form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
+    .form-field { display:flex; flex-direction:column; gap:6px; }
+    .form-field.col-span-2 { grid-column: span 2 / span 2; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid #11182710; cursor:pointer; background:#f3f4f6; }
+    .btn.primary { background:#111827; color:#fff; }
+    .type-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin:12px 0; }
+    .type-card { border:1px solid #e5e7eb; border-radius:14px; padding:12px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
+    .type-card input { margin-top:4px; }
+    /* Gated sections share this class for easy toggling */
+    .gated { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+    .gated.ready { opacity: 1; pointer-events: auto; }
+  </style>
 </head>
-
 <body>
   <!-- Top Navbar -->
   <header class="topbar">
     <div class="logo">
-      <img src="../images/mainLogo.png" alt="Nibash Logo">
+      <img src="../images/mainLogo.png" alt="Nibash Logo" />
       <span class="logo-text">Nibash</span>
     </div>
     <div class="nav-actions">
@@ -39,7 +59,7 @@
 
     <!-- Main Content -->
     <main class="content">
-      <!-- Vendor Info -->
+      <!-- Vendor Info (unchanged) -->
       <section class="vendor-info">
         <div class="vendor-logo">V</div>
         <div class="vendor-details">
@@ -54,51 +74,180 @@
         </div>
       </section>
 
-      <div class="stats-cards">
-  <div class="stat-box">
-    <div class="stat-icon sold"><i class="fas fa-shopping-cart"></i></div>
-    <p>Products Sold</p>
-    <h2>124</h2>
-  </div>
-  <div class="stat-box">
-    <div class="stat-icon stock"><i class="fas fa-boxes"></i></div>
-    <p>In Stock</p>
-    <h2>78</h2>
-  </div>
-  <div class="stat-box">
-    <div class="stat-icon revenue"><i class="fas fa-dollar-sign"></i></div>
-    <p>Total Revenue</p>
-    <h2>$5,420</h2>
-  </div>
-  <div class="stat-box">
-    <div class="stat-icon reviews"><i class="fas fa-star"></i></div>
-    <p>Reviews</p>
-    <h2>320</h2>
-  </div>
-</div>
+      <!-- 1) Vendor Classification (ALWAYS visible) -->
+      <section class="card" style="margin-top: 16px;" id="typeGate">
+        <h3>Vendor Type</h3>
+        <p class="muted">Classify your business to tailor your dashboard and listing form.</p>
 
+        <div class="type-grid">
+          <label class="type-card">
+            <input type="radio" name="vendorType" value="seller" />
+            <div>
+              <strong>Seller</strong>
+              <p>Furniture • Painting • Decoration • দেশীয় মৃতশিল্প</p>
+            </div>
+          </label>
 
-      <!-- Top Products -->
-      <section class="top-products">
+          <label class="type-card">
+            <input type="radio" name="vendorType" value="service" />
+            <div>
+              <strong>Service Provider</strong>
+              <p>Interior Designer • Electrician • Plumber • Painter</p>
+            </div>
+          </label>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn" id="saveTypeBtn" type="button">Save Type</button>
+          <span id="typeStatus" class="status muted"></span>
+        </div>
+      </section>
+
+      <!-- 2) Create Listing (GATED: show after type chosen) -->
+      <section class="card gated hidden" id="createListingSection">
+        <h3>Create Listing</h3>
+        <p class="muted" id="formHint">Choose your vendor type above to reveal the right fields.</p>
+
+        <!-- Shared fields -->
+        <div class="form-grid">
+          <label class="form-field">
+            <span>Title *</span>
+            <input id="listingTitle" type="text" placeholder="e.g., Oak Study Desk / Plumbing Fix Package" />
+          </label>
+
+          <label class="form-field">
+            <span>Description *</span>
+            <textarea id="listingDesc" rows="3" placeholder="Describe your product/service..."></textarea>
+          </label>
+        </div>
+
+        <!-- Seller-specific -->
+        <div id="sellerFields" class="form-grid hidden">
+          <label class="form-field">
+            <span>Category *</span>
+            <select id="productCategory">
+              <option value="">Select a category</option>
+              <option value="furniture">Furniture</option>
+              <option value="painting">Painting</option>
+              <option value="decoration">Decoration</option>
+              <option value="deshi_mritshilpo">দেশীয় মৃতশিল্প</option>
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Price (BDT) *</span>
+            <input id="productPrice" type="number" min="0" step="1" placeholder="e.g., 4500" />
+          </label>
+
+          <label class="form-field">
+            <span>Stock *</span>
+            <input id="productStock" type="number" min="0" step="1" placeholder="e.g., 10" />
+          </label>
+
+          <label class="form-field col-span-2">
+            <span>Image URL (optional)</span>
+            <input id="productImage" type="url" placeholder="https://..." />
+          </label>
+        </div>
+
+        <!-- Service-specific -->
+        <div id="serviceFields" class="form-grid hidden">
+          <label class="form-field">
+            <span>Service Type *</span>
+            <select id="serviceCategory">
+              <option value="">Select a service</option>
+              <option value="interior_design">Interior Designer</option>
+              <option value="electrician">Electrician</option>
+              <option value="plumber">Plumber</option>
+              <option value="painter">Painter</option>
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Rate (BDT) *</span>
+            <input id="serviceRate" type="number" min="0" step="1" placeholder="e.g., 1200" />
+          </label>
+
+          <label class="form-field">
+            <span>Billing *</span>
+            <select id="serviceBilling">
+              <option value="fixed">Fixed</option>
+              <option value="hourly">Hourly</option>
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Service Area *</span>
+            <input id="serviceArea" type="text" placeholder="e.g., Dhaka, BD" />
+          </label>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn" id="clearFormBtn" type="button">Clear</button>
+          <button class="btn primary" id="createListingBtn" type="button">Save Listing</button>
+          <span id="createStatus" class="status muted"></span>
+        </div>
+      </section>
+
+      <!-- 3) My Listings (GATED) -->
+      <section class="card gated hidden" id="myListingsSection">
+        <h3>My Listings</h3>
+        <div class="row-actions" style="margin: 8px 0 12px;">
+          <label class="form-field" style="min-width:240px;">
+            <span>Filter by category</span>
+            <select id="categoryFilter"></select>
+          </label>
+        </div>
+        <div id="listingsContainer" class="products-grid"></div>
+        <p class="muted" id="noListings" style="display:none;">No listings yet. Create one above.</p>
+      </section>
+
+      <!-- 4) Optional: other dashboard pieces (GATED) -->
+      <section class="card gated hidden" id="statsSection">
+        <h3>Stats</h3>
+        <div class="stats-cards">
+          <div class="stat-box">
+            <div class="stat-icon sold"><i class="fas fa-shopping-cart"></i></div>
+            <p>Products Sold</p>
+            <h2>124</h2>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon stock"><i class="fas fa-boxes"></i></div>
+            <p>In Stock</p>
+            <h2>78</h2>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon revenue"><i class="fas fa-dollar-sign"></i></div>
+            <p>Total Revenue</p>
+            <h2>$5,420</h2>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon reviews"><i class="fas fa-star"></i></div>
+            <p>Reviews</p>
+            <h2>320</h2>
+          </div>
+        </div>
+      </section>
+
+      <section class="card gated hidden" id="topProductsSection">
         <h3>Top-Performing Products</h3>
         <div class="products-grid">
           <div class="product-card">
-            <img src="../images/p1.jpg" alt="Terracotta Vase">
+            <img src="../images/p1.jpg" alt="Terracotta Vase" />
             <p>Terracotta Vase</p>
           </div>
           <div class="product-card processing">
-            <img src="../images/p4.jpg" alt="Blue Bowl">
+            <img src="../images/p4.jpg" alt="Blue Bowl" />
             <p>Blue Bowl <span>Processing</span></p>
           </div>
           <div class="product-card">
-            <img src="../images/p8.jpg" alt="Macrame Art">
+            <img src="../images/p8.jpg" alt="Macrame Art" />
             <p>Macrame Art <span class="active">30 hours</span></p>
           </div>
         </div>
       </section>
 
-      <!-- Customer Inquiries -->
-      <section class="inquiries">
+      <section class="card gated hidden" id="inquiriesSection">
         <h3>Customer Inquiries</h3>
         <p><strong>Maisha:</strong> Interested in vase (1 min ago)</p>
         <p><strong>New Followers:</strong> 45</p>
@@ -107,15 +256,307 @@
   </div>
 
   <script>
-    // Sidebar menu toggle active
-    const items = document.querySelectorAll(".sidebar ul li");
-    items.forEach(item => {
-      item.addEventListener("click", () => {
-        items.forEach(i => i.classList.remove("active"));
-        item.classList.add("active");
+    // ===== Sidebar "active" toggling (unchanged) =====
+    const items = document.querySelectorAll('.sidebar ul li');
+    items.forEach((item) => {
+      item.addEventListener('click', () => {
+        items.forEach((i) => i.classList.remove('active'));
+        item.classList.add('active');
       });
     });
+
+    // ===== Helpers for gated visibility =====
+    const GATED_SECTION_IDS = [
+      'createListingSection',
+      'myListingsSection',
+      'statsSection',
+      'topProductsSection',
+      'inquiriesSection',
+    ];
+    function setGateVisibility(type) {
+      const show = type === 'seller' || type === 'service';
+      GATED_SECTION_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (show) {
+          el.classList.remove('hidden');
+          // slight delay to allow transition
+          requestAnimationFrame(() => el.classList.add('ready'));
+        } else {
+          el.classList.add('hidden');
+          el.classList.remove('ready');
+        }
+      });
+    }
+
+    // ===== Vendor Type controls =====
+    const typeRadios = document.querySelectorAll('input[name="vendorType"]');
+    const saveTypeBtn = document.getElementById('saveTypeBtn');
+    const typeStatus = document.getElementById('typeStatus');
+    const sellerFields = document.getElementById('sellerFields');
+    const serviceFields = document.getElementById('serviceFields');
+    const formHint = document.getElementById('formHint');
+
+    // Gated sections & filter
+    const createSection = document.getElementById('createListingSection');
+    const myListingsSection = document.getElementById('myListingsSection');
+    const categoryFilter = document.getElementById('categoryFilter');
+
+    // Load saved type
+    const savedType = localStorage.getItem('vendorType') || '';
+    if (savedType) {
+      const radio = document.querySelector(`input[name="vendorType"][value="${savedType}"]`);
+      if (radio) radio.checked = true;
+      updateFormForType(savedType);
+    }
+    setGateVisibility(savedType);
+
+    typeRadios.forEach((r) => {
+      r.addEventListener('change', () => {
+        updateFormForType(r.value);
+        setGateVisibility(r.value);
+        // On type switch, update filter + re-render listings
+        buildCategoryFilter();
+        renderListings();
+      });
+    });
+
+    function updateFormForType(type) {
+      if (type === 'seller') {
+        sellerFields.classList.remove('hidden');
+        serviceFields.classList.add('hidden');
+        formHint.textContent = 'Create a product listing to sell on Nibash.';
+      } else if (type === 'service') {
+        sellerFields.classList.add('hidden');
+        serviceFields.classList.remove('hidden');
+        formHint.textContent = 'Create a service package listing for customers.';
+      } else {
+        sellerFields.classList.add('hidden');
+        serviceFields.classList.add('hidden');
+        formHint.textContent = 'Choose your vendor type above to reveal the right fields.';
+      }
+    }
+
+    saveTypeBtn.addEventListener('click', () => {
+      const selected = document.querySelector('input[name="vendorType"]:checked');
+      if (!selected) {
+        typeStatus.textContent = 'Select a type first.';
+        typeStatus.style.color = 'crimson';
+        setGateVisibility('');
+        return;
+      }
+      localStorage.setItem('vendorType', selected.value);
+      typeStatus.textContent = 'Saved!';
+      typeStatus.style.color = 'green';
+      setGateVisibility(selected.value);
+      buildCategoryFilter();
+      renderListings();
+      // Focus first input for quick flow
+      const first = document.getElementById('listingTitle');
+      if (first) first.focus();
+    });
+
+    // ===== Create Listing (local only) =====
+    const createBtn = document.getElementById('createListingBtn');
+    const clearBtn = document.getElementById('clearFormBtn');
+    const createStatus = document.getElementById('createStatus');
+    const listingsContainer = document.getElementById('listingsContainer');
+    const noListings = document.getElementById('noListings');
+
+    createBtn.addEventListener('click', () => {
+      try {
+        createStatus.textContent = 'Saving...';
+        createStatus.style.color = 'inherit';
+
+        const listing = readListingForm();
+        saveListingLocal(listing);
+        buildCategoryFilter();
+        renderListings();
+        clearForm();
+
+        createStatus.textContent = 'Saved locally!';
+        createStatus.style.color = 'green';
+        listingsContainer.scrollIntoView({ behavior: 'smooth' });
+      } catch (e) {
+        createStatus.textContent = e.message;
+        createStatus.style.color = 'crimson';
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      clearForm();
+      createStatus.textContent = '';
+    });
+
+    function readListingForm() {
+      const type = localStorage.getItem('vendorType');
+      const title = document.getElementById('listingTitle').value.trim();
+      const description = document.getElementById('listingDesc').value.trim();
+
+      if (!type) throw new Error('Please choose your vendor type above.');
+      if (!title || !description) throw new Error('Title and Description are required.');
+
+      if (type === 'seller') {
+        const category = document.getElementById('productCategory').value;
+        const price = document.getElementById('productPrice').value;
+        const stock = document.getElementById('productStock').value;
+        const image_url = document.getElementById('productImage').value.trim();
+
+        if (!category || price === '' || stock === '') {
+          throw new Error('Please complete all product fields.');
+        }
+
+        return {
+          id: Date.now(),
+          type,
+          title,
+          description,
+          category,
+          price: parseInt(price, 10),
+          stock: parseInt(stock, 10),
+          image_url: image_url || null,
+        };
+      } else {
+        const service_type = document.getElementById('serviceCategory').value;
+        const rate = document.getElementById('serviceRate').value;
+        const billing = document.getElementById('serviceBilling').value;
+        const area = document.getElementById('serviceArea').value.trim();
+
+        if (!service_type || rate === '' || !billing || !area) {
+          throw new Error('Please complete all service fields.');
+        }
+
+        return {
+          id: Date.now(),
+          type,
+          title,
+          description,
+          service_type,
+          rate: parseInt(rate, 10),
+          billing,
+          area,
+        };
+      }
+    }
+
+    function saveListingLocal(listing) {
+      const raw = localStorage.getItem('vendorListings');
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.unshift(listing);
+      localStorage.setItem('vendorListings', JSON.stringify(arr));
+    }
+
+    // Build category filter options based on vendor type + existing listings
+    function buildCategoryFilter() {
+      const type = localStorage.getItem('vendorType') || '';
+      if (!type) {
+        categoryFilter.innerHTML = '';
+        return;
+      }
+      const raw = localStorage.getItem('vendorListings');
+      const arr = raw ? JSON.parse(raw) : [];
+      const typeArr = arr.filter((x) => x.type === type);
+
+      // Base options per type
+      const BASE = type === 'seller'
+        ? [
+            { v: '', t: 'All product categories' },
+            { v: 'furniture', t: 'Furniture' },
+            { v: 'painting', t: 'Painting' },
+            { v: 'decoration', t: 'Decoration' },
+            { v: 'deshi_mritshilpo', t: 'দেশীয় মৃতশিল্প' },
+          ]
+        : [
+            { v: '', t: 'All service types' },
+            { v: 'interior_design', t: 'Interior Designer' },
+            { v: 'electrician', t: 'Electrician' },
+            { v: 'plumber', t: 'Plumber' },
+            { v: 'painter', t: 'Painter' },
+          ];
+
+      // Ensure any custom categories present in data are included
+      const customSet = new Set();
+      typeArr.forEach((x) => {
+        const key = type === 'seller' ? x.category : x.service_type;
+        if (key && !BASE.find((b) => b.v === key)) customSet.add(key);
+      });
+
+      const options = [...BASE, ...Array.from(customSet).map((k) => ({ v: k, t: k }))];
+      categoryFilter.innerHTML = options.map((o) => `<option value="${o.v}">${o.t}</option>`).join('');
+    }
+
+    function renderListings() {
+      const raw = localStorage.getItem('vendorListings');
+      const arr = raw ? JSON.parse(raw) : [];
+      const type = localStorage.getItem('vendorType');
+
+      listingsContainer.innerHTML = '';
+      if (!type) {
+        noListings.style.display = 'block';
+        noListings.textContent = 'Choose a vendor type to view or create listings.';
+        return;
+      }
+
+      const selectedFilter = (categoryFilter && categoryFilter.value) || '';
+      let list = arr.filter((x) => x.type === type);
+      if (selectedFilter) {
+        list = list.filter((x) => {
+          const key = type === 'seller' ? x.category : x.service_type;
+          return key === selectedFilter;
+        });
+      }
+
+      if (!list.length) {
+        noListings.style.display = 'block';
+        noListings.textContent = 'No listings yet. Create one above.';
+        return;
+      }
+      noListings.style.display = 'none';
+
+      list.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        if (item.image_url) {
+          const img = document.createElement('img');
+          img.src = item.image_url;
+          img.alt = item.title;
+          card.appendChild(img);
+        }
+        const p = document.createElement('p');
+        const sub = item.type === 'seller' ? (item.category || 'Product') : (item.service_type || 'Service');
+        p.innerHTML = `<strong>${item.title}</strong><br><span class="muted">${sub}</span>`;
+        card.appendChild(p);
+        listingsContainer.appendChild(card);
+      });
+    }
+
+    function clearForm() {
+      document.getElementById('listingTitle').value = '';
+      document.getElementById('listingDesc').value = '';
+      const ids = [
+        'productCategory', 'productPrice', 'productStock', 'productImage',
+        'serviceCategory', 'serviceRate', 'serviceBilling', 'serviceArea',
+      ];
+      ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.tagName === 'SELECT') {
+          if (id === 'serviceBilling') el.value = 'fixed';
+          else el.value = '';
+        } else {
+          el.value = '';
+        }
+      });
+    }
+
+    // Init: build filter + render
+    buildCategoryFilter();
+    renderListings();
+
+    // React to filter changes
+    if (categoryFilter) {
+      categoryFilter.addEventListener('change', renderListings);
+    }
   </script>
 </body>
-
 </html>

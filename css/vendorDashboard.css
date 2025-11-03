@@ -416,3 +416,111 @@ body {
 ::-webkit-scrollbar-track { background: #faf9f7; }
 ::-webkit-scrollbar-thumb { background: #f3d2b0; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #D4A76A; }
+/* Utility */
+.hidden { display: none !important; }
+.muted { color: #666; font-size: 0.95rem; }
+.status { margin-left: 8px; }
+
+/* Card wrapper */
+.card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-top: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+/* Buttons */
+.btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.15s ease;
+  font-weight: 500;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.primary {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+/* Row actions holder */
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Vendor type grid */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+.type-card {
+  display: flex;
+  gap: 10px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: #fafafa;
+}
+.type-card input[type="radio"] { margin-top: 2px; }
+
+/* Form grid / fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+  max-width: 900px;
+}
+.form-grid .form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-grid .form-field span { font-size: 0.95rem; color: #333; font-weight: 500; }
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.98rem;
+  outline: none;
+}
+.form-grid textarea { resize: vertical; min-height: 90px; }
+.form-grid .col-span-2 { grid-column: span 2; }
+
+/* My Listings grid uses your existing .products-grid styling.
+   If you need a minimal fallback, uncomment below:
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.product-card {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  padding: 10px;
+}
+.product-card img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.product-card p { margin: 0; }
+*/
+
+/* Spacing tweaks so new sections breathe */
+.vendor-info + .card { margin-top: 16px; }
+.card + .card { margin-top: 16px; }
