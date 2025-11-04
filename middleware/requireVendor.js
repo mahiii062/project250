@@ -1,17 +1,23 @@
+// middleware/requireVendor.js
 import jwt from "jsonwebtoken";
 
 export default function requireVendor(req, res, next) {
   try {
-    const auth = req.headers.authorization || "";
-    const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
-    if (!token) return res.status(401).json({ ok: false, error: "Missing token" });
+    const hdr = req.headers.authorization || "";
+    const [type, token] = hdr.split(" ");
+    if (type !== "Bearer" || !token) {
+      return res.status(401).json({ ok: false, error: "Missing or invalid Authorization header" });
+    }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    if (!payload?.vendor_id) return res.status(403).json({ ok: false, error: "Not a vendor" });
+    const payload = jwt.verify(token, process.env.JWT_SECRET); // must match vendorAuthRouter
+    // Expect payload like: { vendor_id: 123, ... }
+    if (!payload?.vendor_id) {
+      return res.status(401).json({ ok: false, error: "Invalid token payload" });
+    }
 
-    req.vendor_id = Number(payload.vendor_id);
+    req.vendor_id = payload.vendor_id;
     next();
-  } catch {
-    return res.status(401).json({ ok: false, error: "Invalid token" });
+  } catch (e) {
+    return res.status(401).json({ ok: false, error: "Unauthorized: " + e.message });
   }
 }

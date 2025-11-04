@@ -20,6 +20,9 @@ app.use('/api/auth', authRouter);
 app.use("/api/vendor", vendorAuthRouter);    
 
 import requireVendor from "./middleware/requireVendor.js";
+// in server.js (NOT in vendors router)
+app.get("/api/vendors-ping", (_req, res) => res.json({ ok: true, where: "server" }));
+
 
 // public
 app.use("/api/lookups", lookupsRouter);

@@ -30,6 +30,23 @@
     /* ---- Gated sections ---- */
     .gated { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
     .gated.ready { opacity: 1; pointer-events: auto; }
+
+    /* ---- Edit dialog ---- */
+    .dialog-backdrop { position: fixed; inset: 0; background: #0006; display:none; align-items:center; justify-content:center; padding: 20px; }
+    .dialog { width: 100%; max-width: 560px; background:#fff; border-radius:16px; border:1px solid #e5e7eb; box-shadow: 0 10px 30px #0003; padding: 16px; }
+    .dialog header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
+    .dialog footer { display:flex; gap:8px; justify-content:flex-end; margin-top: 12px; }
+    .vendor-logo { width: 56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#111827; color:#fff; font-weight:600; font-size:20px; overflow:hidden; }
+    .vendor-logo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding: 10px 16px; border-bottom: 1px solid #e5e7eb; background:#fff; position: sticky; top:0; z-index:5; }
+    .dashboard-container { display:grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 56px); }
+    .sidebar { border-right:1px solid #e5e7eb; padding: 16px; }
+    .sidebar ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .sidebar li { padding:8px 10px; border-radius:8px; cursor:pointer; }
+    .sidebar li.active, .sidebar li:hover { background:#f3f4f6; }
+    .vendor-info { display:flex; gap:16px; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; border-radius:16px; padding:16px; }
+    .vendor-details { flex:1; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px 16px; }
+    .vendor-actions { display:flex; gap:8px; }
   </style>
 </head>
 <body>
@@ -62,18 +79,17 @@
 
     <!-- Main Content -->
     <main class="content">
-      <!-- Vendor Info (static demo) -->
+      <!-- Vendor Info (REAL data) -->
       <section class="vendor-info">
-        <div class="vendor-logo">V</div>
+        <div class="vendor-logo" id="companyLogoBox">V</div>
         <div class="vendor-details">
-          <p><strong>Company Name:</strong> <span id="companyName">Clay & Craft</span></p>
-          <p><strong>Contact:</strong> <span id="companyPhone">555-987-8643</span></p>
-          <p><strong>Location:</strong> <span id="companyLocation">Dhaka, BD</span></p>
-          <p><strong>Email:</strong> <span id="companyEmail">contact@claycrple.com</span></p>
+          <p><strong>Company Name:</strong> <span id="companyName">—</span></p>
+          <p><strong>Contact:</strong> <span id="companyPhone">—</span></p>
+          <p><strong>Location:</strong> <span id="companyLocation">—</span></p>
+          <p><strong>Email:</strong> <span id="companyEmail">—</span></p>
         </div>
         <div class="vendor-actions">
-          <button class="btn">Upload Image</button>
-          <button class="btn">Update Info</button>
+          <button class="btn" id="editInfoBtn">Update Info</button>
         </div>
       </section>
 
@@ -130,7 +146,6 @@
             <span>Category *</span>
             <select id="productCategory">
               <option value="">Select a category</option>
-              <!-- dynamic -->
             </select>
           </label>
 
@@ -156,7 +171,6 @@
             <span>Service Type *</span>
             <select id="serviceCategory">
               <option value="">Select a service</option>
-              <!-- dynamic -->
             </select>
           </label>
 
@@ -252,6 +266,43 @@
     </main>
   </div>
 
+  <!-- Update Info Dialog -->
+  <div class="dialog-backdrop" id="editDialog">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editDialogTitle">
+      <header>
+        <h3 id="editDialogTitle">Update Vendor Info</h3>
+        <button class="btn" id="closeEditBtn" aria-label="Close">✕</button>
+      </header>
+      <div class="form-grid">
+        <label class="form-field">
+          <span>Company Name *</span>
+          <input id="editCompanyName" type="text" />
+        </label>
+        <label class="form-field">
+          <span>Phone *</span>
+          <input id="editCompanyPhone" type="text" />
+        </label>
+        <label class="form-field">
+          <span>Location *</span>
+          <input id="editCompanyLocation" type="text" placeholder="e.g., Dhaka, BD" />
+        </label>
+        <label class="form-field">
+          <span>Email *</span>
+          <input id="editCompanyEmail" type="email" />
+        </label>
+        <label class="form-field col-span-2">
+          <span>Logo URL (optional)</span>
+          <input id="editLogoUrl" type="url" placeholder="https://..." />
+        </label>
+      </div>
+      <footer>
+        <span id="editStatus" class="status muted" style="margin-right:auto"></span>
+        <button class="btn" id="resetEditBtn" type="button">Reset</button>
+        <button class="btn primary" id="saveEditBtn" type="button">Save Changes</button>
+      </footer>
+    </div>
+  </div>
+
   <script>
 /* =========================================================
  * SECTION: CONFIG
@@ -272,12 +323,15 @@ if (!VENDOR_ID || !TOKEN) {
 /* =========================================================
  * SECTION: SIDEBAR / LOGOUT
  * =======================================================*/
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.removeItem("vendorId");
-  localStorage.removeItem("vendorToken");
-  localStorage.removeItem("vendorType");
-  window.location.href = "../index.html";
-});
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("vendorId");
+    localStorage.removeItem("vendorToken");
+    localStorage.removeItem("vendorType");
+    window.location.href = "../index.html";
+  });
+}
 
 // Sidebar active state
 document.querySelectorAll('.sidebar ul li').forEach((item) => {
@@ -312,6 +366,26 @@ const noListings = document.getElementById('noListings');
 const createBtn = document.getElementById('createListingBtn');
 const clearBtn = document.getElementById('clearFormBtn');
 const createStatus = document.getElementById('createStatus');
+
+// Profile display nodes
+const companyLogoBox = document.getElementById('companyLogoBox');
+const companyNameEl = document.getElementById('companyName');
+const companyPhoneEl = document.getElementById('companyPhone');
+const companyLocationEl = document.getElementById('companyLocation');
+const companyEmailEl = document.getElementById('companyEmail');
+
+// Edit dialog nodes
+const editDialog = document.getElementById('editDialog');
+const editCompanyName = document.getElementById('editCompanyName');
+const editCompanyPhone = document.getElementById('editCompanyPhone');
+const editCompanyLocation = document.getElementById('editCompanyLocation');
+const editCompanyEmail = document.getElementById('editCompanyEmail');
+const editLogoUrl = document.getElementById('editLogoUrl');
+const editStatus = document.getElementById('editStatus');
+const editInfoBtn = document.getElementById('editInfoBtn');
+const closeEditBtn = document.getElementById('closeEditBtn');
+const resetEditBtn = document.getElementById('resetEditBtn');
+const saveEditBtn = document.getElementById('saveEditBtn');
 
 /* =========================================================
  * SECTION: UI HELPERS
@@ -366,6 +440,14 @@ function showSuccessInline(el, msg) {
   el.style.color = 'green';
 }
 
+function setLogo(logoUrl, fallbackName) {
+  if (logoUrl) {
+    companyLogoBox.innerHTML = `<img alt="${fallbackName || 'Vendor'} Logo" src="${logoUrl}" onerror="this.closest('.vendor-logo').textContent='${(fallbackName||'V').slice(0,1)}'" />`;
+  } else {
+    companyLogoBox.textContent = (fallbackName || 'V').slice(0,1);
+  }
+}
+
 /* =========================================================
  * SECTION: API LAYER
  * =======================================================*/
@@ -394,13 +476,11 @@ async function apiJSON(path, method, body) {
  * SECTION: LOOKUPS (categories)
  * =======================================================*/
 async function loadLookups() {
-  // products
   const prodCats = await apiGET("/api/lookups/product-categories");
   productCategorySel.innerHTML =
     `<option value="">Select a category</option>` +
     prodCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
 
-  // services
   const servCats = await apiGET("/api/lookups/service-categories");
   serviceCategorySel.innerHTML =
     `<option value="">Select a service</option>` +
@@ -427,6 +507,88 @@ async function buildCategoryFilter() {
 }
 
 /* =========================================================
+ * SECTION: VENDOR PROFILE (REAL DATA)
+ * =======================================================*/
+let VENDOR_PROFILE = null; // cache
+
+async function loadVendorProfile() {
+  try {
+    // Expecting shape: { id, company_name, phone, location, email, logo_url }
+    const me = await apiGET('/api/vendors/me');
+    VENDOR_PROFILE = me;
+
+    companyNameEl.textContent = me.company_name || '—';
+    companyPhoneEl.textContent = me.phone || '—';
+    companyLocationEl.textContent = me.location || '—';
+    companyEmailEl.textContent = me.email || '—';
+    setLogo(me.logo_url, me.company_name);
+
+    // Persist useful bits for other pages (optional)
+    if (me.email) localStorage.setItem('vendorEmail', me.email);
+    if (me.id) localStorage.setItem('vendorId', String(me.id));
+
+  } catch (e) {
+    console.error('Failed to load vendor profile', e);
+    showErrorInline(editStatus, e.message);
+  }
+}
+
+function openEditDialog(prefillFrom) {
+  editStatus.textContent = '';
+  editDialog.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const src = prefillFrom || VENDOR_PROFILE || {};
+  editCompanyName.value = src.company_name || '';
+  editCompanyPhone.value = src.phone || '';
+  editCompanyLocation.value = src.location || '';
+  editCompanyEmail.value = src.email || '';
+  editLogoUrl.value = src.logo_url || '';
+}
+
+function closeEditDialog() {
+  editDialog.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function saveVendorProfileUpdate() {
+  try {
+    showErrorInline(editStatus, '');
+    editStatus.textContent = 'Saving...';
+    editStatus.style.color = 'inherit';
+
+    const payload = {
+      company_name: editCompanyName.value.trim(),
+      phone: editCompanyPhone.value.trim(),
+      location: editCompanyLocation.value.trim(),
+      email: editCompanyEmail.value.trim(),
+      logo_url: editLogoUrl.value.trim() || null,
+    };
+
+    if (!payload.company_name || !payload.phone || !payload.location || !payload.email) {
+      throw new Error('Please fill in Company Name, Phone, Location, and Email.');
+    }
+
+    // PATCH /api/vendors/me should update the authenticated vendor
+    const updated = await apiJSON('/api/vendors/me', 'PATCH', payload);
+    VENDOR_PROFILE = updated;
+
+    // Reflect in UI
+    companyNameEl.textContent = updated.company_name || '—';
+    companyPhoneEl.textContent = updated.phone || '—';
+    companyLocationEl.textContent = updated.location || '—';
+    companyEmailEl.textContent = updated.email || '—';
+    setLogo(updated.logo_url, updated.company_name);
+
+    showSuccessInline(editStatus, 'Saved!');
+    // Close after a short moment
+    setTimeout(closeEditDialog, 600);
+  } catch (e) {
+    showErrorInline(editStatus, e.message);
+  }
+}
+
+/* =========================================================
  * SECTION: VENDOR TYPE (DB-backed)
  * =======================================================*/
 async function loadVendorTypeFromDB() {
@@ -438,28 +600,30 @@ async function loadVendorTypeFromDB() {
   }
 }
 
-saveTypeBtn.addEventListener('click', async () => {
-  const selected = document.querySelector('input[name="vendorType"]:checked');
-  if (!selected) {
-    showErrorInline(typeStatus, "Select a type first.");
-    setGateVisibility('');
-    return;
-  }
-  try {
-    await apiJSON(`/api/vendors/me/type`, "PATCH", { vendor_type: selected.value });
-    localStorage.setItem('vendorType', selected.value);
-    showSuccessInline(typeStatus, "Saved!");
-    setGateVisibility(selected.value);
-    await buildCategoryFilter();
-    await renderListingsFromAPI();
-    document.getElementById('listingTitle')?.focus();
-  } catch (e) {
-    showErrorInline(typeStatus, e.message);
-  }
-});
+if (saveTypeBtn) {
+  saveTypeBtn.addEventListener('click', async () => {
+    const selected = document.querySelector('input[name="vendorType"]:checked');
+    if (!selected) {
+      showErrorInline(typeStatus, "Select a type first.");
+      setGateVisibility('');
+      return;
+    }
+    try {
+      await apiJSON(`/api/vendors/me/type`, "PATCH", { vendor_type: selected.value });
+      localStorage.setItem('vendorType', selected.value);
+      showSuccessInline(typeStatus, "Saved!");
+      setGateVisibility(selected.value);
+      await buildCategoryFilter();
+      await renderListingsFromAPI();
+      document.getElementById('listingTitle')?.focus();
+    } catch (e) {
+      showErrorInline(typeStatus, e.message);
+    }
+  });
+}
 
 // Live preview on radio change (before saving)
-typeRadios.forEach((r) => {
+(typeRadios || []).forEach((r) => {
   r.addEventListener('change', async () => {
     updateFormForType(r.value);
     setGateVisibility(r.value);
@@ -557,7 +721,7 @@ async function renderListingsFromAPI() {
   const selectedFilter = (categoryFilter && categoryFilter.value) || '';
   let url = type === 'seller' ? `/api/products` : `/api/services`;
 
-  // You can omit vendor_id entirely if backend defaults to req.vendor_id.
+  // Backend should default to req.vendor_id, but keep vendor_id for compatibility
   url += `?vendor_id=${encodeURIComponent(VENDOR_ID)}`;
   if (selectedFilter) url += `&category_slug=${encodeURIComponent(selectedFilter)}`;
 
@@ -615,35 +779,55 @@ function clearForm() {
 }
 
 /* =========================================================
- * SECTION: INIT
+ * SECTION: INIT + EVENT BINDINGS
  * =======================================================*/
-createBtn.addEventListener('click', async () => {
-  try {
-    showErrorInline(createStatus, ""); // reset
-    createStatus.textContent = 'Saving...';
-    createStatus.style.color = 'inherit';
+if (createBtn) {
+  createBtn.addEventListener('click', async () => {
+    try {
+      showErrorInline(createStatus, ""); // reset
+      createStatus.textContent = 'Saving...';
+      createStatus.style.color = 'inherit';
 
-    const listing = readListingForm();
-    await saveListingToAPI(listing);
-    await buildCategoryFilter();
-    await renderListingsFromAPI();
+      const listing = readListingForm();
+      await saveListingToAPI(listing);
+      await buildCategoryFilter();
+      await renderListingsFromAPI();
+      clearForm();
+
+      showSuccessInline(createStatus, "Saved!");
+      listingsContainer.scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+      showErrorInline(createStatus, e.message);
+    }
+  });
+}
+
+if (clearBtn) {
+  clearBtn.addEventListener('click', () => {
     clearForm();
+    createStatus.textContent = '';
+  });
+}
 
-    showSuccessInline(createStatus, "Saved!");
-    listingsContainer.scrollIntoView({ behavior: 'smooth' });
-  } catch (e) {
-    showErrorInline(createStatus, e.message);
-  }
-});
-
-clearBtn.addEventListener('click', () => {
-  clearForm();
-  createStatus.textContent = '';
-});
+if (editInfoBtn) {
+  editInfoBtn.addEventListener('click', () => openEditDialog());
+}
+if (closeEditBtn) {
+  closeEditBtn.addEventListener('click', closeEditDialog);
+}
+if (resetEditBtn) {
+  resetEditBtn.addEventListener('click', () => openEditDialog(VENDOR_PROFILE));
+}
+if (saveEditBtn) {
+  saveEditBtn.addEventListener('click', saveVendorProfileUpdate);
+}
 
 (async function init() {
   try {
-    // 1) Load lookups for selects
+    // 0) Load real profile
+    await loadVendorProfile();
+
+    // 1) Lookups for selects
     await loadLookups();
 
     // 2) Load vendor type from DB; fall back to localStorage if missing
@@ -662,9 +846,6 @@ clearBtn.addEventListener('click', () => {
     await buildCategoryFilter();
     await renderListingsFromAPI();
 
-    // (Optional) hydrate visible vendor info from localStorage or a /me endpoint
-    const email = localStorage.getItem("vendorEmail");
-    if (email) document.getElementById("companyEmail").textContent = email;
   } catch (e) {
     console.error(e);
   }
