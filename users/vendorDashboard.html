@@ -87,6 +87,8 @@
           <p><strong>Contact:</strong> <span id="companyPhone">—</span></p>
           <p><strong>Location:</strong> <span id="companyLocation">—</span></p>
           <p><strong>Email:</strong> <span id="companyEmail">—</span></p>
+          <p><strong>Job Type:</strong> <span id="companyJobType">—</span></p>
+          <p class="col-span-2"><strong>Job Description:</strong> <span id="companyJobDesc">—</span></p>
         </div>
         <div class="vendor-actions">
           <button class="btn" id="editInfoBtn">Update Info</button>
@@ -122,9 +124,9 @@
         </div>
       </section>
 
-      <!-- 2) Create Listing (GATED) -->
+      <!-- 2) Create Listing / Project (GATED) -->
       <section class="card gated hidden" id="createListingSection">
-        <h3>Create Listing</h3>
+        <h3 id="createHeader">Create Listing</h3>
         <p class="muted" id="formHint">Choose your vendor type above to reveal the right fields.</p>
 
         <!-- Shared fields -->
@@ -165,12 +167,12 @@
           </label>
         </div>
 
-        <!-- Service-specific -->
+        <!-- Service-specific (Projects) -->
         <div id="serviceFields" class="form-grid hidden">
           <label class="form-field">
-            <span>Service Type *</span>
+            <span>Project Type *</span>
             <select id="serviceCategory">
-              <option value="">Select a service</option>
+              <option value="">Select a project type</option>
             </select>
           </label>
 
@@ -191,26 +193,31 @@
             <span>Service Area *</span>
             <input id="serviceArea" type="text" placeholder="e.g., Dhaka, BD" />
           </label>
+
+          <label class="form-field col-span-2">
+            <span>Project Photo (Image URL)</span>
+            <input id="serviceImage" type="url" placeholder="https://..." />
+          </label>
         </div>
 
         <div class="row-actions">
           <button class="btn" id="clearFormBtn" type="button">Clear</button>
-          <button class="btn primary" id="createListingBtn" type="button">Save Listing</button>
+          <button class="btn primary" id="createListingBtn" type="button">Save</button>
           <span id="createStatus" class="status muted"></span>
         </div>
       </section>
 
-      <!-- 3) My Listings (GATED) -->
+      <!-- 3) My Listings / Projects (GATED) -->
       <section class="card gated hidden" id="myListingsSection">
-        <h3>My Listings</h3>
+        <h3 id="myItemsHeader">My Listings</h3>
         <div class="row-actions" style="margin: 8px 0 12px;">
           <label class="form-field" style="min-width:240px;">
-            <span>Filter by category</span>
+            <span id="filterLabel">Filter by category</span>
             <select id="categoryFilter"></select>
           </label>
         </div>
         <div id="listingsContainer" class="products-grid"></div>
-        <p class="muted" id="noListings" style="display:none;">No listings yet. Create one above.</p>
+        <p class="muted" id="noListings" style="display:none;">No items yet. Create one above.</p>
       </section>
 
       <!-- 4) Optional Dashboard Sections (GATED) -->
@@ -232,7 +239,7 @@
             <p>Total Revenue</p>
             <h2>$5,420</h2>
           </div>
-          <div class="stat-box">
+          <div class="stat-box reviews">
             <div class="stat-icon reviews"><i class="fas fa-star"></i></div>
             <p>Reviews</p>
             <h2>320</h2>
@@ -289,6 +296,22 @@
         <label class="form-field">
           <span>Email *</span>
           <input id="editCompanyEmail" type="email" />
+        </label>
+        <label class="form-field">
+          <span>Job Type *</span>
+          <select id="editJobType">
+            <option value="">Select job type</option>
+            <option>Interior Designer</option>
+            <option>Electrician</option>
+            <option>Plumber</option>
+            <option>Painter</option>
+            <option>Carpenter</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label class="form-field col-span-2">
+          <span>Vendor Description</span>
+          <textarea id="editJobDescription" rows="3" placeholder="Short description about your services/skills"></textarea>
         </label>
         <label class="form-field col-span-2">
           <span>Logo URL (optional)</span>
@@ -350,6 +373,7 @@ const typeStatus = document.getElementById('typeStatus');
 const sellerFields = document.getElementById('sellerFields');
 const serviceFields = document.getElementById('serviceFields');
 const formHint = document.getElementById('formHint');
+const createHeader = document.getElementById('createHeader');
 
 const createSection = document.getElementById('createListingSection');
 const myListingsSection = document.getElementById('myListingsSection');
@@ -366,6 +390,8 @@ const noListings = document.getElementById('noListings');
 const createBtn = document.getElementById('createListingBtn');
 const clearBtn = document.getElementById('clearFormBtn');
 const createStatus = document.getElementById('createStatus');
+const myItemsHeader = document.getElementById('myItemsHeader');
+const filterLabel = document.getElementById('filterLabel');
 
 // Profile display nodes
 const companyLogoBox = document.getElementById('companyLogoBox');
@@ -373,6 +399,8 @@ const companyNameEl = document.getElementById('companyName');
 const companyPhoneEl = document.getElementById('companyPhone');
 const companyLocationEl = document.getElementById('companyLocation');
 const companyEmailEl = document.getElementById('companyEmail');
+const companyJobTypeEl = document.getElementById('companyJobType');
+const companyJobDescEl = document.getElementById('companyJobDesc');
 
 // Edit dialog nodes
 const editDialog = document.getElementById('editDialog');
@@ -381,6 +409,8 @@ const editCompanyPhone = document.getElementById('editCompanyPhone');
 const editCompanyLocation = document.getElementById('editCompanyLocation');
 const editCompanyEmail = document.getElementById('editCompanyEmail');
 const editLogoUrl = document.getElementById('editLogoUrl');
+const editJobType = document.getElementById('editJobType');
+const editJobDescription = document.getElementById('editJobDescription');
 const editStatus = document.getElementById('editStatus');
 const editInfoBtn = document.getElementById('editInfoBtn');
 const closeEditBtn = document.getElementById('closeEditBtn');
@@ -415,16 +445,25 @@ function setGateVisibility(type) {
 
 function updateFormForType(type) {
   if (type === 'seller') {
+    createHeader.textContent = 'Create Listing';
+    myItemsHeader.textContent = 'My Listings';
+    filterLabel.textContent = 'Filter by category';
     sellerFields.classList.remove('hidden');
     serviceFields.classList.add('hidden');
     formHint.textContent = 'Create a product listing to sell on Nibash.';
   } else if (type === 'service') {
+    createHeader.textContent = 'Create Project';
+    myItemsHeader.textContent = 'My Projects';
+    filterLabel.textContent = 'Filter by project type';
     sellerFields.classList.add('hidden');
     serviceFields.classList.remove('hidden');
-    formHint.textContent = 'Create a service package listing for customers.';
+    formHint.textContent = 'Create a project/service package listing for customers.';
   } else {
     sellerFields.classList.add('hidden');
     serviceFields.classList.add('hidden');
+    createHeader.textContent = 'Create Listing';
+    myItemsHeader.textContent = 'My Listings';
+    filterLabel.textContent = 'Filter by category';
     formHint.textContent = 'Choose your vendor type above to reveal the right fields.';
   }
 }
@@ -446,6 +485,12 @@ function setLogo(logoUrl, fallbackName) {
   } else {
     companyLogoBox.textContent = (fallbackName || 'V').slice(0,1);
   }
+}
+
+// prettify values like "Interior_Designer" -> "Interior Designer"
+function pretty(v) {
+  if (!v) return v;
+  return String(v).replace(/_/g, ' ');
 }
 
 /* =========================================================
@@ -483,7 +528,7 @@ async function loadLookups() {
 
   const servCats = await apiGET("/api/lookups/service-categories");
   serviceCategorySel.innerHTML =
-    `<option value="">Select a service</option>` +
+    `<option value="">Select a project type</option>` +
     servCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
 }
 
@@ -501,7 +546,7 @@ async function buildCategoryFilter() {
   } else {
     const cats = await apiGET("/api/lookups/service-categories");
     categoryFilter.innerHTML =
-      `<option value="">All service types</option>` +
+      `<option value="">All project types</option>` +
       cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
   }
 }
@@ -513,7 +558,7 @@ let VENDOR_PROFILE = null; // cache
 
 async function loadVendorProfile() {
   try {
-    // Expecting shape: { id, company_name, phone, location, email, logo_url }
+    // Expecting shape: { id, company_name, phone, location, email, logo_url, job_type, Vendor_description }
     const me = await apiGET('/api/vendors/me');
     VENDOR_PROFILE = me;
 
@@ -521,6 +566,8 @@ async function loadVendorProfile() {
     companyPhoneEl.textContent = me.phone || '—';
     companyLocationEl.textContent = me.location || '—';
     companyEmailEl.textContent = me.email || '—';
+    companyJobTypeEl.textContent = pretty(me.job_type) || '—';
+    companyJobDescEl.textContent = me.Vendor_description || '—';
     setLogo(me.logo_url, me.company_name);
 
     // Persist useful bits for other pages (optional)
@@ -544,6 +591,8 @@ function openEditDialog(prefillFrom) {
   editCompanyLocation.value = src.location || '';
   editCompanyEmail.value = src.email || '';
   editLogoUrl.value = src.logo_url || '';
+  editJobType.value = src.job_type || '';
+  editJobDescription.value = src.Vendor_description || '';
 }
 
 function closeEditDialog() {
@@ -563,10 +612,12 @@ async function saveVendorProfileUpdate() {
       location: editCompanyLocation.value.trim(),
       email: editCompanyEmail.value.trim(),
       logo_url: editLogoUrl.value.trim() || null,
+      job_type: editJobType.value.trim(),
+      Vendor_description: editJobDescription.value.trim(),
     };
 
-    if (!payload.company_name || !payload.phone || !payload.location || !payload.email) {
-      throw new Error('Please fill in Company Name, Phone, Location, and Email.');
+    if (!payload.company_name || !payload.phone || !payload.location || !payload.email || !payload.job_type) {
+      throw new Error('Please fill in Company Name, Phone, Location, Email, and Job Type.');
     }
 
     // PATCH /api/vendors/me should update the authenticated vendor
@@ -578,6 +629,8 @@ async function saveVendorProfileUpdate() {
     companyPhoneEl.textContent = updated.phone || '—';
     companyLocationEl.textContent = updated.location || '—';
     companyEmailEl.textContent = updated.email || '—';
+    companyJobTypeEl.textContent = pretty(updated.job_type) || '—';
+    companyJobDescEl.textContent = updated.Vendor_description || '—';
     setLogo(updated.logo_url, updated.company_name);
 
     showSuccessInline(editStatus, 'Saved!');
@@ -668,9 +721,10 @@ function readListingForm() {
     const rate = document.getElementById('serviceRate').value;
     const billing = document.getElementById('serviceBilling').value;
     const area = document.getElementById('serviceArea').value.trim();
+    const image_url = document.getElementById('serviceImage').value.trim();
 
     if (!service_type || rate === '' || !billing || !area) {
-      throw new Error('Please complete all service fields.');
+      throw new Error('Please complete all project fields.');
     }
 
     return {
@@ -681,6 +735,7 @@ function readListingForm() {
       rate: parseInt(rate, 10),
       billing,
       area,
+      image_url: image_url || null,
     };
   }
 }
@@ -703,7 +758,7 @@ async function saveListingToAPI(listing) {
       rate_bdt: listing.rate,
       billing: listing.billing,     // effective only if your DB has these columns
       service_area: listing.area,   // effective only if your DB has these columns
-      image_url: null,
+      image_url: listing.image_url || null,
     });
   }
 }
@@ -714,7 +769,7 @@ async function renderListingsFromAPI() {
 
   if (!type) {
     noListings.style.display = 'block';
-    noListings.textContent = 'Choose a vendor type to view or create listings.';
+    noListings.textContent = 'Choose a vendor type to view or create items.';
     return;
   }
 
@@ -729,7 +784,7 @@ async function renderListingsFromAPI() {
     const rows = await apiGET(url);
     if (!rows.length) {
       noListings.style.display = 'block';
-      noListings.textContent = 'No listings yet. Create one above.';
+      noListings.textContent = type === 'seller' ? 'No listings yet. Create one above.' : 'No projects yet. Create one above.';
       return;
     }
     noListings.style.display = 'none';
@@ -738,7 +793,15 @@ async function renderListingsFromAPI() {
       const card = document.createElement('div');
       card.className = 'product-card';
 
-      const imgUrl = item.image_url || item.primary_image_url;
+      let imgUrl;
+      if (type === 'service') {
+        imgUrl = item.image_url || null; // strictly use project photo, not logo or other fallbacks
+      } else {
+        imgUrl = item.image_url || item.primary_image_url || null;
+      }
+      if (!imgUrl) {
+        imgUrl = '../images/placeholder.jpg';
+      }
       if (imgUrl) {
         const img = document.createElement('img');
         img.src = imgUrl;
@@ -747,7 +810,8 @@ async function renderListingsFromAPI() {
       }
 
       const p = document.createElement('p');
-      const sub = item.category_slug || item.category_name || (type === 'seller' ? 'Product' : 'Service');
+      const subRaw = item.category_slug || item.category_name || (type === 'seller' ? 'Product' : 'Project');
+      const sub = pretty(subRaw);
       p.innerHTML = `<strong>${item.title}</strong><br><span class="muted">${sub}</span>`;
       card.appendChild(p);
 
@@ -755,7 +819,7 @@ async function renderListingsFromAPI() {
     });
   } catch (err) {
     noListings.style.display = 'block';
-    noListings.textContent = `Failed to load listings: ${err.message}`;
+    noListings.textContent = `Failed to load items: ${err.message}`;
   }
 }
 
@@ -764,7 +828,7 @@ function clearForm() {
   document.getElementById('listingDesc').value = '';
   const ids = [
     'productCategory', 'productPrice', 'productStock', 'productImage',
-    'serviceCategory', 'serviceRate', 'serviceBilling', 'serviceArea',
+    'serviceCategory', 'serviceRate', 'serviceBilling', 'serviceArea', 'serviceImage',
   ];
   ids.forEach((id) => {
     const el = document.getElementById(id);
@@ -794,7 +858,7 @@ if (createBtn) {
       await renderListingsFromAPI();
       clearForm();
 
-      showSuccessInline(createStatus, "Saved!");
+      showSuccessInline(createStatus, 'Saved!');
       listingsContainer.scrollIntoView({ behavior: 'smooth' });
     } catch (e) {
       showErrorInline(createStatus, e.message);
