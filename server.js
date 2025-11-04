@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import db from './config/db.js';
-import authRouter from './routes/auth.js';
+import authRouter from './routes/customerAuth.js';
 import vendorAuthRouter from "./routes/vendorAuth.js";
 import lookupsRouter from "./routes/lookups.js";
 import vendorsRouter from "./routes/vendors.js";
@@ -22,6 +22,15 @@ app.use("/api/vendor", vendorAuthRouter);
 import requireVendor from "./middleware/requireVendor.js";
 // in server.js (NOT in vendors router)
 app.get("/api/vendors-ping", (_req, res) => res.json({ ok: true, where: "server" }));
+
+// app.js / index.js
+// server.js / app.js
+import customersRouter from "./routes/customer.js";
+import { requireCustomerJWT } from "./middleware/auth.js";
+
+// protect every /api/customers/* route with the JWT
+app.use("/api/customer", requireCustomerJWT, customersRouter);
+
 
 
 // public
