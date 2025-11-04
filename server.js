@@ -19,10 +19,16 @@ app.use(express.json());
 app.use('/api/auth', authRouter);
 app.use("/api/vendor", vendorAuthRouter);    
 
+import requireVendor from "./middleware/requireVendor.js";
+
+// public
 app.use("/api/lookups", lookupsRouter);
-app.use("/api/vendors", vendorsRouter);
-app.use("/api/products", productsRouter);
-app.use("/api/services", servicesRouter);
+
+// protected (requires Authorization: Bearer <token>)
+app.use("/api/vendors", requireVendor, vendorsRouter);
+app.use("/api/products", requireVendor, productsRouter);
+app.use("/api/services", requireVendor, servicesRouter);
+
 
  
 
