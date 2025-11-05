@@ -262,6 +262,73 @@
 
     <!-- Chatbot connection script -->
     <script src="js/chatbot.js"></script>
+    
+    <!-- Group Chat Floating Button -->
+    <div id="groupchat-button">👥</div>
+
+    <!-- Group Chat Box -->
+    <div id="groupchat-box">
+        <div class="groupchat-header">
+            Nibash Group Chat <span id="close-groupchat">✖</span>
+        </div>
+
+        <div class="groupchat-body" id="group-messages">
+            <div class="message assistant">Welcome! Join your group to start chatting 🏡</div>
+        </div>
+
+        <div class="groupchat-join" id="join-section">
+            <input type="text" id="username" placeholder="Your Name" />
+            <input type="text" id="groupId" placeholder="Group ID" />
+            <button id="join-btn">Join Group</button>
+        </div>
+
+        <div class="groupchat-input" id="message-section" style="display:none;">
+            <input id="msg" placeholder="Type message..." />
+            <button id="send-msg-btn">Send</button>
+        </div>
+    </div>
+    <script>
+        const groupBtn = document.getElementById("groupchat-button");
+        const groupBox = document.getElementById("groupchat-box");
+        const closeGroupChat = document.getElementById("close-groupchat");
+
+        groupBtn.addEventListener("click", () => {
+            groupBox.style.display = "flex";
+        });
+
+        closeGroupChat.addEventListener("click", () => {
+            groupBox.style.display = "none";
+        });
+
+        const socket = io("http://localhost:5000");
+        let currentGroup = "";
+
+        document.getElementById("join-btn").addEventListener("click", () => {
+            const username = document.getElementById("username").value;
+            const groupId = document.getElementById("groupId").value;
+            if (!username || !groupId) return alert("Enter username and group ID!");
+            currentGroup = groupId;
+            socket.emit("joinGroup", { groupId, username });
+            document.getElementById("join-section").style.display = "none";
+            document.getElementById("message-section").style.display = "flex";
+        });
+
+        socket.on("newMessage", (msg) => {
+            const div = document.createElement("div");
+            div.className = "message " + (msg.username === document.getElementById("username").value ? "user" : "assistant");
+            div.textContent = `${msg.username}: ${msg.text}`;
+            document.getElementById("group-messages").appendChild(div);
+        });
+
+        document.getElementById("send-msg-btn").addEventListener("click", () => {
+            const text = document.getElementById("msg").value.trim();
+            const username = document.getElementById("username").value;
+            if (!text) return;
+            socket.emit("groupMessage", { groupId: currentGroup, username, text });
+            document.getElementById("msg").value = "";
+        });
+    </script>
+
 </body>
 
 </html>
