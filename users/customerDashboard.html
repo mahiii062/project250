@@ -6,11 +6,12 @@
   <title>Customer Dashboard - Nibash</title>
   <link rel="stylesheet" href="../css/customerDashboard.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
-    /* small helpers for modal + states */
     .hidden { display: none !important; }
     .muted { color:#6b7280; }
-    .dialog-backdrop { position:fixed; inset:0; background:#0006; display:none; align-items:center; justify-content:center; padding:20px; }
+    .dialog-backdrop { position:fixed; inset:0; background:#0006; display:none; align-items:center; justify-content:center; padding:20px; z-index:1000; }
     .dialog { width:100%; max-width:520px; background:#fff; border-radius:16px; border:1px solid #e5e7eb; box-shadow:0 10px 30px #0003; padding:16px; }
     .dialog header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
     .dialog footer { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
@@ -23,11 +24,15 @@
     .orders-container, .wishlist-container { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
     .order-item, .wishlist-item { border:1px solid #e5e7eb; border-radius:12px; padding:10px; background:#fff; }
     .order-item img, .wishlist-item img { width:100%; height:120px; object-fit:cover; border-radius:10px; }
-    .delivered { color:#10b981; font-weight:600; }
-    .processing { color:#f59e0b; font-weight:600; }
-    .shipped { color:#3b82f6; font-weight:600; }
     .avatar { width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#111827; color:#fff; font-weight:600; font-size:20px; overflow:hidden; }
     .avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+    #mapContainer { width:100%; height:400px; border-radius:12px; margin:12px 0; border:1px solid #e5e7eb; }
+    .nearby-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:16px; margin-top:12px; }
+    .nearby-card { border:1px solid #e5e7eb; border-radius:12px; padding:12px; background:#fff; }
+    .nearby-card img { width:100%; height:150px; object-fit:cover; border-radius:8px; }
+    .nearby-card h4 { margin:8px 0 4px; font-size:14px; }
+    .row-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .row-actions select { padding:8px 12px; border:1px solid #e5e7eb; border-radius:8px; }
   </style>
 </head>
 
@@ -42,20 +47,17 @@
   </header>
 
   <div class="dashboard">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <h3>My Account</h3>
-      <a href="#">Profile</a>
-      <a href="#">Wishlist</a>
-      <a href="#">Orders</a>
-      <a href="#">Saved Collections</a>
-      <a href="#">Settings</a>
+      <a href="#profile">Profile</a>
+      <a href="#location">My Location</a>
+      <a href="#nearby">Nearby Services</a>
+      <a href="#wishlist">Wishlist</a>
+      <a href="#orders">Orders</a>
     </aside>
 
-    <!-- Main Content -->
     <main class="content">
-      <!-- Quick Access -->
-      <div class="card quick-access">
+      <div class="card quick-access" id="profile">
         <div class="profile-info">
           <div class="avatar-container">
             <div class="avatar" id="avatarBox">M</div>
@@ -69,47 +71,60 @@
         </div>
 
         <div class="buttons-row" style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn upload-btn" id="uploadAvatarBtn" title="Paste a public URL in Update Info">Upload Image</button>
           <button class="btn update-btn" id="openUpdateBtn">Update Info</button>
           <button class="btn">Contact Support</button>
-          <button class="btn secondary">Browse New Arrivals</button>
         </div>
       </div>
 
-      <!-- Wishlist + Orders -->
+      <div class="card" id="location">
+        <h4>📍 My Location</h4>
+        <p class="muted">Set your location to get recommendations for nearby vendors and services.</p>
+        <div id="mapContainer"></div>
+        <div class="form-grid" style="margin-top:12px;">
+          <input type="text" id="locationName" placeholder="Location name" style="grid-column: span 2;" />
+          <button class="btn primary" id="useCurrentLocationBtn">📍 Use Current Location</button>
+          <button class="btn primary" id="saveLocationBtn">Save Location</button>
+        </div>
+        <p id="locationStatus" class="status muted" style="margin-top:8px;"></p>
+      </div>
+
+      <div class="card" id="nearby">
+        <h4>🔍 Nearby Services (Within 5 km)</h4>
+        <div class="row-actions" style="margin:12px 0;">
+          <select id="nearbyFilter">
+            <option value="">All Categories</option>
+            <option value="electrician">Electrician</option>
+            <option value="plumber">Plumber</option>
+            <option value="painter">Painter</option>
+            <option value="interior_designer">Interior Designer</option>
+          </select>
+          <button class="btn primary" id="searchNearbyBtn">Search Nearby</button>
+        </div>
+        <div id="nearbyContainer" class="nearby-grid"></div>
+        <p id="nearbyEmpty" class="muted hidden">No nearby services found. Update your location first.</p>
+      </div>
+
       <div class="grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
-        <div class="card">
+        <div class="card" id="wishlist">
           <h4>My Wishlist</h4>
           <div id="wishlistContainer" class="wishlist-container"></div>
           <p id="wishlistEmpty" class="muted hidden">No wishlist items yet.</p>
         </div>
 
-        <div class="card">
+        <div class="card" id="orders">
           <h4>My Orders</h4>
           <div id="ordersContainer" class="orders-container"></div>
           <p id="ordersEmpty" class="muted hidden">No orders found.</p>
         </div>
       </div>
-
-      <!-- Activity Feed (static demo) -->
-      <div class="activity-card card">
-        <h4>Activity Feed</h4>
-        <div class="activity-grid">
-          <div class="activity">🆕 New arrivals in your style!</div>
-          <div class="activity">❤️ Wishlist item "Wool Sofa" on sale!</div>
-          <div class="activity">🏅 You earned loyalty badge for purchase!</div>
-          <div class="activity">✍️ Your review of "Loyalty" was approved!</div>
-        </div>
-      </div>
     </main>
   </div>
 
-  <!-- Update Info Dialog -->
   <div class="dialog-backdrop" id="editDialog">
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editDialogTitle">
+    <div class="dialog">
       <header>
-        <h3 id="editDialogTitle">Update Your Info</h3>
-        <button class="btn" id="closeEditBtn" aria-label="Close">✕</button>
+        <h3>Update Your Info</h3>
+        <button class="btn" id="closeEditBtn">✕</button>
       </header>
 
       <div class="form-grid">
@@ -136,12 +151,228 @@
       </div>
 
       <footer>
-        <span id="editStatus" class="status muted" style="margin-right:auto"></span>
-        <button class="btn" id="resetEditBtn" type="button">Reset</button>
-        <button class="btn primary" id="saveEditBtn" type="button">Save Changes</button>
+        <span id="editStatus" class="status muted"></span>
+        <button class="btn" id="resetEditBtn">Reset</button>
+        <button class="btn primary" id="saveEditBtn">Save Changes</button>
       </footer>
     </div>
   </div>
 
-<script src="../scripts/customer.js"></script>
+  <script>
+    const API_BASE = "http://localhost:5555";
+    const CUSTOMER_TOKEN = localStorage.getItem("customerToken");
+    const CUSTOMER_ID = Number(localStorage.getItem("customerId"));
 
+    console.log("🔐 Auth Check:");
+    console.log("  Customer ID:", CUSTOMER_ID);
+    console.log("  Token exists:", !!CUSTOMER_TOKEN);
+    console.log("  Token:", CUSTOMER_TOKEN ? CUSTOMER_TOKEN.substring(0, 20) + "..." : "MISSING");
+
+    if (!CUSTOMER_ID || !CUSTOMER_TOKEN) {
+      alert("❌ Not authenticated. Redirecting to login...");
+      window.location.href = "../index.html";
+    }
+
+    let map = null;
+    let userMarker = null;
+    let currentLat = 23.8103;
+    let currentLng = 90.4125;
+
+    function initMap() {
+      if (map) return;
+      const container = document.getElementById("mapContainer");
+      if (!container) {
+        console.error("❌ Map container not found!");
+        return;
+      }
+      
+      map = L.map("mapContainer").setView([currentLat, currentLng], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19,
+      }).addTo(map);
+
+      userMarker = L.marker([currentLat, currentLng]).addTo(map)
+        .bindPopup("Your Location");
+
+      map.on("click", (e) => {
+        currentLat = e.latlng.lat;
+        currentLng = e.latlng.lng;
+        userMarker.setLatLng([currentLat, currentLng]);
+        document.getElementById("locationName").value = `${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+      });
+
+      setTimeout(() => map.invalidateSize(), 100);
+    }
+
+    async function apiCall(path, method = "GET", body = null) {
+      try {
+        console.log(`📡 ${method} ${path}`);
+        
+        const options = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${CUSTOMER_TOKEN}`  // ← CRITICAL: Include token
+          }
+        };
+
+        if (body) {
+          options.body = JSON.stringify(body);
+          console.log("  Body:", body);
+        }
+
+        const res = await fetch(`${API_BASE}${path}`, options);
+        console.log(`  Status: ${res.status}`);
+
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("text/html")) {
+          throw new Error(`Server returned HTML (Status ${res.status})`);
+        }
+
+        const json = await res.json();
+        console.log("  Response:", json);
+
+        if (!res.ok) {
+          throw new Error(json.error || json.message || `HTTP ${res.status}`);
+        }
+
+        return json.data || json;
+      } catch (e) {
+        console.error(`❌ API Error on ${path}:`, e.message);
+        throw e;
+      }
+    }
+
+    async function loadCustomerProfile() {
+      try {
+        const me = await apiCall("/api/customer/me");
+        
+        document.getElementById("custName").textContent = me.name || "—";
+        document.getElementById("custPhone").textContent = me.phone || "—";
+        document.getElementById("custLocation").textContent = me.location || "—";
+        document.getElementById("custEmail").textContent = me.email || "—";
+
+        if (me.latitude && me.longitude) {
+          currentLat = parseFloat(me.latitude);
+          currentLng = parseFloat(me.longitude);
+        }
+
+        document.getElementById("editName").value = me.name || "";
+        document.getElementById("editPhone").value = me.phone || "";
+        document.getElementById("editLocation").value = me.location || "";
+        document.getElementById("editEmail").value = me.email || "";
+        document.getElementById("editAvatarUrl").value = me.avatar_url || "";
+
+        initMap();
+        if (me.latitude && me.longitude) {
+          map.setView([currentLat, currentLng], 13);
+          userMarker.setLatLng([currentLat, currentLng]);
+        }
+      } catch (e) {
+        alert(`❌ Failed to load profile: ${e.message}`);
+      }
+    }
+
+    document.getElementById("useCurrentLocationBtn")?.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert("❌ Geolocation not supported");
+        return;
+      }
+
+      const statusEl = document.getElementById("locationStatus");
+      statusEl.textContent = "📍 Getting location...";
+      statusEl.style.color = "inherit";
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          currentLat = pos.coords.latitude;
+          currentLng = pos.coords.longitude;
+          userMarker.setLatLng([currentLat, currentLng]);
+          map.setView([currentLat, currentLng], 13);
+          document.getElementById("locationName").value = `${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+          statusEl.textContent = "✅ Location updated! Click Save.";
+          statusEl.style.color = "green";
+        },
+        (err) => {
+          statusEl.textContent = `❌ Error: ${err.message}`;
+          statusEl.style.color = "crimson";
+        }
+      );
+    });
+
+    document.getElementById("saveLocationBtn")?.addEventListener("click", async () => {
+      try {
+        const locationName = document.getElementById("locationName").value.trim();
+        if (!locationName) throw new Error("Enter a location name");
+
+        const statusEl = document.getElementById("locationStatus");
+        statusEl.textContent = "💾 Saving...";
+        statusEl.style.color = "inherit";
+
+        console.log("🔐 Sending location with token:", CUSTOMER_TOKEN.substring(0, 20) + "...");
+
+        await apiCall("/api/customer/me/location", "PATCH", {
+          latitude: currentLat,
+          longitude: currentLng,
+          location_name: locationName,
+        });
+
+        statusEl.textContent = "✅ Location saved!";
+        statusEl.style.color = "green";
+        await loadCustomerProfile();
+      } catch (e) {
+        document.getElementById("locationStatus").textContent = `❌ ${e.message}`;
+        document.getElementById("locationStatus").style.color = "crimson";
+      }
+    });
+
+    document.getElementById("openUpdateBtn")?.addEventListener("click", () => {
+      document.getElementById("editDialog").style.display = "flex";
+    });
+
+    document.getElementById("closeEditBtn")?.addEventListener("click", () => {
+      document.getElementById("editDialog").style.display = "none";
+    });
+
+    document.getElementById("saveEditBtn")?.addEventListener("click", async () => {
+      try {
+        const name = document.getElementById("editName").value.trim();
+        const phone = document.getElementById("editPhone").value.trim();
+        const location = document.getElementById("editLocation").value.trim();
+        const email = document.getElementById("editEmail").value.trim();
+        const avatar_url = document.getElementById("editAvatarUrl").value.trim();
+
+        if (!name || !phone || !location || !email) throw new Error("All fields required");
+
+        const editStatus = document.getElementById("editStatus");
+        editStatus.textContent = "💾 Saving...";
+        editStatus.style.color = "inherit";
+
+        await apiCall("/api/customer/me", "PATCH", {
+          name, phone, location, email, avatar_url: avatar_url || null
+        });
+
+        editStatus.textContent = "✅ Saved!";
+        editStatus.style.color = "green";
+        setTimeout(() => {
+          document.getElementById("editDialog").style.display = "none";
+          loadCustomerProfile();
+        }, 600);
+      } catch (e) {
+        document.getElementById("editStatus").textContent = `❌ ${e.message}`;
+        document.getElementById("editStatus").style.color = "crimson";
+      }
+    });
+
+    document.getElementById("logoutBtn")?.addEventListener("click", () => {
+      localStorage.removeItem("customerToken");
+      localStorage.removeItem("customerId");
+      window.location.href = "../index.html";
+    });
+
+    console.log("🚀 Initializing customer dashboard...");
+    loadCustomerProfile();
+  </script>
+</body>
+</html>
