@@ -6,8 +6,9 @@
   <title>Vendor Dashboard - Nibash (Gated)</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/vendorDashboard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
-    /* ---- Layout helpers ---- */
     .hidden { display: none !important; }
     .muted { color: #6b7280; }
     .row-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
@@ -15,24 +16,18 @@
     .products-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); gap:16px; }
     .product-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; overflow: hidden; }
     .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
-    .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; background:#fff; }
+    .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; background:#fff; margin-bottom:16px; }
     .form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
     .form-field { display:flex; flex-direction:column; gap:6px; }
     .form-field.col-span-2 { grid-column: span 2 / span 2; }
     .btn { padding:8px 14px; border-radius:10px; border:1px solid #11182710; cursor:pointer; background:#f3f4f6; }
     .btn.primary { background:#111827; color:#fff; }
-
-    /* ---- Vendor type cards ---- */
     .type-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin:12px 0; }
     .type-card { border:1px solid #e5e7eb; border-radius:14px; padding:12px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
     .type-card input { margin-top:4px; }
-
-    /* ---- Gated sections ---- */
     .gated { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
     .gated.ready { opacity: 1; pointer-events: auto; }
-
-    /* ---- Edit dialog ---- */
-    .dialog-backdrop { position: fixed; inset: 0; background: #0006; display:none; align-items:center; justify-content:center; padding: 20px; }
+    .dialog-backdrop { position: fixed; inset: 0; background: #0006; display:none; align-items:center; justify-content:center; padding: 20px; z-index:1000; overflow-y:auto; }
     .dialog { width: 100%; max-width: 560px; background:#fff; border-radius:16px; border:1px solid #e5e7eb; box-shadow: 0 10px 30px #0003; padding: 16px; }
     .dialog header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
     .dialog footer { display:flex; gap:8px; justify-content:flex-end; margin-top: 12px; }
@@ -44,31 +39,31 @@
     .sidebar ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
     .sidebar li { padding:8px 10px; border-radius:8px; cursor:pointer; }
     .sidebar li.active, .sidebar li:hover { background:#f3f4f6; }
-    .vendor-info { display:flex; gap:16px; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; border-radius:16px; padding:16px; }
+    .vendor-info { display:flex; gap:16px; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; border-radius:16px; padding:16px; margin-bottom:16px; }
     .vendor-details { flex:1; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px 16px; }
     .vendor-actions { display:flex; gap:8px; }
+    #mapContainer { width:100%; height:400px; border-radius:12px; margin:12px 0; border:1px solid #e5e7eb; }
   </style>
 </head>
 <body>
-  <!-- Top Navbar -->
   <header class="topbar">
     <div class="logo">
       <img src="../images/mainLogo.png" alt="Nibash Logo" />
       <span class="logo-text">Nibash</span>
     </div>
     <div class="nav-actions">
-      <a href="#">Home</a>
-      <a href="#">Vendor</a>
+      <a href="../index.html">Home</a>
+      <a href="customerDashboard.html">Customer</a>
       <button class="logout-btn" id="logoutBtn">Log Out</button>
     </div>
   </header>
 
   <div class="dashboard-container">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <h3>My Account</h3>
       <ul>
         <li class="active">Profile</li>
+        <li>Location</li>
         <li>Products</li>
         <li>Orders</li>
         <li>Analytics</li>
@@ -77,9 +72,7 @@
       </ul>
     </aside>
 
-    <!-- Main Content -->
     <main class="content">
-      <!-- Vendor Info (REAL data) -->
       <section class="vendor-info">
         <div class="vendor-logo" id="companyLogoBox">V</div>
         <div class="vendor-details">
@@ -88,15 +81,26 @@
           <p><strong>Location:</strong> <span id="companyLocation">—</span></p>
           <p><strong>Email:</strong> <span id="companyEmail">—</span></p>
           <p><strong>Job Type:</strong> <span id="companyJobType">—</span></p>
-          <p class="col-span-2"><strong>Job Description:</strong> <span id="companyJobDesc">—</span></p>
+          <p><strong>Job Description:</strong> <span id="companyJobDesc">—</span></p>
         </div>
         <div class="vendor-actions">
           <button class="btn" id="editInfoBtn">Update Info</button>
         </div>
       </section>
 
-      <!-- 1) Vendor Classification -->
-      <section class="card" style="margin-top: 16px;" id="typeGate">
+      <section class="card">
+        <h3>📍 Manage Your Location</h3>
+        <p class="muted">Set your business location so customers can find you nearby.</p>
+        <div id="mapContainer"></div>
+        <div class="form-grid" style="margin-top: 12px;">
+          <input type="text" id="locationName" placeholder="Business Location" style="grid-column: span 2;" />
+          <button class="btn primary" id="useCurrentLocationBtn">📍 Use Current Location</button>
+          <button class="btn primary" id="saveLocationBtn">Save Location</button>
+        </div>
+        <p id="locationStatus" class="status" style="margin-top: 8px;"></p>
+      </section>
+
+      <section class="card" id="typeGate">
         <h3>Vendor Type</h3>
         <p class="muted">Classify your business to tailor your dashboard and listing form.</p>
 
@@ -105,7 +109,7 @@
             <input type="radio" name="vendorType" value="seller" />
             <div>
               <strong>Seller</strong>
-              <p>Furniture • Painting • Decoration • দেশীয় মৃতশিল্প</p>
+              <p>Furniture • Painting • Decoration • দেশীয় মৃতশিল্প</p>
             </div>
           </label>
 
@@ -119,30 +123,29 @@
         </div>
 
         <div class="row-actions">
-          <button class="btn" id="saveTypeBtn" type="button">Save Type</button>
+          <button class="btn primary" id="saveTypeBtn" type="button">Save Type</button>
           <span id="typeStatus" class="status muted"></span>
         </div>
       </section>
 
-      <!-- 2) Create Listing / Project (GATED) -->
+      <!-- CREATE LISTING -->
       <section class="card gated hidden" id="createListingSection">
         <h3 id="createHeader">Create Listing</h3>
         <p class="muted" id="formHint">Choose your vendor type above to reveal the right fields.</p>
 
-        <!-- Shared fields -->
         <div class="form-grid">
-          <label class="form-field">
+          <label class="form-field col-span-2">
             <span>Title *</span>
-            <input id="listingTitle" type="text" placeholder="e.g., Oak Study Desk / Plumbing Fix Package" />
+            <input id="listingTitle" type="text" placeholder="e.g., Oak Study Desk" />
           </label>
 
-          <label class="form-field">
+          <label class="form-field col-span-2">
             <span>Description *</span>
             <textarea id="listingDesc" rows="3" placeholder="Describe your product/service..."></textarea>
           </label>
         </div>
 
-        <!-- Seller-specific -->
+        <!-- SELLER FIELDS -->
         <div id="sellerFields" class="form-grid hidden">
           <label class="form-field">
             <span>Category *</span>
@@ -167,7 +170,7 @@
           </label>
         </div>
 
-        <!-- Service-specific (Projects) -->
+        <!-- SERVICE FIELDS -->
         <div id="serviceFields" class="form-grid hidden">
           <label class="form-field">
             <span>Project Type *</span>
@@ -202,12 +205,12 @@
 
         <div class="row-actions">
           <button class="btn" id="clearFormBtn" type="button">Clear</button>
-          <button class="btn primary" id="createListingBtn" type="button">Save</button>
+          <button class="btn primary" id="createListingBtn" type="button">Save Listing</button>
           <span id="createStatus" class="status muted"></span>
         </div>
       </section>
 
-      <!-- 3) My Listings / Projects (GATED) -->
+      <!-- MY LISTINGS -->
       <section class="card gated hidden" id="myListingsSection">
         <h3 id="myItemsHeader">My Listings</h3>
         <div class="row-actions" style="margin: 8px 0 12px;">
@@ -219,66 +222,14 @@
         <div id="listingsContainer" class="products-grid"></div>
         <p class="muted" id="noListings" style="display:none;">No items yet. Create one above.</p>
       </section>
-
-      <!-- 4) Optional Dashboard Sections (GATED) -->
-      <section class="card gated hidden" id="statsSection">
-        <h3>Stats</h3>
-        <div class="stats-cards">
-          <div class="stat-box">
-            <div class="stat-icon sold"><i class="fas fa-shopping-cart"></i></div>
-            <p>Products Sold</p>
-            <h2>124</h2>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon stock"><i class="fas fa-boxes"></i></div>
-            <p>In Stock</p>
-            <h2>78</h2>
-          </div>
-          <div class="stat-box">
-            <div class="stat-icon revenue"><i class="fas fa-dollar-sign"></i></div>
-            <p>Total Revenue</p>
-            <h2>$5,420</h2>
-          </div>
-          <div class="stat-box reviews">
-            <div class="stat-icon reviews"><i class="fas fa-star"></i></div>
-            <p>Reviews</p>
-            <h2>320</h2>
-          </div>
-        </div>
-      </section>
-
-      <section class="card gated hidden" id="topProductsSection">
-        <h3>Top-Performing Products</h3>
-        <div class="products-grid">
-          <div class="product-card">
-            <img src="../images/p1.jpg" alt="Terracotta Vase" />
-            <p>Terracotta Vase</p>
-          </div>
-          <div class="product-card processing">
-            <img src="../images/p4.jpg" alt="Blue Bowl" />
-            <p>Blue Bowl <span>Processing</span></p>
-          </div>
-          <div class="product-card">
-            <img src="../images/p8.jpg" alt="Macrame Art" />
-            <p>Macrame Art <span class="active">30 hours</span></p>
-          </div>
-        </div>
-      </section>
-
-      <section class="card gated hidden" id="inquiriesSection">
-        <h3>Customer Inquiries</h3>
-        <p><strong>Maisha:</strong> Interested in vase (1 min ago)</p>
-        <p><strong>New Followers:</strong> 45</p>
-      </section>
     </main>
   </div>
 
-  <!-- Update Info Dialog -->
   <div class="dialog-backdrop" id="editDialog">
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="editDialogTitle">
+    <div class="dialog">
       <header>
-        <h3 id="editDialogTitle">Update Vendor Info</h3>
-        <button class="btn" id="closeEditBtn" aria-label="Close">✕</button>
+        <h3>Update Vendor Info</h3>
+        <button class="btn" id="closeEditBtn">✕</button>
       </header>
       <div class="form-grid">
         <label class="form-field">
@@ -327,593 +278,403 @@
   </div>
 
   <script>
-/* =========================================================
- * SECTION: CONFIG
- * =======================================================*/
-const API_BASE = "http://localhost:5555"; // <- change if needed
+const API_BASE = "http://localhost:5555";
+const VENDOR_TOKEN = localStorage.getItem("vendorToken");
+const VENDOR_ID = Number(localStorage.getItem("vendorId"));
 
-/* =========================================================
- * SECTION: STATE (session)
- * =======================================================*/
-let VENDOR_ID = Number(localStorage.getItem("vendorId")) || null;
-const TOKEN = localStorage.getItem("vendorToken") || null;
+console.log("🔐 Vendor Auth:", { VENDOR_ID, tokenExists: !!VENDOR_TOKEN });
 
-// Guard: if not authenticated, go to login
-if (!VENDOR_ID || !TOKEN) {
-  window.location.href = "vendorLogin.html"; // adjust path
+if (!VENDOR_ID || !VENDOR_TOKEN) {
+  alert("❌ Not authenticated");
+  window.location.href = "../index.html";
 }
 
-/* =========================================================
- * SECTION: SIDEBAR / LOGOUT
- * =======================================================*/
-const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("vendorId");
-    localStorage.removeItem("vendorToken");
-    localStorage.removeItem("vendorType");
-    window.location.href = "../index.html";
-  });
-}
+let map = null;
+let vendorMarker = null;
+let currentLat = 23.8103;
+let currentLng = 90.4125;
+let VENDOR_PROFILE = null;
 
-// Sidebar active state
-document.querySelectorAll('.sidebar ul li').forEach((item) => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.sidebar ul li').forEach((i) => i.classList.remove('active'));
-    item.classList.add('active');
-  });
-});
-
-/* =========================================================
- * SECTION: DOM HANDLES
- * =======================================================*/
-const typeRadios = document.querySelectorAll('input[name="vendorType"]');
-const saveTypeBtn = document.getElementById('saveTypeBtn');
-const typeStatus = document.getElementById('typeStatus');
-const sellerFields = document.getElementById('sellerFields');
-const serviceFields = document.getElementById('serviceFields');
-const formHint = document.getElementById('formHint');
-const createHeader = document.getElementById('createHeader');
-
-const createSection = document.getElementById('createListingSection');
-const myListingsSection = document.getElementById('myListingsSection');
-const statsSection = document.getElementById('statsSection');
-const topProductsSection = document.getElementById('topProductsSection');
-const inquiriesSection = document.getElementById('inquiriesSection');
-
-const productCategorySel = document.getElementById('productCategory');
-const serviceCategorySel = document.getElementById('serviceCategory');
-
-const categoryFilter = document.getElementById('categoryFilter');
-const listingsContainer = document.getElementById('listingsContainer');
-const noListings = document.getElementById('noListings');
-const createBtn = document.getElementById('createListingBtn');
-const clearBtn = document.getElementById('clearFormBtn');
-const createStatus = document.getElementById('createStatus');
-const myItemsHeader = document.getElementById('myItemsHeader');
-const filterLabel = document.getElementById('filterLabel');
-
-// Profile display nodes
-const companyLogoBox = document.getElementById('companyLogoBox');
-const companyNameEl = document.getElementById('companyName');
-const companyPhoneEl = document.getElementById('companyPhone');
-const companyLocationEl = document.getElementById('companyLocation');
-const companyEmailEl = document.getElementById('companyEmail');
-const companyJobTypeEl = document.getElementById('companyJobType');
-const companyJobDescEl = document.getElementById('companyJobDesc');
-
-// Edit dialog nodes
-const editDialog = document.getElementById('editDialog');
-const editCompanyName = document.getElementById('editCompanyName');
-const editCompanyPhone = document.getElementById('editCompanyPhone');
-const editCompanyLocation = document.getElementById('editCompanyLocation');
-const editCompanyEmail = document.getElementById('editCompanyEmail');
-const editLogoUrl = document.getElementById('editLogoUrl');
-const editJobType = document.getElementById('editJobType');
-const editJobDescription = document.getElementById('editJobDescription');
-const editStatus = document.getElementById('editStatus');
-const editInfoBtn = document.getElementById('editInfoBtn');
-const closeEditBtn = document.getElementById('closeEditBtn');
-const resetEditBtn = document.getElementById('resetEditBtn');
-const saveEditBtn = document.getElementById('saveEditBtn');
-
-/* =========================================================
- * SECTION: UI HELPERS
- * =======================================================*/
-const GATED_SECTION_IDS = [
-  'createListingSection',
-  'myListingsSection',
-  'statsSection',
-  'topProductsSection',
-  'inquiriesSection',
-];
-
-function setGateVisibility(type) {
-  const show = type === 'seller' || type === 'service';
-  GATED_SECTION_IDS.forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (show) {
-      el.classList.remove('hidden');
-      requestAnimationFrame(() => el.classList.add('ready'));
-    } else {
-      el.classList.add('hidden');
-      el.classList.remove('ready');
-    }
-  });
-}
-
-function updateFormForType(type) {
-  if (type === 'seller') {
-    createHeader.textContent = 'Create Listing';
-    myItemsHeader.textContent = 'My Listings';
-    filterLabel.textContent = 'Filter by category';
-    sellerFields.classList.remove('hidden');
-    serviceFields.classList.add('hidden');
-    formHint.textContent = 'Create a product listing to sell on Nibash.';
-  } else if (type === 'service') {
-    createHeader.textContent = 'Create Project';
-    myItemsHeader.textContent = 'My Projects';
-    filterLabel.textContent = 'Filter by project type';
-    sellerFields.classList.add('hidden');
-    serviceFields.classList.remove('hidden');
-    formHint.textContent = 'Create a project/service package listing for customers.';
-  } else {
-    sellerFields.classList.add('hidden');
-    serviceFields.classList.add('hidden');
-    createHeader.textContent = 'Create Listing';
-    myItemsHeader.textContent = 'My Listings';
-    filterLabel.textContent = 'Filter by category';
-    formHint.textContent = 'Choose your vendor type above to reveal the right fields.';
-  }
-}
-
-function showErrorInline(el, msg) {
-  if (!el) return;
-  el.textContent = msg;
-  el.style.color = 'crimson';
-}
-function showSuccessInline(el, msg) {
-  if (!el) return;
-  el.textContent = msg;
-  el.style.color = 'green';
-}
-
-function setLogo(logoUrl, fallbackName) {
-  if (logoUrl) {
-    companyLogoBox.innerHTML = `<img alt="${fallbackName || 'Vendor'} Logo" src="${logoUrl}" onerror="this.closest('.vendor-logo').textContent='${(fallbackName||'V').slice(0,1)}'" />`;
-  } else {
-    companyLogoBox.textContent = (fallbackName || 'V').slice(0,1);
-  }
-}
-
-// prettify values like "Interior_Designer" -> "Interior Designer"
-function pretty(v) {
-  if (!v) return v;
-  return String(v).replace(/_/g, ' ');
-}
-
-/* =========================================================
- * SECTION: API LAYER
- * =======================================================*/
-function authHeaders() {
-  return TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {};
-}
-
-async function apiGET(path) {
-  const res = await fetch(`${API_BASE}${path}`, { headers: { ...authHeaders() } });
-  const json = await res.json();
-  if (!res.ok || json.ok === false) throw new Error(json.error || `GET ${path} failed`);
-  return json.data ?? json;
-}
-async function apiJSON(path, method, body) {
-  const res = await fetch(`${API_BASE}${path}`, {
+// ===== API CALL WITH PROPER AUTH =====
+async function apiCall(path, method = "GET", body = null) {
+  const options = {
     method,
-    headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify(body || {}),
-  });
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${VENDOR_TOKEN}`
+    }
+  };
+  
+  if (body) options.body = JSON.stringify(body);
+  
+  const res = await fetch(`${API_BASE}${path}`, options);
+  const contentType = res.headers.get("content-type");
+  if (contentType?.includes("text/html")) throw new Error(`HTML response: ${res.status}`);
+  
   const json = await res.json();
-  if (!res.ok || json.ok === false) throw new Error(json.error || `${method} ${path} failed`);
-  return json.data ?? json;
+  if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+  return json.data || json;
 }
 
-/* =========================================================
- * SECTION: LOOKUPS (categories)
- * =======================================================*/
-async function loadLookups() {
-  const prodCats = await apiGET("/api/lookups/product-categories");
-  productCategorySel.innerHTML =
-    `<option value="">Select a category</option>` +
-    prodCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+// ===== MAP INITIALIZATION =====
+function initMap() {
+  if (map) return;
+  const container = document.getElementById("mapContainer");
+  if (!container) return;
+  
+  map = L.map("mapContainer").setView([currentLat, currentLng], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+    maxZoom: 19,
+  }).addTo(map);
 
-  const servCats = await apiGET("/api/lookups/service-categories");
-  serviceCategorySel.innerHTML =
-    `<option value="">Select a project type</option>` +
-    servCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+  vendorMarker = L.marker([currentLat, currentLng]).addTo(map).bindPopup("Your Business Location");
+
+  map.on("click", (e) => {
+    currentLat = e.latlng.lat;
+    currentLng = e.latlng.lng;
+    vendorMarker.setLatLng([currentLat, currentLng]);
+    document.getElementById("locationName").value = `${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+  });
+
+  setTimeout(() => map.invalidateSize(), 100);
 }
 
-async function buildCategoryFilter() {
-  const type = localStorage.getItem('vendorType') || '';
-  if (!type) {
-    categoryFilter.innerHTML = '';
-    return;
-  }
-  if (type === 'seller') {
-    const cats = await apiGET("/api/lookups/product-categories");
-    categoryFilter.innerHTML =
-      `<option value="">All product categories</option>` +
-      cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
-  } else {
-    const cats = await apiGET("/api/lookups/service-categories");
-    categoryFilter.innerHTML =
-      `<option value="">All project types</option>` +
-      cats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
-  }
-}
-
-/* =========================================================
- * SECTION: VENDOR PROFILE (REAL DATA)
- * =======================================================*/
-let VENDOR_PROFILE = null; // cache
-
+// ===== LOAD PROFILE =====
 async function loadVendorProfile() {
   try {
-    // Expecting shape: { id, company_name, phone, location, email, logo_url, job_type, Vendor_description }
-    const me = await apiGET('/api/vendors/me');
+    const me = await apiCall("/api/vendors/me");
     VENDOR_PROFILE = me;
 
-    companyNameEl.textContent = me.company_name || '—';
-    companyPhoneEl.textContent = me.phone || '—';
-    companyLocationEl.textContent = me.location || '—';
-    companyEmailEl.textContent = me.email || '—';
-    companyJobTypeEl.textContent = pretty(me.job_type) || '—';
-    companyJobDescEl.textContent = me.Vendor_description || '—';
-    setLogo(me.logo_url, me.company_name);
+    document.getElementById("companyName").textContent = me.company_name || "—";
+    document.getElementById("companyPhone").textContent = me.phone || "—";
+    document.getElementById("companyLocation").textContent = me.location || "—";
+    document.getElementById("companyEmail").textContent = me.email || "—";
+    document.getElementById("companyJobType").textContent = (me.job_type || "—").replace(/_/g, " ");
+    document.getElementById("companyJobDesc").textContent = me.Vendor_description || "—";
 
-    // Persist useful bits for other pages (optional)
-    if (me.email) localStorage.setItem('vendorEmail', me.email);
-    if (me.id) localStorage.setItem('vendorId', String(me.id));
+    if (me.latitude && me.longitude) {
+      currentLat = parseFloat(me.latitude);
+      currentLng = parseFloat(me.longitude);
+    }
 
+    document.getElementById("editCompanyName").value = me.company_name || "";
+    document.getElementById("editCompanyPhone").value = me.phone || "";
+    document.getElementById("editCompanyLocation").value = me.location || "";
+    document.getElementById("editCompanyEmail").value = me.email || "";
+    document.getElementById("editJobType").value = me.job_type || "";
+    document.getElementById("editJobDescription").value = me.Vendor_description || "";
+    document.getElementById("editLogoUrl").value = me.logo_url || "";
+
+    initMap();
+    if (me.latitude && me.longitude) {
+      map.setView([currentLat, currentLng], 13);
+      vendorMarker.setLatLng([currentLat, currentLng]);
+      document.getElementById("locationName").value = me.location || "";
+    }
   } catch (e) {
-    console.error('Failed to load vendor profile', e);
-    showErrorInline(editStatus, e.message);
+    alert(`❌ Failed to load profile: ${e.message}`);
   }
 }
 
-function openEditDialog(prefillFrom) {
-  editStatus.textContent = '';
-  editDialog.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-
-  const src = prefillFrom || VENDOR_PROFILE || {};
-  editCompanyName.value = src.company_name || '';
-  editCompanyPhone.value = src.phone || '';
-  editCompanyLocation.value = src.location || '';
-  editCompanyEmail.value = src.email || '';
-  editLogoUrl.value = src.logo_url || '';
-  editJobType.value = src.job_type || '';
-  editJobDescription.value = src.Vendor_description || '';
-}
-
-function closeEditDialog() {
-  editDialog.style.display = 'none';
-  document.body.style.overflow = '';
-}
-
-async function saveVendorProfileUpdate() {
-  try {
-    showErrorInline(editStatus, '');
-    editStatus.textContent = 'Saving...';
-    editStatus.style.color = 'inherit';
-
-    const payload = {
-      company_name: editCompanyName.value.trim(),
-      phone: editCompanyPhone.value.trim(),
-      location: editCompanyLocation.value.trim(),
-      email: editCompanyEmail.value.trim(),
-      logo_url: editLogoUrl.value.trim() || null,
-      job_type: editJobType.value.trim(),
-      Vendor_description: editJobDescription.value.trim(),
-    };
-
-    if (!payload.company_name || !payload.phone || !payload.location || !payload.email || !payload.job_type) {
-      throw new Error('Please fill in Company Name, Phone, Location, Email, and Job Type.');
-    }
-
-    // PATCH /api/vendors/me should update the authenticated vendor
-    const updated = await apiJSON('/api/vendors/me', 'PATCH', payload);
-    VENDOR_PROFILE = updated;
-
-    // Reflect in UI
-    companyNameEl.textContent = updated.company_name || '—';
-    companyPhoneEl.textContent = updated.phone || '—';
-    companyLocationEl.textContent = updated.location || '—';
-    companyEmailEl.textContent = updated.email || '—';
-    companyJobTypeEl.textContent = pretty(updated.job_type) || '—';
-    companyJobDescEl.textContent = updated.Vendor_description || '—';
-    setLogo(updated.logo_url, updated.company_name);
-
-    showSuccessInline(editStatus, 'Saved!');
-    // Close after a short moment
-    setTimeout(closeEditDialog, 600);
-  } catch (e) {
-    showErrorInline(editStatus, e.message);
-  }
-}
-
-/* =========================================================
- * SECTION: VENDOR TYPE (DB-backed)
- * =======================================================*/
-async function loadVendorTypeFromDB() {
-  try {
-    const data = await apiGET(`/api/vendors/me/type`);
-    return data?.vendor_type || "";
-  } catch {
-    return "";
-  }
-}
-
-if (saveTypeBtn) {
-  saveTypeBtn.addEventListener('click', async () => {
-    const selected = document.querySelector('input[name="vendorType"]:checked');
-    if (!selected) {
-      showErrorInline(typeStatus, "Select a type first.");
-      setGateVisibility('');
-      return;
-    }
-    try {
-      await apiJSON(`/api/vendors/me/type`, "PATCH", { vendor_type: selected.value });
-      localStorage.setItem('vendorType', selected.value);
-      showSuccessInline(typeStatus, "Saved!");
-      setGateVisibility(selected.value);
-      await buildCategoryFilter();
-      await renderListingsFromAPI();
-      document.getElementById('listingTitle')?.focus();
-    } catch (e) {
-      showErrorInline(typeStatus, e.message);
-    }
-  });
-}
-
-// Live preview on radio change (before saving)
-(typeRadios || []).forEach((r) => {
-  r.addEventListener('change', async () => {
-    updateFormForType(r.value);
-    setGateVisibility(r.value);
-    localStorage.setItem('vendorType', r.value); // temporary until Save
-    await buildCategoryFilter();
-    await renderListingsFromAPI();
-  });
-});
-
-/* =========================================================
- * SECTION: LISTINGS (Create + Render)
- * =======================================================*/
-function readListingForm() {
-  const type = localStorage.getItem('vendorType');
-  const title = document.getElementById('listingTitle').value.trim();
-  const description = document.getElementById('listingDesc').value.trim();
-
-  if (!type) throw new Error('Please choose your vendor type above.');
-  if (!title || !description) throw new Error('Title and Description are required.');
-
-  if (type === 'seller') {
-    const category = productCategorySel.value;
-    const price = document.getElementById('productPrice').value;
-    const stock = document.getElementById('productStock').value;
-    const image_url = document.getElementById('productImage').value.trim();
-
-    if (!category || price === '' || stock === '') {
-      throw new Error('Please complete all product fields.');
-    }
-
-    return {
-      type,
-      title,
-      description,
-      category, // slug
-      price: parseInt(price, 10),
-      stock: parseInt(stock, 10),
-      image_url: image_url || null,
-    };
-  } else {
-    const service_type = serviceCategorySel.value; // slug
-    const rate = document.getElementById('serviceRate').value;
-    const billing = document.getElementById('serviceBilling').value;
-    const area = document.getElementById('serviceArea').value.trim();
-    const image_url = document.getElementById('serviceImage').value.trim();
-
-    if (!service_type || rate === '' || !billing || !area) {
-      throw new Error('Please complete all project fields.');
-    }
-
-    return {
-      type,
-      title,
-      description,
-      service_type,
-      rate: parseInt(rate, 10),
-      billing,
-      area,
-      image_url: image_url || null,
-    };
-  }
-}
-
-async function saveListingToAPI(listing) {
-  if (listing.type === "seller") {
-    await apiJSON("/api/products", "POST", {
-      title: listing.title,
-      description: listing.description,
-      category_slug: listing.category,
-      price_bdt: listing.price,
-      stock: listing.stock,
-      image_url: listing.image_url || null,
-    });
-  } else {
-    await apiJSON("/api/services", "POST", {
-      title: listing.title,
-      description: listing.description,
-      service_category_slug: listing.service_type,
-      rate_bdt: listing.rate,
-      billing: listing.billing,     // effective only if your DB has these columns
-      service_area: listing.area,   // effective only if your DB has these columns
-      image_url: listing.image_url || null,
-    });
-  }
-}
-
-async function renderListingsFromAPI() {
-  const type = localStorage.getItem('vendorType');
-  listingsContainer.innerHTML = '';
-
-  if (!type) {
-    noListings.style.display = 'block';
-    noListings.textContent = 'Choose a vendor type to view or create items.';
+// ===== LOCATION HANDLERS =====
+document.getElementById("useCurrentLocationBtn").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    alert("❌ Geolocation not supported");
     return;
   }
 
-  const selectedFilter = (categoryFilter && categoryFilter.value) || '';
-  let url = type === 'seller' ? `/api/products` : `/api/services`;
+  const statusEl = document.getElementById("locationStatus");
+  statusEl.textContent = "📍 Getting location...";
+  statusEl.style.color = "inherit";
 
-  // Backend should default to req.vendor_id, but keep vendor_id for compatibility
-  url += `?vendor_id=${encodeURIComponent(VENDOR_ID)}`;
-  if (selectedFilter) url += `&category_slug=${encodeURIComponent(selectedFilter)}`;
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      currentLat = pos.coords.latitude;
+      currentLng = pos.coords.longitude;
+      vendorMarker.setLatLng([currentLat, currentLng]);
+      map.setView([currentLat, currentLng], 13);
+      document.getElementById("locationName").value = `${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+      statusEl.textContent = "✅ Location updated! Click Save.";
+      statusEl.style.color = "green";
+    },
+    (err) => {
+      statusEl.textContent = `❌ Error: ${err.message}`;
+      statusEl.style.color = "crimson";
+    }
+  );
+});
 
+document.getElementById("saveLocationBtn").addEventListener("click", async () => {
   try {
-    const rows = await apiGET(url);
-    if (!rows.length) {
-      noListings.style.display = 'block';
-      noListings.textContent = type === 'seller' ? 'No listings yet. Create one above.' : 'No projects yet. Create one above.';
+    const locationName = document.getElementById("locationName").value.trim();
+    if (!locationName) throw new Error("Enter a location name");
+
+    const statusEl = document.getElementById("locationStatus");
+    statusEl.textContent = "💾 Saving...";
+    statusEl.style.color = "inherit";
+
+    await apiCall("/api/vendors/me/location", "PATCH", {
+      latitude: currentLat,
+      longitude: currentLng,
+      location_name: locationName,
+    });
+
+    statusEl.textContent = "✅ Location saved!";
+    statusEl.style.color = "green";
+    await loadVendorProfile();
+  } catch (e) {
+    document.getElementById("locationStatus").textContent = `❌ ${e.message}`;
+    document.getElementById("locationStatus").style.color = "crimson";
+  }
+});
+
+// ===== VENDOR TYPE HANDLERS =====
+document.getElementById("saveTypeBtn").addEventListener("click", async () => {
+  try {
+    const selected = document.querySelector('input[name="vendorType"]:checked');
+    if (!selected) throw new Error("Select a type first");
+
+    const typeStatus = document.getElementById("typeStatus");
+    typeStatus.textContent = "💾 Saving...";
+    typeStatus.style.color = "inherit";
+
+    await apiCall("/api/vendors/me/type", "PATCH", { vendor_type: selected.value });
+    localStorage.setItem("vendorType", selected.value);
+
+    typeStatus.textContent = "✅ Saved!";
+    typeStatus.style.color = "green";
+
+    updateFormForType(selected.value);
+    setGateVisibility(selected.value);
+    await loadLookups();
+    await renderListings();
+  } catch (e) {
+    document.getElementById("typeStatus").textContent = `❌ ${e.message}`;
+    document.getElementById("typeStatus").style.color = "crimson";
+  }
+});
+
+document.querySelectorAll('input[name="vendorType"]').forEach((radio) => {
+  radio.addEventListener("change", (e) => {
+    updateFormForType(e.target.value);
+    setGateVisibility(e.target.value);
+    localStorage.setItem("vendorType", e.target.value);
+  });
+});
+
+// ===== UI HELPERS =====
+function updateFormForType(type) {
+  const sellerFields = document.getElementById("sellerFields");
+  const serviceFields = document.getElementById("serviceFields");
+
+  if (type === "seller") {
+    document.getElementById("createHeader").textContent = "Create Product Listing";
+    document.getElementById("myItemsHeader").textContent = "My Products";
+    document.getElementById("filterLabel").textContent = "Filter by category";
+    sellerFields.classList.remove("hidden");
+    serviceFields.classList.add("hidden");
+    document.getElementById("formHint").textContent = "Add products to sell on Nibash.";
+  } else if (type === "service") {
+    document.getElementById("createHeader").textContent = "Create Service Project";
+    document.getElementById("myItemsHeader").textContent = "My Projects";
+    document.getElementById("filterLabel").textContent = "Filter by project type";
+    sellerFields.classList.add("hidden");
+    serviceFields.classList.remove("hidden");
+    document.getElementById("formHint").textContent = "Create service packages for customers.";
+  }
+}
+
+function setGateVisibility(type) {
+  const show = type === "seller" || type === "service";
+  document.getElementById("createListingSection").classList.toggle("hidden", !show);
+  document.getElementById("myListingsSection").classList.toggle("hidden", !show);
+  if (show) {
+    document.getElementById("createListingSection").classList.add("ready");
+    document.getElementById("myListingsSection").classList.add("ready");
+  }
+}
+
+// ===== LOOKUPS & LISTINGS =====
+async function loadLookups() {
+  try {
+    const prodCats = await apiCall("/api/lookups/product-categories");
+    document.getElementById("productCategory").innerHTML = `<option value="">Select a category</option>` +
+      prodCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+
+    const servCats = await apiCall("/api/lookups/service-categories");
+    document.getElementById("serviceCategory").innerHTML = `<option value="">Select a project type</option>` +
+      servCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+  } catch (e) {
+    console.error("Lookups error:", e);
+  }
+}
+
+async function renderListings() {
+  try {
+    const type = localStorage.getItem("vendorType") || "";
+    const container = document.getElementById("listingsContainer");
+    const noListings = document.getElementById("noListings");
+    
+    if (!type) {
+      noListings.style.display = "block";
+      noListings.textContent = "Choose vendor type to view items.";
       return;
     }
-    noListings.style.display = 'none';
+
+    const url = type === "seller" ? `/api/products?vendor_id=${VENDOR_ID}` : `/api/services?vendor_id=${VENDOR_ID}`;
+    const rows = await apiCall(url);
+    
+    container.innerHTML = "";
+    
+    if (!rows || rows.length === 0) {
+      noListings.style.display = "block";
+      noListings.textContent = type === "seller" ? "No products yet. Create one above." : "No projects yet. Create one above.";
+      return;
+    }
+    
+    noListings.style.display = "none";
 
     rows.forEach((item) => {
-      const card = document.createElement('div');
-      card.className = 'product-card';
-
-      let imgUrl;
-      if (type === 'service') {
-        imgUrl = item.image_url || null; // strictly use project photo, not logo or other fallbacks
-      } else {
-        imgUrl = item.image_url || item.primary_image_url || null;
-      }
-      if (!imgUrl) {
-        imgUrl = '../images/placeholder.jpg';
-      }
-      if (imgUrl) {
-        const img = document.createElement('img');
-        img.src = imgUrl;
-        img.alt = item.title;
-        card.appendChild(img);
-      }
-
-      const p = document.createElement('p');
-      const subRaw = item.category_slug || item.category_name || (type === 'seller' ? 'Product' : 'Project');
-      const sub = pretty(subRaw);
-      p.innerHTML = `<strong>${item.title}</strong><br><span class="muted">${sub}</span>`;
-      card.appendChild(p);
-
-      listingsContainer.appendChild(card);
+      const card = document.createElement("div");
+      card.className = "product-card";
+      const img = item.image_url || "../images/placeholder.jpg";
+      const cat = item.category_slug || item.service_category_slug || "Item";
+      
+      card.innerHTML = `
+        <img src="${img}" alt="${item.title}" onerror="this.src='../images/placeholder.jpg'">
+        <p><strong>${item.title}</strong><br><span class="muted">${cat.replace(/_/g, " ")}</span></p>
+      `;
+      container.appendChild(card);
     });
-  } catch (err) {
-    noListings.style.display = 'block';
-    noListings.textContent = `Failed to load items: ${err.message}`;
-  }
-}
-
-function clearForm() {
-  document.getElementById('listingTitle').value = '';
-  document.getElementById('listingDesc').value = '';
-  const ids = [
-    'productCategory', 'productPrice', 'productStock', 'productImage',
-    'serviceCategory', 'serviceRate', 'serviceBilling', 'serviceArea', 'serviceImage',
-  ];
-  ids.forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.tagName === 'SELECT') {
-      if (id === 'serviceBilling') el.value = 'fixed';
-      else el.value = '';
-    } else {
-      el.value = '';
-    }
-  });
-}
-
-/* =========================================================
- * SECTION: INIT + EVENT BINDINGS
- * =======================================================*/
-if (createBtn) {
-  createBtn.addEventListener('click', async () => {
-    try {
-      showErrorInline(createStatus, ""); // reset
-      createStatus.textContent = 'Saving...';
-      createStatus.style.color = 'inherit';
-
-      const listing = readListingForm();
-      await saveListingToAPI(listing);
-      await buildCategoryFilter();
-      await renderListingsFromAPI();
-      clearForm();
-
-      showSuccessInline(createStatus, 'Saved!');
-      listingsContainer.scrollIntoView({ behavior: 'smooth' });
-    } catch (e) {
-      showErrorInline(createStatus, e.message);
-    }
-  });
-}
-
-if (clearBtn) {
-  clearBtn.addEventListener('click', () => {
-    clearForm();
-    createStatus.textContent = '';
-  });
-}
-
-if (editInfoBtn) {
-  editInfoBtn.addEventListener('click', () => openEditDialog());
-}
-if (closeEditBtn) {
-  closeEditBtn.addEventListener('click', closeEditDialog);
-}
-if (resetEditBtn) {
-  resetEditBtn.addEventListener('click', () => openEditDialog(VENDOR_PROFILE));
-}
-if (saveEditBtn) {
-  saveEditBtn.addEventListener('click', saveVendorProfileUpdate);
-}
-
-(async function init() {
-  try {
-    // 0) Load real profile
-    await loadVendorProfile();
-
-    // 1) Lookups for selects
-    await loadLookups();
-
-    // 2) Load vendor type from DB; fall back to localStorage if missing
-    let vt = await loadVendorTypeFromDB();
-    if (!vt) vt = localStorage.getItem('vendorType') || '';
-
-    if (vt) {
-      const radio = document.querySelector(`input[name="vendorType"][value="${vt}"]`);
-      if (radio) radio.checked = true;
-      localStorage.setItem('vendorType', vt);
-    }
-    updateFormForType(vt);
-    setGateVisibility(vt);
-
-    // 3) Build category filter & render
-    await buildCategoryFilter();
-    await renderListingsFromAPI();
-
   } catch (e) {
-    console.error(e);
+    console.error("Listings error:", e);
   }
-})();
+}
+
+// ===== CREATE LISTING =====
+document.getElementById("createListingBtn").addEventListener("click", async () => {
+  try {
+    const type = localStorage.getItem("vendorType");
+    if (!type) throw new Error("Select vendor type first");
+
+    const title = document.getElementById("listingTitle").value.trim();
+    const description = document.getElementById("listingDesc").value.trim();
+    if (!title || !description) throw new Error("Title and description required");
+
+    const createStatus = document.getElementById("createStatus");
+    createStatus.textContent = "💾 Saving...";
+    createStatus.style.color = "inherit";
+
+    let body = { title, description };
+
+    if (type === "seller") {
+      body.category_slug = document.getElementById("productCategory").value;
+      body.price_bdt = parseInt(document.getElementById("productPrice").value);
+      body.stock = parseInt(document.getElementById("productStock").value);
+      body.image_url = document.getElementById("productImage").value.trim() || null;
+      if (!body.category_slug || !body.price_bdt || !body.stock) throw new Error("Fill all product fields");
+      await apiCall("/api/products", "POST", body);
+    } else {
+      body.service_category_slug = document.getElementById("serviceCategory").value;
+      body.rate_bdt = parseInt(document.getElementById("serviceRate").value);
+      body.billing = document.getElementById("serviceBilling").value;
+      body.service_area = document.getElementById("serviceArea").value.trim();
+      body.image_url = document.getElementById("serviceImage").value.trim() || null;
+      if (!body.service_category_slug || !body.rate_bdt || !body.billing || !body.service_area) throw new Error("Fill all service fields");
+      await apiCall("/api/services", "POST", body);
+    }
+
+    createStatus.textContent = "✅ Saved!";
+    createStatus.style.color = "green";
+    document.getElementById("listingTitle").value = "";
+    document.getElementById("listingDesc").value = "";
+    await renderListings();
+  } catch (e) {
+    document.getElementById("createStatus").textContent = `❌ ${e.message}`;
+    document.getElementById("createStatus").style.color = "crimson";
+  }
+});
+
+document.getElementById("clearFormBtn").addEventListener("click", () => {
+  document.getElementById("listingTitle").value = "";
+  document.getElementById("listingDesc").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productStock").value = "";
+  document.getElementById("productImage").value = "";
+  document.getElementById("serviceRate").value = "";
+  document.getElementById("serviceArea").value = "";
+  document.getElementById("serviceImage").value = "";
+  document.getElementById("createStatus").textContent = "";
+});
+
+// ===== EDIT DIALOG =====
+document.getElementById("editInfoBtn").addEventListener("click", () => {
+  document.getElementById("editDialog").style.display = "flex";
+});
+
+document.getElementById("closeEditBtn").addEventListener("click", () => {
+  document.getElementById("editDialog").style.display = "none";
+});
+
+document.getElementById("saveEditBtn").addEventListener("click", async () => {
+  try {
+    const data = {
+      company_name: document.getElementById("editCompanyName").value.trim(),
+      phone: document.getElementById("editCompanyPhone").value.trim(),
+      location: document.getElementById("editCompanyLocation").value.trim(),
+      email: document.getElementById("editCompanyEmail").value.trim(),
+      job_type: document.getElementById("editJobType").value.trim(),
+      Vendor_description: document.getElementById("editJobDescription").value.trim(),
+      logo_url: document.getElementById("editLogoUrl").value.trim() || null,
+    };
+
+    if (!data.company_name || !data.phone || !data.location || !data.email || !data.job_type) {
+      throw new Error("All required fields must be filled");
+    }
+
+    const editStatus = document.getElementById("editStatus");
+    editStatus.textContent = "💾 Saving...";
+    editStatus.style.color = "inherit";
+
+    await apiCall("/api/vendors/me", "PATCH", data);
+
+    editStatus.textContent = "✅ Saved!";
+    editStatus.style.color = "green";
+
+    setTimeout(() => {
+      document.getElementById("editDialog").style.display = "none";
+      loadVendorProfile();
+    }, 600);
+  } catch (e) {
+    document.getElementById("editStatus").textContent = `❌ ${e.message}`;
+    document.getElementById("editStatus").style.color = "crimson";
+  }
+});
+
+document.getElementById("resetEditBtn").addEventListener("click", () => {
+  if (VENDOR_PROFILE) {
+    document.getElementById("editCompanyName").value = VENDOR_PROFILE.company_name || "";
+    document.getElementById("editCompanyPhone").value = VENDOR_PROFILE.phone || "";
+    document.getElementById("editCompanyLocation").value = VENDOR_PROFILE.location || "";
+    document.getElementById("editCompanyEmail").value = VENDOR_PROFILE.email || "";
+    document.getElementById("editJobType").value = VENDOR_PROFILE.job_type || "";
+    document.getElementById("editJobDescription").value = VENDOR_PROFILE.Vendor_description || "";
+    document.getElementById("editLogoUrl").value = VENDOR_PROFILE.logo_url || "";
+  }
+});
+
+// ===== LOGOUT =====
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("vendorId");
+  localStorage.removeItem("vendorToken");
+  localStorage.removeItem("vendorType");
+  window.location.href = "../index.html";
+});
+
+// ===== INIT =====
+console.log("🚀 Initializing vendor dashboard...");
+loadVendorProfile();
   </script>
 </body>
 </html>
