@@ -4,20 +4,12 @@ import db from "../config/db.js";
 
 const router = express.Router();
 
-/** Require auth middleware */
-function requireAuth(req, res, next) {
-  if (!req.vendor_id) {
-    return res.status(401).json({ ok: false, error: "Unauthorized" });
-  }
-  next();
-}
-
 /** helper: build dynamic UPDATE SETs safely */
 function buildUpdateSet(obj) {
   const cols = [];
   const vals = [];
   for (const [k, v] of Object.entries(obj)) {
-    if (typeof v === "undefined") continue;        // skip missing keys
+    if (typeof v === "undefined") continue; // skip missing keys
     cols.push(`${k} = ?`);
     vals.push(v);
   }
@@ -28,8 +20,10 @@ function buildUpdateSet(obj) {
  * GET /api/vendors/me
  * Return the logged-in vendor's profile
  */
-router.get("/me", requireAuth, async (req, res) => {
+router.get("/me", async (req, res) => {
   try {
+    if (!req.vendor_id) return res.status(401).json({ ok: false, error: "Unauthorized" });
+
     const [rows] = await db.query(
       `SELECT 
          vendor_id,
@@ -40,8 +34,8 @@ router.get("/me", requireAuth, async (req, res) => {
          logo_url,
          vendor_type,
          rating,
-         job_type,                 -- NEW
-         Vendor_description        -- NEW (keep exact casing)
+         job_type,
+         Vendor_description
        FROM Vendors
        WHERE vendor_id = ?
        LIMIT 1`,
@@ -63,32 +57,32 @@ router.get("/me", requireAuth, async (req, res) => {
  * Update vendor profile
  * Accepts: { company_name, phone, location, email, logo_url, job_type, Vendor_description }
  */
-router.patch("/me", requireAuth, async (req, res) => {
+router.patch("/me", async (req, res) => {
   try {
+    if (!req.vendor_id) return res.status(401).json({ ok: false, error: "Unauthorized" });
+
     const {
       company_name,
       phone,
       location,
       email,
       logo_url,
-      job_type,             // NEW
-      Vendor_description,   // NEW (exact casing)
+      job_type,
+      Vendor_description,
     } = req.body || {};
 
-    // Minimal validation (adjust to taste)
     if (!company_name || !phone || !location || !email) {
       return res.status(400).json({ ok: false, error: "Missing required fields" });
     }
 
-    // Map to DB columns; include only provided keys
     const updateCols = {
       Vendor_Name: company_name,
       Vendor_Email: email,
       phone,
       location,
       logo_url: logo_url ?? null,
-      job_type,                  // optional but saved if provided
-      Vendor_description,        // optional but saved if provided
+      job_type,
+      Vendor_description,
     };
 
     const { setClause, values } = buildUpdateSet(updateCols);
@@ -105,7 +99,6 @@ router.patch("/me", requireAuth, async (req, res) => {
       return res.status(404).json({ ok: false, error: "Vendor not found" });
     }
 
-    // Return the updated row
     const [rows] = await db.query(
       `SELECT 
          vendor_id,
@@ -130,13 +123,16 @@ router.patch("/me", requireAuth, async (req, res) => {
   }
 });
 
-/** GET /api/vendors/me/type (unchanged) */
-router.get("/me/type", requireAuth, async (req, res) => {
+/** GET /api/vendors/me/type */
+router.get("/me/type", async (req, res) => {
   try {
+    if (!req.vendor_id) return res.status(401).json({ ok: false, error: "Unauthorized" });
+
     const [rows] = await db.query(
       "SELECT vendor_type FROM Vendors WHERE vendor_id = ? LIMIT 1",
       [req.vendor_id]
     );
+
     if (!rows.length) {
       return res.status(404).json({ ok: false, error: "Vendor not found" });
     }
@@ -146,9 +142,11 @@ router.get("/me/type", requireAuth, async (req, res) => {
   }
 });
 
-/** PATCH /api/vendors/me/type (unchanged) */
-router.patch("/me/type", requireAuth, async (req, res) => {
+/** PATCH /api/vendors/me/type */
+router.patch("/me/type", async (req, res) => {
   try {
+    if (!req.vendor_id) return res.status(401).json({ ok: false, error: "Unauthorized" });
+
     const { vendor_type } = req.body || {};
     if (!["seller", "service", "both"].includes(vendor_type || "")) {
       return res
@@ -170,7 +168,5 @@ router.patch("/me/type", requireAuth, async (req, res) => {
     return res.status(500).json({ ok: false, error: e.message });
   }
 });
-
-/* Optional id-based admin routes (unchanged) ... */
 
 export default router;
