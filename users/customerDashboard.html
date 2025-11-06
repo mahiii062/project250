@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,26 +9,139 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
   <style>
     /* small helpers for modal + states */
-    .hidden { display: none !important; }
-    .muted { color:#6b7280; }
-    .dialog-backdrop { position:fixed; inset:0; background:#0006; display:none; align-items:center; justify-content:center; padding:20px; }
-    .dialog { width:100%; max-width:520px; background:#fff; border-radius:16px; border:1px solid #e5e7eb; box-shadow:0 10px 30px #0003; padding:16px; }
-    .dialog header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-    .dialog footer { display:flex; gap:8px; justify-content:flex-end; margin-top:12px; }
-    .form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
-    .form-field { display:flex; flex-direction:column; gap:6px; }
-    .form-field.col-span-2 { grid-column: span 2 / span 2; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid #11182710; cursor:pointer; background:#f3f4f6; }
-    .btn.primary { background:#111827; color:#fff; }
-    .status { font-size:.9rem; }
-    .orders-container, .wishlist-container { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
-    .order-item, .wishlist-item { border:1px solid #e5e7eb; border-radius:12px; padding:10px; background:#fff; }
-    .order-item img, .wishlist-item img { width:100%; height:120px; object-fit:cover; border-radius:10px; }
-    .delivered { color:#10b981; font-weight:600; }
-    .processing { color:#f59e0b; font-weight:600; }
-    .shipped { color:#3b82f6; font-weight:600; }
-    .avatar { width:56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#111827; color:#fff; font-weight:600; font-size:20px; overflow:hidden; }
-    .avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+    .hidden {
+      display: none !important;
+    }
+
+    .muted {
+      color: #6b7280;
+    }
+
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      background: #0006;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .dialog {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 30px #0003;
+      padding: 16px;
+    }
+
+    .dialog header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .dialog footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field.col-span-2 {
+      grid-column: span 2 / span 2;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid #11182710;
+      cursor: pointer;
+      background: #f3f4f6;
+    }
+
+    .btn.primary {
+      background: #111827;
+      color: #fff;
+    }
+
+    .status {
+      font-size: .9rem;
+    }
+
+    .orders-container,
+    .wishlist-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .order-item,
+    .wishlist-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    .order-item img,
+    .wishlist-item img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .delivered {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .processing {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .shipped {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111827;
+      color: #fff;
+      font-weight: 600;
+      font-size: 20px;
+      overflow: hidden;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
   </style>
 </head>
 
@@ -37,6 +151,7 @@
     <nav>
       <a href="customer.html">Home</a>
       <a href="vendorDashboard.html">Vendor</a>
+      <a href="./shop-nearby.html">Shop Nearby</a>
       <a href="../index.html" class="logout-btn" id="logoutBtn">Log out</a>
     </nav>
   </header>
@@ -69,15 +184,16 @@
         </div>
 
         <div class="buttons-row" style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn upload-btn" id="uploadAvatarBtn" title="Paste a public URL in Update Info">Upload Image</button>
+          <button class="btn upload-btn" id="uploadAvatarBtn" title="Paste a public URL in Update Info">Upload
+            Image</button>
           <button class="btn update-btn" id="openUpdateBtn">Update Info</button>
           <button class="btn">Contact Support</button>
           <button class="btn secondary">Browse New Arrivals</button>
         </div>
       </div>
-    <a href="users/shop-nearby.html" class="btn btn-primary">
-  🗺️ Find Shops Nearby
-</a>
+      <a href="users/shop-nearby.html" class="btn btn-primary">
+        🗺️ Find Shops Nearby
+      </a>
       <!-- Wishlist + Orders -->
       <div class="grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
         <div class="card">
@@ -92,7 +208,7 @@
           <p id="ordersEmpty" class="muted hidden">No orders found.</p>
         </div>
       </div>
-      
+
       <!-- Activity Feed (static demo) -->
       <div class="activity-card card">
         <h4>Activity Feed</h4>
@@ -113,7 +229,7 @@
         <h3 id="editDialogTitle">Update Your Info</h3>
         <button class="btn" id="closeEditBtn" aria-label="Close">✕</button>
       </header>
-        
+
       <div class="form-grid">
         <label class="form-field">
           <span>Name *</span>
@@ -145,5 +261,4 @@
     </div>
   </div>
 
-<script src="../scripts/customer.js"></script>
-
+  <script src="../scripts/customer.js"></script>
