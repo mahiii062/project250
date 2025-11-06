@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vendor Dashboard - Nibash (Gated)</title>
+
+  <!-- Fonts + your stylesheet -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/vendorDashboard.css" />
+
   <style>
     /* ---- Layout helpers ---- */
     .hidden { display: none !important; }
@@ -47,8 +50,40 @@
     .vendor-info { display:flex; gap:16px; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; border-radius:16px; padding:16px; }
     .vendor-details { flex:1; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px 16px; }
     .vendor-actions { display:flex; gap:8px; }
+
+    /* ===========================
+       Location Picker (scoped)
+       Prefix: .lp-
+       =========================== */
+    .lp-modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:1000; }
+    .lp-modal { width:min(900px, 96vw); background:#fff; color:#111827; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.35); }
+    .lp-modal header { padding:10px 12px; border-bottom:1px solid #e5e7eb; display:flex; gap:8px; align-items:center; background:#fafafa; }
+    .lp-modal header input { flex:1; border-radius:10px; border:1px solid #e5e7eb; background:#fff; color:#111827; padding:8px 10px; }
+    #lp-map { height:60vh; width:100%; }
+    .lp-bar { display:flex; gap:8px; align-items:center; }
+    .lp-pad { padding:10px 12px; }
+    .lp-actions { display:flex; gap:8px; justify-content:flex-end; border-top:1px solid #e5e7eb; padding:10px 12px; background:#fafafa; }
+    .lp-btn { padding:8px 12px; border-radius:10px; border:1px solid #e5e7eb; background:#f3f4f6; cursor:pointer; }
+    .lp-btn.primary { background:#111827; color:#fff; border-color:#111827; }
+    .lp-muted { color:#6b7280; }
+    .sidebar a { color: inherit; text-decoration: none; display:block; }
   </style>
+
+  <!-- Leaflet (CSS/JS) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    defer
+  ></script>
 </head>
+
 <body>
   <!-- Top Navbar -->
   <header class="topbar">
@@ -57,8 +92,10 @@
       <span class="logo-text">Nibash</span>
     </div>
     <div class="nav-actions">
-      <a href="#">Home</a>
-      <a href="#">Vendor</a>
+      <a href="../index.html">Home</a>
+      <a href="./vendorDashboard.html">Vendor</a>
+      <a href="../shop-nearby.html">Shop Nearby</a>
+      <a href="../customerDashboard.html">Customer</a>
       <button class="logout-btn" id="logoutBtn">Log Out</button>
     </div>
   </header>
@@ -68,31 +105,63 @@
     <aside class="sidebar">
       <h3>My Account</h3>
       <ul>
-        <li class="active">Profile</li>
-        <li>Products</li>
-        <li>Orders</li>
-        <li>Analytics</li>
-        <li>Messages</li>
-        <li>Settings</li>
+        <li class="active"><a href="#profile">Profile</a></li>
+        <li><a href="#createListingSection">Create</a></li>
+        <li><a href="#myListingsSection">My Items</a></li>
+        <li><a href="#statsSection">Analytics</a></li>
+        <li><a href="#inquiriesSection">Messages</a></li>
+        <li><a href="#typeGate">Settings</a></li>
+      </ul>
+
+      <h3 style="margin-top:16px">Quick Links</h3>
+      <ul>
+        <li><a href="../shop-nearby.html">Find Vendors Nearby</a></li>
+        <li><a href="../customerDashboard.html">Customer Dashboard</a></li>
+        <li><a href="../user.html">User Profile</a></li>
       </ul>
     </aside>
 
     <!-- Main Content -->
     <main class="content">
       <!-- Vendor Info (REAL data) -->
-      <section class="vendor-info">
+      <section class="vendor-info" id="profile">
         <div class="vendor-logo" id="companyLogoBox">V</div>
         <div class="vendor-details">
           <p><strong>Company Name:</strong> <span id="companyName">—</span></p>
           <p><strong>Contact:</strong> <span id="companyPhone">—</span></p>
-          <p><strong>Location:</strong> <span id="companyLocation">—</span></p>
           <p><strong>Email:</strong> <span id="companyEmail">—</span></p>
+          <p><strong>Location:</strong> <span id="companyLocation">—</span></p>
           <p><strong>Job Type:</strong> <span id="companyJobType">—</span></p>
           <p class="col-span-2"><strong>Job Description:</strong> <span id="companyJobDesc">—</span></p>
         </div>
+
         <div class="vendor-actions">
           <button class="btn" id="editInfoBtn">Update Info</button>
         </div>
+      </section>
+
+      <!-- Business Location -->
+      <section class="card" style="margin-top:16px;">
+        <h3>Business Location</h3>
+        <div class="form-grid">
+          <label class="form-field">
+            <span>Business Location (City/Area)</span>
+            <input type="text" id="location" placeholder="e.g., Gulshan, Dhaka" />
+          </label>
+          <label class="form-field">
+            <span>Latitude</span>
+            <input type="number" id="latitude" step="0.000001" placeholder="23.810300" />
+          </label>
+          <label class="form-field">
+            <span>Longitude</span>
+            <input type="number" id="longitude" step="0.000001" placeholder="90.412500" />
+          </label>
+          <div class="form-field">
+            <span>&nbsp;</span>
+            <button class="btn primary" onclick="getLocationFromMap()">📍 Set Location on Map</button>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:8px">Tip: you can also paste lat/lon manually if you already know them.</p>
       </section>
 
       <!-- 1) Vendor Classification -->
@@ -234,8 +303,7 @@
             <p>In Stock</p>
             <h2>78</h2>
           </div>
-          <div class="stat-box">
-            <div class="stat-icon revenue"><i class="fas fa-dollar-sign"></i></div>
+          <div class="stat-box revenue"><i class="fas fa-dollar-sign"></i>
             <p>Total Revenue</p>
             <h2>$5,420</h2>
           </div>
@@ -326,25 +394,51 @@
     </div>
   </div>
 
+  <!-- Location Picker MODAL -->
+  <div id="lp-modal" class="lp-modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="lp-modal">
+      <header>
+        <strong style="font-size:14px;">Pick a spot</strong>
+        <input id="lp-search" type="text" placeholder="Search a place (e.g., Banani, Dhaka)" />
+        <button class="lp-btn" id="lp-search-btn" title="Search">Search</button>
+        <button class="lp-btn" id="lp-myLoc-btn" title="Use my location">My Location</button>
+        <button class="lp-btn" id="lp-close-btn" title="Close">✕</button>
+      </header>
+      <div id="lp-map"></div>
+      <div class="lp-pad lp-bar" id="lp-preview">
+        <div class="lp-muted">Click on the map to choose a point.</div>
+      </div>
+      <div class="lp-actions">
+        <button class="lp-btn" id="lp-cancel-btn">Cancel</button>
+        <button class="lp-btn primary" id="lp-confirm-btn">Confirm Selection</button>
+      </div>
+    </div>
+  </div>
+
   <script>
 /* =========================================================
- * SECTION: CONFIG
+ * CONFIG: dynamic API base (same-origin if served, else localhost:5555)
  * =======================================================*/
-const API_BASE = "http://localhost:5000"; // <- change if needed
+const API_BASE = (() => {
+  try {
+    if (location.origin && /^https?:\/\//.test(location.origin)) return location.origin;
+  } catch {}
+  return 'http://localhost:5555';
+})();
 
 /* =========================================================
- * SECTION: STATE (session)
+ * STATE (session)
  * =======================================================*/
 let VENDOR_ID = Number(localStorage.getItem("vendorId")) || null;
 const TOKEN = localStorage.getItem("vendorToken") || null;
 
 // Guard: if not authenticated, go to login
 if (!VENDOR_ID || !TOKEN) {
-  window.location.href = "vendorLogin.html"; // adjust path
+  window.location.href = "vendorLogin.html";
 }
 
 /* =========================================================
- * SECTION: SIDEBAR / LOGOUT
+ * SIDEBAR / LOGOUT
  * =======================================================*/
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
@@ -356,7 +450,7 @@ if (logoutBtn) {
   });
 }
 
-// Sidebar active state
+// Sidebar active highlight on click
 document.querySelectorAll('.sidebar ul li').forEach((item) => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.sidebar ul li').forEach((i) => i.classList.remove('active'));
@@ -365,7 +459,7 @@ document.querySelectorAll('.sidebar ul li').forEach((item) => {
 });
 
 /* =========================================================
- * SECTION: DOM HANDLES
+ * DOM HANDLES
  * =======================================================*/
 const typeRadios = document.querySelectorAll('input[name="vendorType"]');
 const saveTypeBtn = document.getElementById('saveTypeBtn');
@@ -374,12 +468,6 @@ const sellerFields = document.getElementById('sellerFields');
 const serviceFields = document.getElementById('serviceFields');
 const formHint = document.getElementById('formHint');
 const createHeader = document.getElementById('createHeader');
-
-const createSection = document.getElementById('createListingSection');
-const myListingsSection = document.getElementById('myListingsSection');
-const statsSection = document.getElementById('statsSection');
-const topProductsSection = document.getElementById('topProductsSection');
-const inquiriesSection = document.getElementById('inquiriesSection');
 
 const productCategorySel = document.getElementById('productCategory');
 const serviceCategorySel = document.getElementById('serviceCategory');
@@ -418,7 +506,7 @@ const resetEditBtn = document.getElementById('resetEditBtn');
 const saveEditBtn = document.getElementById('saveEditBtn');
 
 /* =========================================================
- * SECTION: UI HELPERS
+ * UI HELPERS
  * =======================================================*/
 const GATED_SECTION_IDS = [
   'createListingSection',
@@ -468,16 +556,8 @@ function updateFormForType(type) {
   }
 }
 
-function showErrorInline(el, msg) {
-  if (!el) return;
-  el.textContent = msg;
-  el.style.color = 'crimson';
-}
-function showSuccessInline(el, msg) {
-  if (!el) return;
-  el.textContent = msg;
-  el.style.color = 'green';
-}
+function showErrorInline(el, msg) { if (el) { el.textContent = msg; el.style.color = 'crimson'; } }
+function showSuccessInline(el, msg) { if (el) { el.textContent = msg; el.style.color = 'green'; } }
 
 function setLogo(logoUrl, fallbackName) {
   if (logoUrl) {
@@ -486,23 +566,16 @@ function setLogo(logoUrl, fallbackName) {
     companyLogoBox.textContent = (fallbackName || 'V').slice(0,1);
   }
 }
-
-// prettify values like "Interior_Designer" -> "Interior Designer"
-function pretty(v) {
-  if (!v) return v;
-  return String(v).replace(/_/g, ' ');
-}
+function pretty(v) { return v ? String(v).replace(/_/g, ' ') : v; }
 
 /* =========================================================
- * SECTION: API LAYER
+ * API LAYER
  * =======================================================*/
-function authHeaders() {
-  return TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {};
-}
+function authHeaders() { return TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}; }
 
 async function apiGET(path) {
   const res = await fetch(`${API_BASE}${path}`, { headers: { ...authHeaders() } });
-  const json = await res.json();
+  const json = await res.json().catch(() => ({}));
   if (!res.ok || json.ok === false) throw new Error(json.error || `GET ${path} failed`);
   return json.data ?? json;
 }
@@ -512,13 +585,13 @@ async function apiJSON(path, method, body) {
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body || {}),
   });
-  const json = await res.json();
+  const json = await res.json().catch(() => ({}));
   if (!res.ok || json.ok === false) throw new Error(json.error || `${method} ${path} failed`);
   return json.data ?? json;
 }
 
 /* =========================================================
- * SECTION: LOOKUPS (categories)
+ * LOOKUPS (categories)
  * =======================================================*/
 async function loadLookups() {
   const prodCats = await apiGET("/api/lookups/product-categories");
@@ -534,10 +607,7 @@ async function loadLookups() {
 
 async function buildCategoryFilter() {
   const type = localStorage.getItem('vendorType') || '';
-  if (!type) {
-    categoryFilter.innerHTML = '';
-    return;
-  }
+  if (!type) { categoryFilter.innerHTML = ''; return; }
   if (type === 'seller') {
     const cats = await apiGET("/api/lookups/product-categories");
     categoryFilter.innerHTML =
@@ -552,28 +622,25 @@ async function buildCategoryFilter() {
 }
 
 /* =========================================================
- * SECTION: VENDOR PROFILE (REAL DATA)
+ * VENDOR PROFILE (REAL DATA)
  * =======================================================*/
-let VENDOR_PROFILE = null; // cache
+let VENDOR_PROFILE = null;
 
 async function loadVendorProfile() {
   try {
-    // Expecting shape: { id, company_name, phone, location, email, logo_url, job_type, Vendor_description }
     const me = await apiGET('/api/vendors/me');
     VENDOR_PROFILE = me;
 
     companyNameEl.textContent = me.company_name || '—';
     companyPhoneEl.textContent = me.phone || '—';
-    companyLocationEl.textContent = me.location || '—';
     companyEmailEl.textContent = me.email || '—';
+    companyLocationEl.textContent = me.location || '—';
     companyJobTypeEl.textContent = pretty(me.job_type) || '—';
     companyJobDescEl.textContent = me.Vendor_description || '—';
     setLogo(me.logo_url, me.company_name);
 
-    // Persist useful bits for other pages (optional)
     if (me.email) localStorage.setItem('vendorEmail', me.email);
-    if (me.id) localStorage.setItem('vendorId', String(me.id));
-
+    if (me.vendor_id) localStorage.setItem('vendorId', String(me.vendor_id));
   } catch (e) {
     console.error('Failed to load vendor profile', e);
     showErrorInline(editStatus, e.message);
@@ -620,21 +687,18 @@ async function saveVendorProfileUpdate() {
       throw new Error('Please fill in Company Name, Phone, Location, Email, and Job Type.');
     }
 
-    // PATCH /api/vendors/me should update the authenticated vendor
     const updated = await apiJSON('/api/vendors/me', 'PATCH', payload);
     VENDOR_PROFILE = updated;
 
-    // Reflect in UI
     companyNameEl.textContent = updated.company_name || '—';
     companyPhoneEl.textContent = updated.phone || '—';
-    companyLocationEl.textContent = updated.location || '—';
     companyEmailEl.textContent = updated.email || '—';
+    companyLocationEl.textContent = updated.location || '—';
     companyJobTypeEl.textContent = pretty(updated.job_type) || '—';
     companyJobDescEl.textContent = updated.Vendor_description || '—';
     setLogo(updated.logo_url, updated.company_name);
 
     showSuccessInline(editStatus, 'Saved!');
-    // Close after a short moment
     setTimeout(closeEditDialog, 600);
   } catch (e) {
     showErrorInline(editStatus, e.message);
@@ -642,7 +706,7 @@ async function saveVendorProfileUpdate() {
 }
 
 /* =========================================================
- * SECTION: VENDOR TYPE (DB-backed)
+ * VENDOR TYPE (DB-backed)
  * =======================================================*/
 async function loadVendorTypeFromDB() {
   try {
@@ -653,14 +717,11 @@ async function loadVendorTypeFromDB() {
   }
 }
 
-if (saveTypeBtn) {
-  saveTypeBtn.addEventListener('click', async () => {
+const saveTypeBtnEl = document.getElementById('saveTypeBtn');
+if (saveTypeBtnEl) {
+  saveTypeBtnEl.addEventListener('click', async () => {
     const selected = document.querySelector('input[name="vendorType"]:checked');
-    if (!selected) {
-      showErrorInline(typeStatus, "Select a type first.");
-      setGateVisibility('');
-      return;
-    }
+    if (!selected) { showErrorInline(typeStatus, "Select a type first."); setGateVisibility(''); return; }
     try {
       await apiJSON(`/api/vendors/me/type`, "PATCH", { vendor_type: selected.value });
       localStorage.setItem('vendorType', selected.value);
@@ -675,19 +736,18 @@ if (saveTypeBtn) {
   });
 }
 
-// Live preview on radio change (before saving)
 (typeRadios || []).forEach((r) => {
   r.addEventListener('change', async () => {
     updateFormForType(r.value);
     setGateVisibility(r.value);
-    localStorage.setItem('vendorType', r.value); // temporary until Save
+    localStorage.setItem('vendorType', r.value);
     await buildCategoryFilter();
     await renderListingsFromAPI();
   });
 });
 
 /* =========================================================
- * SECTION: LISTINGS (Create + Render)
+ * LISTINGS (Create + Render)
  * =======================================================*/
 function readListingForm() {
   const type = localStorage.getItem('vendorType');
@@ -702,41 +762,16 @@ function readListingForm() {
     const price = document.getElementById('productPrice').value;
     const stock = document.getElementById('productStock').value;
     const image_url = document.getElementById('productImage').value.trim();
-
-    if (!category || price === '' || stock === '') {
-      throw new Error('Please complete all product fields.');
-    }
-
-    return {
-      type,
-      title,
-      description,
-      category, // slug
-      price: parseInt(price, 10),
-      stock: parseInt(stock, 10),
-      image_url: image_url || null,
-    };
+    if (!category || price === '' || stock === '') throw new Error('Please complete all product fields.');
+    return { type, title, description, category, price: parseInt(price,10), stock: parseInt(stock,10), image_url: image_url || null };
   } else {
-    const service_type = serviceCategorySel.value; // slug
+    const service_type = serviceCategorySel.value;
     const rate = document.getElementById('serviceRate').value;
     const billing = document.getElementById('serviceBilling').value;
     const area = document.getElementById('serviceArea').value.trim();
     const image_url = document.getElementById('serviceImage').value.trim();
-
-    if (!service_type || rate === '' || !billing || !area) {
-      throw new Error('Please complete all project fields.');
-    }
-
-    return {
-      type,
-      title,
-      description,
-      service_type,
-      rate: parseInt(rate, 10),
-      billing,
-      area,
-      image_url: image_url || null,
-    };
+    if (!service_type || rate === '' || !billing || !area) throw new Error('Please complete all project fields.');
+    return { type, title, description, service_type, rate: parseInt(rate,10), billing, area, image_url: image_url || null };
   }
 }
 
@@ -756,8 +791,8 @@ async function saveListingToAPI(listing) {
       description: listing.description,
       service_category_slug: listing.service_type,
       rate_bdt: listing.rate,
-      billing: listing.billing,     // effective only if your DB has these columns
-      service_area: listing.area,   // effective only if your DB has these columns
+      billing: listing.billing,
+      service_area: listing.area,
       image_url: listing.image_url || null,
     });
   }
@@ -775,8 +810,6 @@ async function renderListingsFromAPI() {
 
   const selectedFilter = (categoryFilter && categoryFilter.value) || '';
   let url = type === 'seller' ? `/api/products` : `/api/services`;
-
-  // Backend should default to req.vendor_id, but keep vendor_id for compatibility
   url += `?vendor_id=${encodeURIComponent(VENDOR_ID)}`;
   if (selectedFilter) url += `&category_slug=${encodeURIComponent(selectedFilter)}`;
 
@@ -793,15 +826,11 @@ async function renderListingsFromAPI() {
       const card = document.createElement('div');
       card.className = 'product-card';
 
-      let imgUrl;
-      if (type === 'service') {
-        imgUrl = item.image_url || null; // strictly use project photo, not logo or other fallbacks
-      } else {
-        imgUrl = item.image_url || item.primary_image_url || null;
-      }
-      if (!imgUrl) {
-        imgUrl = '../images/placeholder.jpg';
-      }
+      let imgUrl = (localStorage.getItem('vendorType') === 'service')
+        ? (item.image_url || null)
+        : (item.image_url || item.primary_image_url || null);
+      if (!imgUrl) imgUrl = '../images/placeholder.jpg';
+
       if (imgUrl) {
         const img = document.createElement('img');
         img.src = imgUrl;
@@ -811,8 +840,7 @@ async function renderListingsFromAPI() {
 
       const p = document.createElement('p');
       const subRaw = item.category_slug || item.category_name || (type === 'seller' ? 'Product' : 'Project');
-      const sub = pretty(subRaw);
-      p.innerHTML = `<strong>${item.title}</strong><br><span class="muted">${sub}</span>`;
+      p.innerHTML = `<strong>${item.title}</strong><br><span class="muted">${pretty(subRaw)}</span>`;
       card.appendChild(p);
 
       listingsContainer.appendChild(card);
@@ -826,29 +854,120 @@ async function renderListingsFromAPI() {
 function clearForm() {
   document.getElementById('listingTitle').value = '';
   document.getElementById('listingDesc').value = '';
-  const ids = [
-    'productCategory', 'productPrice', 'productStock', 'productImage',
-    'serviceCategory', 'serviceRate', 'serviceBilling', 'serviceArea', 'serviceImage',
-  ];
+  const ids = ['productCategory','productPrice','productStock','productImage','serviceCategory','serviceRate','serviceBilling','serviceArea','serviceImage'];
   ids.forEach((id) => {
     const el = document.getElementById(id);
     if (!el) return;
     if (el.tagName === 'SELECT') {
-      if (id === 'serviceBilling') el.value = 'fixed';
-      else el.value = '';
-    } else {
-      el.value = '';
-    }
+      if (id === 'serviceBilling') el.value = 'fixed'; else el.value = '';
+    } else el.value = '';
   });
 }
 
 /* =========================================================
- * SECTION: INIT + EVENT BINDINGS
+ * LOCATION PICKER (scoped)
  * =======================================================*/
+let lpMap, lpMarker, lpSelected = null;
+
+async function getLocationFromMap() {
+  lpOpen();
+  await lpEnsureMap();
+  lpMap.invalidateSize();
+}
+function lpOpen() {
+  const m = document.getElementById('lp-modal');
+  m.style.display = 'flex';
+  m.setAttribute('aria-hidden', 'false');
+}
+function lpClose() {
+  const m = document.getElementById('lp-modal');
+  m.style.display = 'none';
+  m.setAttribute('aria-hidden', 'true');
+}
+async function lpEnsureMap() {
+  if (lpMap) return;
+  lpMap = L.map('lp-map').setView([23.780887, 90.279239], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(lpMap);
+
+  lpMap.on("click", async (e) => {
+    lpSetPoint(e.latlng.lat, e.latlng.lng);
+    const label = await lpReverseGeocode(e.latlng.lat, e.latlng.lng);
+    lpSetPreview(e.latlng.lat, e.latlng.lng, label);
+  });
+
+  document.getElementById('lp-search-btn').addEventListener('click', () => lpDoSearch(document.getElementById('lp-search').value));
+  document.getElementById('lp-search').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') lpDoSearch(ev.target.value); });
+  document.getElementById('lp-myLoc-btn').addEventListener('click', () => {
+    if (!navigator.geolocation) return alert("Geolocation not available");
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude, lon = pos.coords.longitude;
+      lpMap.setView([lat, lon], 15);
+      lpSetPoint(lat, lon);
+      const label = await lpReverseGeocode(lat, lon);
+      lpSetPreview(lat, lon, label);
+    }, (err) => alert(err.message), { enableHighAccuracy: true, timeout: 10000 });
+  });
+  document.getElementById('lp-close-btn').addEventListener('click', lpClose);
+  document.getElementById('lp-cancel-btn').addEventListener('click', lpClose);
+  document.getElementById('lp-confirm-btn').addEventListener('click', () => {
+    if (!lpSelected) { alert("Please pick a spot on the map."); return; }
+    const { lat, lon, label } = lpSelected;
+    document.getElementById('location').value = label || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    document.getElementById('latitude').value = lat.toFixed(6);
+    document.getElementById('longitude').value = lon.toFixed(6);
+    lpClose();
+  });
+}
+function lpSetPoint(lat, lon) {
+  if (lpMarker) lpMap.removeLayer(lpMarker);
+  lpMarker = L.marker([lat, lon]).addTo(lpMap);
+  lpSelected = { lat, lon, label: lpSelected?.label };
+}
+function lpSetPreview(lat, lon, label) {
+  lpSelected = { lat, lon, label: label || lpSelected?.label };
+  document.getElementById('lp-preview').innerHTML =
+    `<div><div><strong>Selected:</strong> ${lpEscape(label || "Unnamed place")}</div><div class="lp-muted">${lat.toFixed(6)}, ${lon.toFixed(6)}</div></div>`;
+}
+async function lpDoSearch(q) {
+  q = (q || "").trim();
+  if (!q) return;
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(q)}`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    const arr = await res.json();
+    if (!arr.length) { alert("No results found."); return; }
+    const item = arr[0];
+    const lat = parseFloat(item.lat), lon = parseFloat(item.lon);
+    lpMap.setView([lat, lon], 15);
+    lpSetPoint(lat, lon);
+    lpSetPreview(lat, lon, item.display_name);
+  } catch (e) {
+    console.error(e);
+    alert("Search failed. Try a different query.");
+  }
+}
+async function lpReverseGeocode(lat, lon) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+    const res = await fetch(url, { headers: { "Accept": "application/json" } });
+    const data = await res.json();
+    return data.display_name || "";
+  } catch { return ""; }
+}
+const lpEscape = (s) => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* =========================================================
+ * INIT + EVENT BINDINGS
+ * =======================================================*/
+if (editInfoBtn) editInfoBtn.addEventListener('click', () => openEditDialog());
+if (closeEditBtn) closeEditBtn.addEventListener('click', closeEditDialog);
+if (resetEditBtn) resetEditBtn.addEventListener('click', () => openEditDialog(VENDOR_PROFILE));
+if (saveEditBtn) saveEditBtn.addEventListener('click', saveVendorProfileUpdate);
+
 if (createBtn) {
   createBtn.addEventListener('click', async () => {
     try {
-      showErrorInline(createStatus, ""); // reset
+      showErrorInline(createStatus, "");
       createStatus.textContent = 'Saving...';
       createStatus.style.color = 'inherit';
 
@@ -865,39 +984,16 @@ if (createBtn) {
     }
   });
 }
-
 if (clearBtn) {
-  clearBtn.addEventListener('click', () => {
-    clearForm();
-    createStatus.textContent = '';
-  });
-}
-
-if (editInfoBtn) {
-  editInfoBtn.addEventListener('click', () => openEditDialog());
-}
-if (closeEditBtn) {
-  closeEditBtn.addEventListener('click', closeEditDialog);
-}
-if (resetEditBtn) {
-  resetEditBtn.addEventListener('click', () => openEditDialog(VENDOR_PROFILE));
-}
-if (saveEditBtn) {
-  saveEditBtn.addEventListener('click', saveVendorProfileUpdate);
+  clearBtn.addEventListener('click', () => { clearForm(); createStatus.textContent = ''; });
 }
 
 (async function init() {
   try {
-    // 0) Load real profile
     await loadVendorProfile();
-
-    // 1) Lookups for selects
     await loadLookups();
-
-    // 2) Load vendor type from DB; fall back to localStorage if missing
     let vt = await loadVendorTypeFromDB();
     if (!vt) vt = localStorage.getItem('vendorType') || '';
-
     if (vt) {
       const radio = document.querySelector(`input[name="vendorType"][value="${vt}"]`);
       if (radio) radio.checked = true;
@@ -905,15 +1001,51 @@ if (saveEditBtn) {
     }
     updateFormForType(vt);
     setGateVisibility(vt);
-
-    // 3) Build category filter & render
     await buildCategoryFilter();
     await renderListingsFromAPI();
-
   } catch (e) {
     console.error(e);
   }
 })();
+
+/* Reviews section (optional, shown if API exists) */
+async function loadMyReviews() {
+  try {
+    const vendorId = Number(localStorage.getItem('vendorId'));
+    if (!vendorId) return;
+    const res = await fetch(`${API_BASE}/api/reviews/vendor/${vendorId}`);
+    const json = await res.json();
+    if (!res.ok || json.ok === false) throw new Error(json.error || 'reviews failed');
+
+    const wrap = document.createElement('section');
+    wrap.className = 'card gated hidden';
+    wrap.id = 'reviewsSection';
+    const stats = json.data.stats || { avg_rating: null, total: 0 };
+    wrap.innerHTML = `
+      <h3>Your Reviews</h3>
+      <p class="muted">Average: ${(stats.avg_rating ?? 0).toFixed(2)} (${stats.total} reviews)</p>
+      <div id="reviewsList"></div>
+    `;
+    document.querySelector('.content').appendChild(wrap);
+
+    const list = wrap.querySelector('#reviewsList');
+    (json.data.reviews || []).forEach(r => {
+      const div = document.createElement('div');
+      div.style.borderTop = '1px solid #e5e7eb';
+      div.style.padding = '8px 0';
+      div.innerHTML = `<strong>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</strong> — ${r.customer_name || 'Customer'}<br>
+                       <span class="muted">${new Date(r.created_at).toLocaleString()}</span><br>
+                       ${r.comment ? `<div>${r.comment}</div>` : ''}`;
+      list.appendChild(div);
+    });
+
+    wrap.classList.remove('hidden');
+    requestAnimationFrame(() => wrap.classList.add('ready'));
+  } catch (e) {
+    console.warn('reviews failed', e.message);
+  }
+}
+(async function initAppendReviews() { try { await loadMyReviews(); } catch {} })();
   </script>
 </body>
 </html>
