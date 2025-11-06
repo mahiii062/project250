@@ -1,17 +1,29 @@
-// middleware/auth.js
+// middleware/auth.js (ESM)
 import jwt from "jsonwebtoken";
 
 export function requireCustomerJWT(req, res, next) {
   try {
-    const h = req.headers.authorization || "";
-    const token = h.startsWith("Bearer ") ? h.slice(7) : null;
-    if (!token) return res.status(401).json({ ok:false, error:"Unauthorized" });
+    const auth = req.headers.authorization || "";
+    const [scheme, token] = auth.split(" ");
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // token should encode { customer_id, email, ... }
-    req.customer_id = decoded.customer_id;
+    if (scheme !== "Bearer" || !token) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET not set");
+      return res.status(500).json({ error: "Server misconfiguration" });
+    }
+
+    const payload = jwt.verify(token, process.env.JWT_SECRET); // throws on invalid/expired
+    // normalize; your tokens use { customer_id, email }
+    req.customer_id = payload.customer_id;
+    req.customer_email = payload.email;
+
+    if (!req.customer_id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
     next();
   } catch (e) {
-    return res.status(401).json({ ok:false, error:"Unauthorized: " + e.message });
+    return res.status(401).json({ error: "Unauthorized" });
   }
 }

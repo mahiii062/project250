@@ -52,7 +52,7 @@ async function requestJSON(path, options = {}) {
 
   let data;
   if (ctype.includes("application/json")) {
-    try { data = JSON.parse(raw); } catch { /* fallthrough */ }
+    try { data = JSON.parse(raw); } catch {}
   }
   if (!resp.ok || data?.ok === false) {
     const message = data?.error || raw?.slice(0, 200) || `HTTP ${resp.status}`;

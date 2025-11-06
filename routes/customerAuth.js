@@ -109,37 +109,37 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-// ===========================
-// GET /api/customer/me (protected)
-// ===========================
-router.get("/me", requireCustomerJWT, async (req, res) => {
-  try {
-    const id = req.customer_id || req.user?.customer_id;
-    if (!id) return res.status(401).json({ error: "Unauthorized" });
+// // ===========================
+// // GET /api/customer/me (protected)
+// // ===========================
+// router.get("/me", requireCustomerJWT, async (req, res) => {
+//   try {
+//     const id = req.customer_id || req.user?.customer_id;
+//     if (!id) return res.status(401).json({ error: "Unauthorized" });
 
-    // alias to keep JSON consistent with signup/signin
-    const [rows] = await db.query(
-      `SELECT
-         customer_id,
-         Customer_Name  AS customer_name,
-         Customer_Email AS customer_email
-       FROM customers
-       WHERE customer_id = ?`,
-      [id]
-    );
+//     // alias to keep JSON consistent with signup/signin
+//     const [rows] = await db.query(
+//       `SELECT
+//          customer_id,
+//          Customer_Name  AS customer_name,
+//          Customer_Email AS customer_email
+//        FROM customers
+//        WHERE customer_id = ?`,
+//       [id]
+//     );
 
-    if (!rows.length) return res.status(404).json({ error: "Not found" });
+//     if (!rows.length) return res.status(404).json({ error: "Not found" });
 
-    const u = rows[0];
-    res.json({
-      customer_id: u.customer_id,
-      customer_name: u.customer_name,
-      customer_email: u.customer_email,
-    });
-  } catch (e) {
-    console.error("Customer me error:", e);
-    res.status(500).json({ error: "Server error" });
-  }
-});
+//     const u = rows[0];
+//     res.json({
+//       customer_id: u.customer_id,
+//       customer_name: u.customer_name,
+//       customer_email: u.customer_email,
+//     });
+//   } catch (e) {
+//     console.error("Customer me error:", e);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
 
 export default router;
