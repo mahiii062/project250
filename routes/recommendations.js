@@ -209,5 +209,120 @@ r.get("/products", async (req, res) => {
     res.status(500).json({ ok: false, error: "Failed to fetch product recommendations" });
   }
 });
+/**
+ * GET /api/recommendations/nearby-technicians
+ * Query: latitude, longitude, radiusKm, category, limit
+ */
+r.get("/nearby-technicians", async (req, res) => {
+  try {
+    const { latitude, longitude, radiusKm = 5, category, limit = 20 } = req.query;
 
+    // Validate
+    if (!latitude || !longitude) {
+      return res.status(400).json({ ok: false, error: "latitude and longitude required" });
+    }
+
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+    const radius = Number(radiusKm);
+    const maxLimit = Number(limit);
+
+    if (Number.isNaN(lat) || Number.isNaN(lng) || Number.isNaN(radius)) {
+      return res.status(400).json({ ok: false, error: "Invalid coordinates" });
+    }
+
+    // Build SQL query with correct column names
+    let whereClause = `v.latitude IS NOT NULL 
+      AND v.longitude IS NOT NULL
+      AND (v.vendor_type = 'service' OR v.vendor_type = 'both')`;
+
+    const queryParams = [lat, lng, lat]; // For distance calculation
+
+    if (category) {
+      // Use the 'category' varchar column for filtering
+      whereClause += ` AND s.category = ?`;
+      queryParams.push(category);
+    }
+
+    // Add radius and limit to params
+    queryParams.push(radius, maxLimit);
+
+    const sql = `
+      SELECT 
+        v.vendor_id,
+        v.Vendor_Name,
+        v.Vendor_Email,
+        v.phone,
+        v.location,
+        v.latitude,
+        v.longitude,
+        v.logo_url,
+        v.rating,
+        v.Vendor_description,
+        s.service_id,
+        s.title,
+        s.description,
+        s.category,
+        s.price,
+        s.availability,
+        (6371 * acos(
+          cos(radians(?)) * cos(radians(v.latitude)) * 
+          cos(radians(v.longitude) - radians(?)) + 
+          sin(radians(?)) * sin(radians(v.latitude))
+        )) AS distance_km
+      FROM Vendors v
+      LEFT JOIN Services s ON v.vendor_id = s.vendor_id
+      WHERE ${whereClause}
+      HAVING distance_km <= ?
+      ORDER BY distance_km ASC, v.rating DESC
+      LIMIT ?
+    `;
+
+    console.log("🔍 Query:", sql);
+    console.log("📋 Params:", queryParams);
+
+    const [rows] = await db2.query(sql, queryParams);
+
+    console.log("✅ Found rows:", rows.length);
+
+    // Group by vendor
+    const vendors = {};
+    rows.forEach(row => {
+      const vid = row.vendor_id;
+      if (!vendors[vid]) {
+        vendors[vid] = {
+          vendor_id: vid,
+          name: row.Vendor_Name,
+          email: row.Vendor_Email,
+          phone: row.phone,
+          location: row.location,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          logo_url: row.logo_url,
+          rating: row.rating,
+          description: row.Vendor_description,
+          distance: Number(row.distance_km).toFixed(2),
+          services: []
+        };
+      }
+      if (row.service_id) {
+        vendors[vid].services.push({
+          id: row.service_id,
+          title: row.title,
+          description: row.description,
+          category: row.category,
+          price: row.price,
+          availability: row.availability
+        });
+      }
+    });
+
+    const data = Object.values(vendors);
+    res.json({ ok: true, data });
+
+  } catch (e) {
+    console.error("❌ Technician endpoint error:", e.message);
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
 export default r;

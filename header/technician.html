@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Services - Nibash</title>
+  <title>Technicians - Nibash</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -66,6 +66,9 @@
       color: white;
       padding: 0.4rem 1rem;
       border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      font-weight: 600;
     }
 
     /* layout */
@@ -163,33 +166,6 @@
       color: #fff;
     }
 
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 1.5rem;
-      background: white;
-      padding: 8px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px var(--shadow);
-    }
-
-    .tab {
-      flex: 1;
-      padding: 12px 16px;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-
-    .tab.active {
-      background: var(--accent);
-      color: white;
-    }
-
     /* Controls */
     .controls {
       background: var(--card);
@@ -201,22 +177,6 @@
       flex-wrap: wrap;
       gap: 16px;
       align-items: center;
-    }
-
-    .search {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex: 1;
-      min-width: 300px;
-    }
-
-    .search input {
-      flex: 1;
-      padding: 10px 12px;
-      border: 1px solid var(--muted);
-      border-radius: 8px;
-      font-size: 14px;
     }
 
     .filters {
@@ -242,7 +202,7 @@
       font-size: 14px;
     }
 
-    .add-btn {
+    .search-btn {
       background: var(--accent);
       color: white;
       border: none;
@@ -253,7 +213,7 @@
       transition: all 0.2s ease;
     }
 
-    .add-btn:hover {
+    .search-btn:hover {
       background: #d38b5f;
       transform: translateY(-2px);
     }
@@ -304,6 +264,7 @@
       object-fit: cover;
       border: 3px solid white;
       box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      background: #f0f0f0;
     }
 
     .card-info h3 {
@@ -329,6 +290,13 @@
     .rating-num {
       color: #666;
       font-weight: 600;
+    }
+
+    .services-offered {
+      margin: 8px 0;
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.4;
     }
 
     .card-actions {
@@ -363,76 +331,8 @@
       color: #666;
     }
 
-    .btn.danger {
-      background: #dc3545;
-      color: white;
-    }
-
     .btn:hover {
       transform: translateY(-2px);
-    }
-
-    /* Modals */
-    .modal {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 9999;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-card {
-      width: 420px;
-      max-width: 94%;
-      background: white;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .modal-close {
-      float: right;
-      background: transparent;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: #666;
-    }
-
-    .modal-card h3 {
-      margin: 0 0 16px 0;
-      font-size: 1.3rem;
-      color: var(--accent);
-    }
-
-    .modal-card label {
-      display: block;
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-
-    .modal-card input,
-    .modal-card textarea,
-    .modal-card select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--muted);
-      border-radius: 6px;
-      font-size: 14px;
-      margin-top: 4px;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      margin-top: 16px;
     }
 
     .empty {
@@ -440,6 +340,20 @@
       color: #666;
       font-style: italic;
       padding: 2rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      padding: 2rem;
+      font-style: italic;
+    }
+
+    .error {
+      text-align: center;
+      color: #dc3545;
+      padding: 2rem;
+      font-weight: 600;
     }
 
     /* Responsive */
@@ -460,10 +374,6 @@
       .controls {
         flex-direction: column;
         align-items: stretch;
-      }
-
-      .search {
-        min-width: auto;
       }
     }
 
@@ -488,8 +398,9 @@
   <header>
     <div class="logo"><img src="../images/mainLogo.png" alt="Nibash Logo" class="logo-img">Nibash</div>
     <nav>
+      <a href="../users/customerDashboard.html">Dashboard</a>
       <a href="../users/customer.html">Home</a>
-      <a href="../index.html" class="logout-btn">Log out</a>
+      <button class="logout-btn" id="logoutBtn">Log out</button>
     </nav>
   </header>
 
@@ -499,11 +410,10 @@
       <a href="../users/customerDashboard.html">
         <h3>My Account</h3>
       </a>
-      <a href="#" class="active">Profile</a>
-      <a href="#">Wishlist</a>
-      <a href="#">Orders</a>
-      <a href="#">Saved Collections</a>
-      <a href="#">Settings</a>
+      <a href="#" class="active">Find Technicians</a>
+      <a href="../users/customerDashboard.html">Profile</a>
+      <a href="../users/customerDashboard.html">Wishlist</a>
+      <a href="../users/customerDashboard.html">Orders</a>
     </aside>
 
     <!-- main -->
@@ -520,375 +430,200 @@
         </div>
       </section>
 
-      <!-- Tabs -->
-      <nav class="tabs" role="tablist">
-        <button class="tab active" data-tab="electrician">Electricians</button>
-        <button class="tab" data-tab="plumber">Plumbers</button>
-        <button class="tab" data-tab="painter">Painters</button>
-      </nav>
-
       <!-- Controls -->
       <section class="controls">
-        <div class="search">
-          <input id="searchInput" type="text" placeholder="Search by name or location..." />
-          <button class="btn primary" id="searchBtn">Search</button>
-          <button class="btn ghost" id="clearSearchBtn" title="Clear search">✕</button>
-        </div>
-
         <div class="filters">
+         <label>
+  Service Type:
+  <select id="categoryFilter">
+    <option value="">All Services</option>
+    <option value="electrician">Electrician</option>
+    <option value="plumber">Plumber</option>
+    <option value="painter">Painter</option>
+    <option value="interior_design">Interior Designer</option>
+    <!-- Add more categories based on your actual data -->
+    
+  </select>
+  </label>
+
           <label>
-            Sort:
-            <select id="sortSelect">
-              <option value="recommended">Recommended</option>
-              <option value="rating-desc">Rating: High → Low</option>
-              <option value="rating-asc">Rating: Low → High</option>
-              <option value="name-asc">Name A → Z</option>
+            Search Radius (km):
+            <input type="number" id="radiusInput" min="1" max="50" value="5" />
+          </label>
+
+          <label>
+            Sort By:
+            <select id="sortBy">
+              <option value="distance">Distance</option>
+              <option value="rating">Rating</option>
             </select>
           </label>
 
-          <label>
-            "Near you" location:
-            <input id="userLocation" type="text" placeholder="e.g., Dhaka" />
-          </label>
-
-          <button id="addBtn" class="add-btn">+ Add New</button>
+          <button id="searchBtn" class="search-btn">🔍 Search</button>
         </div>
       </section>
 
       <!-- Services Sections -->
       <section id="serviceArea" class="services">
         <div class="sub-section">
-          <h2 id="highestTitle">Highest Rated</h2>
-          <div id="highestList" class="service-list"></div>
-        </div>
-
-        <div class="sub-section">
-          <h2 id="nearTitle">Near You</h2>
-          <div id="nearList" class="service-list"></div>
-        </div>
-
-        <div class="sub-section">
-          <h2 id="allTitle">All Professionals</h2>
-          <div id="allList" class="service-list"></div>
+          <h2>Available Technicians</h2>
+          <div id="techniciansList" class="service-list"></div>
         </div>
       </section>
 
     </main>
   </div>
 
-  <!-- Add/Edit Form Modal -->
-  <div id="formModal" class="modal" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <button class="modal-close" onclick="closeForm()">✕</button>
-      <h3 id="formTitle">Add Professional</h3>
-      <form id="serviceForm">
-        <input type="hidden" id="serviceType" value="electrician">
-        <input type="hidden" id="editIndex" value="-1">
-        <label>
-          Full name
-          <input id="nameInput" type="text" required />
-        </label>
-
-        <label>
-          Location
-          <input id="locationInput" type="text" required />
-        </label>
-
-        <label>
-          Rating (1-5)
-          <input id="ratingInput" type="number" min="1" max="5" step="0.5" value="5" required />
-        </label>
-
-        <label>
-          Image URL (optional)
-          <input id="imageInput" type="text" placeholder="../images/logo2.png" />
-        </label>
-
-        <div class="modal-actions">
-          <button type="button" class="btn primary" onclick="submitForm()">Save</button>
-          <button type="button" class="btn ghost" onclick="closeForm()">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Contact Modal -->
-  <div id="contactModal" class="modal" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <button class="modal-close" onclick="closeContact()">✕</button>
-      <h3>Contact <span id="contactName"></span></h3>
-      <form id="contactForm" onsubmit="sendContact(event)">
-        <label>
-          Your name
-          <input id="contacterName" type="text" required />
-        </label>
-
-        <label>
-          Message
-          <textarea id="contactMessage" rows="4" placeholder="Describe the problem or request..." required></textarea>
-        </label>
-
-        <div class="modal-actions">
-          <button type="submit" class="btn primary">Send Message</button>
-          <button type="button" class="btn ghost" onclick="closeContact()">Cancel</button>
-        </div>
-
-        <p class="contact-note" style="font-size: 0.8rem; color: #666; margin-top: 1rem;">
-          Tip: you can wire this to an email/WhatsApp or an API to actually send messages.
-        </p>
-      </form>
-    </div>
-  </div>
-
   <script>
-    /* ----------------------------
-       Data model and persistence
-       ---------------------------- */
-    const defaultElectricians = [
-      { name: "Rashid Karim", location: "Dhaka", rating: 5, image: "../images/artist.jpg" },
-      { name: "Aminul Haque", location: "Chattogram", rating: 4.5, image: "../images/artist2.jpg" }
-    ];
-    const defaultPlumbers = [
-      { name: "Jamal Uddin", location: "Dhaka", rating: 5, image: "../images/artist.jpg" },
-      { name: "Kamal Hossain", location: "Sylhet", rating: 4, image: "../images/artist2.jpg" }
-    ];
-    const defaultPainters = [
-      { name: "Sadia Akter", location: "Dhaka", rating: 5, image: "../images/artist1.jpg" },
-      { name: "Tariq Islam", location: "Chattogram", rating: 4.5, image: "../images/artist1.jpg" },
-      { name: "Farzana Rahman", location: "Sylhet", rating: 4, image: "../images/artist1.jpg" },
-      { name: "Rafiq Ahmed", location: "Dhaka", rating: 4.5, image: "../images/artist1.jpg" }
-    ];
+    const API_BASE = "http://localhost:5555";
+    const CUSTOMER_TOKEN = localStorage.getItem("customerToken");
+    const CUSTOMER_ID = Number(localStorage.getItem("customerId"));
 
-    function getKey(type) { return type + "s"; }
-
-    function loadFromStorage(type) {
-      const raw = localStorage.getItem(getKey(type));
-      if (!raw) {
-        let initial;
-        if (type === "electrician") initial = defaultElectricians;
-        else if (type === "plumber") initial = defaultPlumbers;
-        else if (type === "painter") initial = defaultPainters;
-        localStorage.setItem(getKey(type), JSON.stringify(initial));
-        return initial.slice();
-      }
-      try { return JSON.parse(raw); } catch { return []; }
+    if (!CUSTOMER_ID || !CUSTOMER_TOKEN) {
+      alert("⚠ Not authenticated. Redirecting to login...");
+      window.location.href = "../index.html";
     }
 
-    function saveToStorage(type, arr) { localStorage.setItem(getKey(type), JSON.stringify(arr)); }
+    let currentLat = 23.8103;
+    let currentLng = 90.4125;
 
-    /* ----------------------------
-       UI state
-       ---------------------------- */
-    let activeTab = "electrician";
-    const tabs = document.querySelectorAll(".tab");
-    const searchInput = document.getElementById("searchInput");
-    const sortSelect = document.getElementById("sortSelect");
-    const userLocation = document.getElementById("userLocation");
-
-    // initial load
-    function init() {
-      document.querySelectorAll(".tab").forEach(btn => {
-        btn.addEventListener("click", () => switchTab(btn.dataset.tab));
-      });
-
-      document.getElementById("addBtn").addEventListener("click", () => openForm("add"));
-
-      document.getElementById("searchBtn").addEventListener("click", render);
-      document.getElementById("clearSearchBtn").addEventListener("click", () => { searchInput.value = ""; render(); });
-      document.getElementById("sortSelect").addEventListener("change", render);
-      document.getElementById("userLocation").addEventListener("input", render);
-
-      // pre-create storage if missing
-      loadFromStorage("electrician");
-      loadFromStorage("plumber");
-      loadFromStorage("painter");
-
-      render();
-    }
-
-    function switchTab(tab) {
-      activeTab = tab;
-      tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
-      document.getElementById("formTitle").textContent = `Add ${capitalize(tab)}`;
-      document.getElementById("serviceType").value = tab;
-      render();
-    }
-
-    /* ----------------------------
-       Rendering helpers
-       ---------------------------- */
-    function render() {
-      const type = activeTab;
-      const services = loadFromStorage(type);
-      const query = searchInput.value.trim().toLowerCase();
-      const loc = userLocation.value.trim().toLowerCase();
-
-      // Filter by search
-      let filtered = services.filter(s => {
-        if (!query) return true;
-        return s.name.toLowerCase().includes(query) || s.location.toLowerCase().includes(query);
-      });
-
-      // Highest rated: rating >= 4.5
-      const highest = filtered.filter(s => parseFloat(s.rating) >= 4.5);
-
-      // Near you: if user provided location, match; else default empty
-      const near = loc ? filtered.filter(s => s.location.toLowerCase() === loc) : [];
-
-      // All list sorted by selected sort
-      const sort = sortSelect.value;
-      let all = filtered.slice();
-      if (sort === "rating-desc") all.sort((a, b) => b.rating - a.rating);
-      else if (sort === "rating-asc") all.sort((a, b) => a.rating - b.rating);
-      else if (sort === "name-asc") all.sort((a, b) => a.name.localeCompare(b.name));
-      else if (sort === "recommended") all.sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
-
-      document.getElementById("highestList").innerHTML = renderCards(highest, type);
-      document.getElementById("nearList").innerHTML = renderCards(near, type);
-      document.getElementById("allList").innerHTML = renderCards(all, type, true);
-
-      document.getElementById("highestTitle").textContent = `Highest Rated ${capitalize(type)}s`;
-      document.getElementById("nearTitle").textContent = `${capitalize(type)}s Near "${userLocation.value || '...'}"`;
-      document.getElementById("allTitle").textContent = `All ${capitalize(type)}s`;
-    }
-
-    function renderCards(list, type, includeIndex = false) {
-      if (!list || list.length === 0) return `<p class="empty">No results.</p>`;
-      const storage = loadFromStorage(type);
-      return list.map(item => {
-        const index = storage.findIndex(s => s.name === item.name && s.location === item.location && String(s.rating) === String(item.rating));
-        return cardHtml(item, type, index);
-      }).join("");
-    }
-
-    function cardHtml(item, type, index) {
-      const img = item.image || "../images/logo2.png";
-      const ratingStars = renderStars(item.rating);
-      return `
-        <div class="service-card">
-          <div class="card-top">
-            <img src="${img}" alt="${escapeHtml(item.name)}" />
-            <div class="card-info">
-              <h3>${escapeHtml(item.name)}</h3>
-              <p class="meta">📍 ${escapeHtml(item.location)}</p>
-              <p class="rating"> ${ratingStars} <span class="rating-num">${item.rating}</span></p>
-            </div>
-          </div>
-
-          <div class="card-actions">
-            <button class="btn primary small" onclick="openContact('${escapeJs(item.name)}')">Message</button>
-            <button class="btn ghost small" onclick="openForm('edit', '${type}', ${index})">Edit</button>
-            <button class="btn danger small" onclick="deleteItem('${type}', ${index})">Delete</button>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderStars(rating) {
-      const full = Math.floor(rating);
-      const half = (rating - full) >= 0.5 ? 1 : 0;
-      const empty = 5 - full - half;
-      return "★".repeat(full) + (half ? "☆" : "") + "✩".repeat(empty);
-    }
-
-    /* ----------------------------
-       CRUD operations
-       ---------------------------- */
-    function openForm(mode = 'add', type = null, index = -1) {
-      const modal = document.getElementById("formModal");
-      modal.classList.add("active");
-      document.getElementById("serviceType").value = type || activeTab;
-      document.getElementById("editIndex").value = index;
-
-      if (mode === "add") {
-        document.getElementById("formTitle").textContent = `Add ${capitalize(type || activeTab)}`;
-        document.getElementById("serviceForm").reset();
-        document.getElementById("ratingInput").value = 5;
-      } else {
-        document.getElementById("formTitle").textContent = `Edit ${capitalize(type)}`;
-        const arr = loadFromStorage(type);
-        const item = arr[index];
-        if (item) {
-          document.getElementById("nameInput").value = item.name;
-          document.getElementById("locationInput").value = item.location;
-          document.getElementById("ratingInput").value = item.rating;
-          document.getElementById("imageInput").value = item.image || "";
+    // Load customer location
+    async function loadCustomerLocation() {
+      try {
+        const res = await fetch(`${API_BASE}/api/customer/me`, {
+          headers: { "Authorization": `Bearer ${CUSTOMER_TOKEN}` }
+        });
+        const json = await res.json();
+        const me = json.data || json;
+        
+        if (me.latitude && me.longitude) {
+          currentLat = parseFloat(me.latitude);
+          currentLng = parseFloat(me.longitude);
         }
+      } catch (e) {
+        console.error("Failed to load location:", e);
       }
     }
 
-    function closeForm() { document.getElementById("formModal").classList.remove("active"); }
+    // Search technicians
+    async function searchTechnicians() {
+  try {
+    const container = document.getElementById("techniciansList");
+    container.innerHTML = '<p class="loading">🔍 Searching technicians...</p>';
 
-    function submitForm() {
-      const type = document.getElementById("serviceType").value;
-      const index = parseInt(document.getElementById("editIndex").value, 10);
-      const name = document.getElementById("nameInput").value.trim();
-      const location = document.getElementById("locationInput").value.trim();
-      const rating = parseFloat(document.getElementById("ratingInput").value);
-      const image = document.getElementById("imageInput").value.trim() || "../images/logo2.png";
+    const category = document.getElementById("categoryFilter").value;
+    const radius = document.getElementById("radiusInput").value || 5;
 
-      if (!name || !location || !rating) {
-        alert("Please fill in all required fields.");
+    let query = `/api/recommendations/nearby-technicians?latitude=${currentLat}&longitude=${currentLng}&radiusKm=${radius}&limit=50`;
+    if (category) query += `&category=${category}`;
+
+    console.log("📍 Request:", `${API_BASE}${query}`);
+    
+    const res = await fetch(`${API_BASE}${query}`, {
+      headers: { "Authorization": `Bearer ${CUSTOMER_TOKEN}` }
+    });
+    
+    const json = await res.json();
+    console.log("📦 Response:", json);
+    
+    if (!res.ok) throw new Error(json.error || "Failed to fetch technicians");
+
+    // Handle both response structures
+    const technicians = json.data || json.items || [];
+
+    // Sort
+    const sortBy = document.getElementById("sortBy").value;
+    if (sortBy === "rating") {
+      technicians.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else {
+      // Default sort by distance
+      technicians.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+    }
+
+    renderTechnicians(technicians);
+  } catch (e) {
+    console.error("Search error:", e);
+    document.getElementById("techniciansList").innerHTML = 
+      `<p class="error">❌ Error: ${e.message}</p>`;
+  }
+}
+
+    function renderTechnicians(technicians) {
+      const container = document.getElementById("techniciansList");
+
+      if (!technicians || technicians.length === 0) {
+        container.innerHTML = '<p class="empty">😐 No technicians found in your area. Try increasing the search radius.</p>';
         return;
       }
 
-      const arr = loadFromStorage(type);
-      if (index >= 0) {
-        arr[index] = { name, location, rating, image };
-      } else {
-        arr.push({ name, location, rating, image });
+      container.innerHTML = technicians.map(tech => {
+        const logo = tech.logo_url || "../images/logo2.png";
+        const rating = tech.rating || 0;
+        const stars = "★".repeat(Math.round(rating)) + "✩".repeat(5 - Math.round(rating));
+        
+        const servicesText = tech.services && tech.services.length > 0
+          ? tech.services.map(s => s.category || s.title).join(", ")
+          : "Services available";
+
+        return `
+          <div class="service-card">
+            <div class="card-top">
+              <img src="${logo}" alt="${escapeHtml(tech.name)}" onerror="this.src='../images/logo2.png'" />
+              <div class="card-info">
+                <h3>${escapeHtml(tech.name)}</h3>
+                <p class="meta">📍 ${escapeHtml(tech.location)} (${tech.distance} km)</p>
+                <p class="rating">${stars} <span class="rating-num">${Number(rating).toFixed(1)}</span></p>
+              </div>
+            </div>
+            <p class="services-offered">📋 ${servicesText}</p>
+            <p class="meta">☎️ ${tech.phone || "Contact via app"}</p>
+            <div class="card-actions">
+              <button class="btn primary small" onclick="contactTechnician('${escapeJs(tech.name)}', '${escapeJs(tech.phone || '')}')">Message</button>
+              <button class="btn ghost small" onclick="callTechnician('${escapeJs(tech.phone || '')}')">Call</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function contactTechnician(name, phone) {
+      const msg = `Hi ${name}, I'm interested in your services. Please get back to me!`;
+      alert(`📱 Contact: ${name}\n\n${msg}\n\n(Messaging feature coming soon)`);
+    }
+
+    function callTechnician(phone) {
+      if (!phone || phone === "Contact via app") {
+        alert("Phone number not available");
+        return;
       }
-      saveToStorage(type, arr);
-      closeForm();
-      render();
+      navigator.clipboard.writeText(phone);
+      alert(`✅ Phone copied: ${phone}`);
     }
 
-    function deleteItem(type, index) {
-      if (!confirm("Delete this profile?")) return;
-      const arr = loadFromStorage(type);
-      arr.splice(index, 1);
-      saveToStorage(type, arr);
-      render();
-    }
-
-    /* ----------------------------
-       Contact modal
-       ---------------------------- */
-    function openContact(name) {
-      document.getElementById("contactName").textContent = name;
-      document.getElementById("contacterName").value = "";
-      document.getElementById("contactMessage").value = "";
-      document.getElementById("contactModal").classList.add("active");
-    }
-
-    function closeContact() { document.getElementById("contactModal").classList.remove("active"); }
-
-    function sendContact(e) {
-      e.preventDefault();
-      const to = document.getElementById("contactName").textContent;
-      const sender = document.getElementById("contacterName").value.trim();
-      const msg = document.getElementById("contactMessage").value.trim();
-      if (!sender || !msg) { alert("Please fill name and message."); return; }
-      alert(`Message sent to ${to}:\n\nFrom: ${sender}\n\n${msg}`);
-      closeContact();
-    }
-
-    /* ----------------------------
-       Utilities
-       ---------------------------- */
-    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     function escapeHtml(s) {
       if (!s) return "";
-      return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+      return s.replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[c]);
     }
-    function escapeJs(s) { return s.replace(/'/g, "\\'"); }
 
-    // Initialize
-    document.getElementById("addBtn").addEventListener("click", () => {
-      document.getElementById("serviceType").value = activeTab;
-      document.getElementById("editIndex").value = -1;
-      openForm("add", activeTab, -1);
+    function escapeJs(s) {
+      return (s || "").replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    // Event listeners
+    document.getElementById("searchBtn").addEventListener("click", searchTechnicians);
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("customerToken");
+      localStorage.removeItem("customerId");
+      window.location.href = "../index.html";
     });
+
+    // Init
+    async function init() {
+      await loadCustomerLocation();
+      await searchTechnicians();
+    }
 
     init();
   </script>
