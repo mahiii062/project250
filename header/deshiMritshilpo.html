@@ -6,6 +6,37 @@
   <title>Vendor Dashboard — Nibash</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link href="../css/dashb.css" rel="stylesheet">
+  <style>
+    .muted { color:#7a6f67 }
+    .loading { opacity:.7; font-size:14px; color:#7a6f67; padding:12px }
+
+    /* Wider, roomier seller rows */
+    .seller-row {
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap:14px;
+    }
+    .seller-card {
+      background:#fff; border-radius:16px; padding:14px;
+      box-shadow:0 1px 3px rgba(0,0,0,.06);
+      display:flex; flex-direction:column; align-items:flex-start; gap:8px; min-height:120px;
+    }
+    .seller-card .topline { display:flex; align-items:center; gap:12px; width:100% }
+    .seller-card .avatar img { width:44px; height:44px; border-radius:999px; object-fit:cover }
+    .seller-card .meta { line-height:1.15; flex:1 }
+    .seller-card .name { font-weight:700; font-size:15px }
+    .seller-card .sub { font-size:12px; color:#9a8f85 }
+    .seller-card .desc { margin-top:2px; color:#6e645c; font-size:12px; line-height:1.35;
+                         display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }
+    .seller-card .stats { display:flex; gap:8px; align-items:center; font-size:12px; color:#7a6f67 }
+    .seller-card .btn { padding:8px 12px; font-size:12px; width:100%; margin-top:6px }
+    .coords { font-variant-numeric:tabular-nums }
+
+    /* Products */
+    .creationsGrid { display:grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap:14px }
+    .product { background:#fff; border-radius:16px; padding:12px; box-shadow:0 1px 3px rgba(0,0,0,.06) }
+    .product img { width:100%; height:180px; object-fit:cover; border-radius:12px }
+  </style>
 </head>
 <body class="theme-pottery">
 
@@ -18,7 +49,6 @@
   </header>
 
   <div class="dashboard">
-    <!-- sidebar -->
     <aside class="sidebar" aria-label="Account menu">
       <a href="../users/customerDashboard.html"><h3>My Account</h3></a>
       <a href="#" class="active">Profile</a>
@@ -28,172 +58,51 @@
       <a href="#">Settings</a>
     </aside>
 
-    <!-- main -->
     <main class="content">
+      <!-- (Notice removed as requested) -->
 
-      <!-- HERO -->
       <section class="hero" role="banner" aria-label="hero">
-        <!-- slider images (cover entire hero) -->
         <div class="hero-slider" aria-hidden="true">
           <div class="slide active" style="background-image:url('../images/pott.webp')"></div>
           <div class="slide" style="background-image:url('../images/p7.jpg')"></div>
           <div class="slide" style="background-image:url('../images/pottery2.jpg')"></div>
         </div>
-
-        <!-- arrows -->
         <button class="hero-arrow prev" aria-label="Previous slide">‹</button>
         <button class="hero-arrow next" aria-label="Next slide">›</button>
-
-        <!-- main text overlay -->
         <div class="hero-text-overlay" aria-live="polite">
           <h1>Guardians of Clay: <br> Bangladesh Pottery</h1>
-          <p>
-            Experience the soul of Bangladesh in every handcrafted piece.
-            Step into a world where clay isn't just a material, but a canvas of history,
-            culture, and passion. Each handcrafted kolshi or handi carries a story — support
-            the Kumars and bring home a piece of living heritage.
-          </p>
+          <p>Experience the soul of Bangladesh in every handcrafted piece. Step into a world where clay isn't just a material, but a canvas of history, culture, and passion.</p>
           <div class="cta">
             <button class="btn white" id="contactSupportBtn">Contact Support</button>
             <button class="btn dark" id="browseBtn">Browse New Arrivals</button>
           </div>
         </div>
-
-        <!-- optional small image previews on right -->
-        <div class="hero-right-previews" aria-hidden="true">
-          <div class="preview-thumb"><img src="../images/p4.jpg" alt="preview 1"></div>
-          <div class="preview-thumb"><img src="../images/p2.jpg" alt="preview 2"></div>
-          <div class="preview-thumb"><img src="../images/p3.jpg" alt="preview 3"></div>
-        </div>
-
-        <!-- dots -->
-        <div class="hero-controls" aria-hidden="true"></div>
       </section>
 
-
-      <!-- small cards row (restored) -->
-      <div class="card-row" style="margin-bottom:8px">
-        <div class="card" style="flex:1">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="avatar"><img src="../images/artist.jpg" alt="artisan" style="width:100%;height:100%;object-fit:cover"></div>
-            <div>
-              <div style="font-weight:700">Master Artisan - Rahman Ali</div>
-              <div style="font-size:13px;color:#7a6f67">Known for Traditional Terracotta</div>
-            </div>
-          </div>
+      <!-- Sellers -->
+      <section class="section" id="recommended-sellers">
+        <h3>Nearby Sellers</h3>
+        <div id="sellerListNearby" class="seller-row">
+          <div class="loading">Loading nearby sellers…</div>
         </div>
 
-        <div class="card" style="width:360px;align-items:center;justify-content:space-between">
-          <div style="display:flex;gap:12px;align-items:center">
-            <div class="avatar"><img src="../images/artist.jpg" alt="seller" style="width:100%;height:100%;object-fit:cover"></div>
-            <div>
-              <div style="font-weight:700">Aisha Khan</div>
-              <div style="font-size:13px;color:#7a6f67">Modern designs & glazes</div>
-              <div class="progressWrap" style="width:260px"><span class="progressFill"></span></div>
-            </div>
-          </div>
-         </div>
-      </div>
-
-      <!-- Nearby Sellers -->
-      <section class="section">
-        <h3>New Sellers Nearby</h3>
-        <div class="card-row">
-          <div class="card" style="flex:1;justify-content:space-between">
-            <div style="display:flex;gap:12px;align-items:center">
-              <div class="avatar"><img src="../images/artist.jpg" alt="seller"></div>
-              <div>
-                <div style="font-weight:700">Mizan Pottery House</div>
-                <div style="font-size:13px;color:#7a6f67">Dhaka • 2km away</div>
-              </div>
-            </div>
-            <button class="btn white message-btn" data-seller="Mizan Pottery House">Message</button>
-          </div>
-
-          <div class="card" style="flex:1;justify-content:space-between">
-            <div style="display:flex;gap:12px;align-items:center">
-              <div class="avatar"><img src="../images/artist.jpg" alt="seller"></div>
-              <div>
-                <div style="font-weight:700">Sultana Crafts</div>
-                <div style="font-size:13px;color:#7a6f67">Narayanganj • 5km away</div>
-              </div>
-            </div>
-            <button class="btn white message-btn" data-seller="Sultana Crafts">Message</button>
-          </div>
+        <h3 style="margin-top:18px">Top Sellers in this Category</h3>
+        <div id="sellerListTop" class="seller-row">
+          <div class="loading">Loading top sellers…</div>
         </div>
       </section>
 
-      <!-- Our creations (expanded examples) -->
-      <section class="section" aria-labelledby="our-creations">
-        <h3 id="our-creations">Our Creations</h3>
-        <div class="creationsGrid" style="margin-top:12px">
-          <div class="product">
-            <img src="../images/pottery4.webp" alt="Terracotta Vase">
-            <div class="txt">Terracotta Vase</div>
-            <div style="font-weight:700;color:var(--accent)">$45</div>
-            <button class="contact-seller" data-product="Terracotta Vase" data-seller="Mizan Pottery House">Contact the seller!</button>
-          </div>
-
-          <div class="product">
-            <img src="../images/pottery3.webp" alt="Lamp">
-            <div class="txt">Handmade Lamp</div>
-            <div style="font-weight:700;color:var(--accent)">$30</div>
-            <button class="contact-seller" data-product="Handmade Lamp" data-seller="Sultana Crafts">Contact the seller!</button>
-          </div>
-
-          <div class="product">
-            <img src="../images/pottery.jpg" alt="Storage Jar">
-            <div class="txt">Handmade Storage Jar</div>
-            <div style="font-weight:700;color:var(--accent)">$38</div>
-            <button class="contact-seller" data-product="Storage Jar" data-seller="Rahman Ali">Contact the seller!</button>
-          </div>
-
-          <div class="product">
-            <img src="../images/p7.jpg" alt="Set">
-            <div class="txt">Kolshi (Water Pot)</div>
-            <div style="font-weight:700;color:var(--accent)">$22</div>
-            <button class="contact-seller" data-product="Kolshi" data-seller="Mizan Pottery House">Contact the seller!</button>
-          </div>
-
-          <div class="product">
-            <img src="../images/p8.jpg" alt="Decor">
-            <div class="txt">Terracotta Decor Set</div>
-            <div style="font-weight:700;color:var(--accent)">$60</div>
-            <button class="contact-seller" data-product="Decor Set" data-seller="Aisha Khan">Contact the seller!</button>
-          </div>
-
-          <div class="product">
-            <img src="../images/p4.jpg" alt="Doll">
-            <div class="txt">Candle</div>
-            <div style="font-weight:700;color:var(--accent)">$18</div>
-            <button class="contact-seller" data-product="Candle" data-seller="Sultana Crafts">Contact the seller!</button>
-          </div>
-        </div>
-        <!-- callout -->
-        <div style="margin-top:12px;display:flex;gap:12px;align-items:center">
-          <div style="flex:1;min-width:220px;background:linear-gradient(180deg,#fbf5ec,#f1e8dd);padding:16px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;gap:8px">
-            <strong>Your review of 'Yoyoid' the seller right now!</strong>
-            <small style="color:#6b635e">Leave a quick star rating to help other buyers</small>
-            <div style="margin-top:8px"><button class="btn white" style="padding:8px 12px">Write a review</button></div>
-          </div>
+      <!-- Products -->
+      <section class="section" id="recommended-products">
+        <h3>Recommended For You</h3>
+        <div id="productGrid" class="creationsGrid">
+          <div class="loading">Loading products…</div>
         </div>
       </section>
-
-      <!-- Activity Feed (restored + styled) -->
-      <div class="activity-card card">
-        <h4>Activity Feed</h4>
-        <div class="activity-grid" style="margin-top:10px">
-          <div class="activity">🆕 New pottery designs available!</div>
-          <div class="activity">❤️ Wishlist item "Terracotta Vase" on sale!</div>
-          <div class="activity">🏅 You earned artisan badge for sales!</div>
-          <div class="activity">✍️ Your review of "Clay Workshop" was approved!</div>
-        </div>
-      </div>
-
     </main>
   </div>
 
-  <!-- Chat Modal (used by message and contact buttons) -->
+  <!-- Chat Modal -->
   <div class="chat-modal" id="chatModal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
     <div class="chat-box" role="document">
       <button class="chat-close" id="chatCloseBtn" aria-label="Close chat">✕</button>
@@ -208,194 +117,253 @@
     </div>
   </div>
 
-  <script>
-    /* ===== HERO SLIDER (touch + mouse drag + arrows + dots + pause) ===== */
-    (function(){
-      const hero = document.querySelector('.hero');
-      const slides = Array.from(document.querySelectorAll('.hero-slider .slide'));
-      const prevBtn = document.querySelector('.hero-arrow.prev');
-      const nextBtn = document.querySelector('.hero-arrow.next');
-      const controls = document.querySelector('.hero-controls');
-      let current = 0;
-      let autoplayInterval = 4000;
-      let timer = null;
-      let isDragging = false;
-      let startX = 0;
-      let moved = 0;
+<script>
+  const API_BASE = 'http://localhost:5555';
 
-      // create dots
-      slides.forEach((_, i) => {
-        const dot = document.createElement('div');
-        dot.className = 'dot' + (i === 0 ? ' active' : '');
-        dot.dataset.index = i;
-        dot.title = 'Go to slide ' + (i+1);
-        controls.appendChild(dot);
+  // ---------- general helpers ----------
+  function getQueryInt(key, fallback) {
+    const v = new URLSearchParams(location.search).get(key);
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  async function getCoords() {
+    const fallback = { lat: 23.8103, lng: 90.4125 }; // Dhaka fallback
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 6000 })
+      );
+      return { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    } catch {
+      return fallback;
+    }
+  }
+
+  // ---------- chat wiring ----------
+  const chatModal = document.getElementById('chatModal');
+  const chatSeller = document.getElementById('chatSeller');
+  const chatProduct = document.getElementById('chatProduct');
+  const chatMessage = document.getElementById('chatMessage');
+  const chatStatus = document.getElementById('chatStatus');
+  const chatCloseBtn = document.getElementById('chatCloseBtn');
+  const chatCancel = document.getElementById('chatCancel');
+  const chatSend = document.getElementById('chatSend');
+
+  function openChat({ seller = '—', product = '—' } = {}) {
+    chatSeller.textContent = seller || '—';
+    chatProduct.textContent = product || '—';
+    chatMessage.value = `Hi ${seller || 'there'}, I'm interested in "${product || 'your product'}". Can I know more?`;
+    chatStatus.style.display = 'none';
+    chatModal.classList.add('active');
+    chatMessage.focus();
+  }
+  function closeChat() { chatModal.classList.remove('active'); }
+  chatCloseBtn.addEventListener('click', closeChat);
+  chatCancel.addEventListener('click', closeChat);
+  chatModal.addEventListener('click', (e) => { if (e.target === chatModal) closeChat(); });
+  chatSend.addEventListener('click', () => {
+    chatStatus.textContent = 'Message sent ✔';
+    chatStatus.style.display = 'block';
+    setTimeout(closeChat, 900);
+  });
+
+  // ---------- renderers ----------
+  function safeText(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => (
+      { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]
+    ));
+  }
+  function pick(vals, ...keys) {
+    for (const k of keys) {
+      const val = vals[k];
+      if (val !== undefined && val !== null && String(val).trim() !== '') return val;
+    }
+    return undefined;
+  }
+  function getDesc(v) {
+    // Prefer exact DB field: Vendor_description
+    return pick(
+      v,
+      'Vendor_description', 'Vendor_Description', 'vendor_description',
+      'vendorDescription', 'description', 'VendorDesc', 'VendorDesciption' // a couple of common typos/variants
+    );
+  }
+  function extractCoords(v) {
+    const lat = Number(pick(v, 'vendor_latitude','vendor_lat','latitude','lat'));
+    const lng = Number(pick(v, 'vendor_longitude','vendor_lng','longitude','lng'));
+    return (Number.isFinite(lat) && Number.isFinite(lng)) ? { lat, lng } : null;
+  }
+  function fmtCoord(n) { return (Number.isFinite(n)) ? n.toFixed(4) : '—'; }
+
+  function sellerCardHTML(v) {
+    const rating = Number(v.avg_rating_cat ?? v.avg_rating ?? 0) || 0;
+    const count  = Number(v.rating_count_cat ?? v.rating_count ?? 0) || 0;
+    const dist   = Number(v.distance_km ?? NaN);
+    const distKm = Number.isFinite(dist) ? `${dist.toFixed(1)} km` : '';
+    const coords = extractCoords(v);
+    const descRaw = getDesc(v);
+    const desc = descRaw ? safeText(descRaw) : '';
+
+    const coordLine = coords
+      ? `<span class="coords">📍 ${fmtCoord(coords.lat)}, ${fmtCoord(coords.lng)}</span>`
+      : '';
+
+    return `
+      <div class="seller-card">
+        <div class="topline">
+          <div class="avatar"><img src="${v.logo_url || '../images/artist.jpg'}" alt="${(v.Vendor_Name||'Seller')}"></div>
+          <div class="meta">
+            <div class="name">${safeText(v.Vendor_Name || 'Seller')}</div>
+            <div class="sub">${safeText(v.location || '')}${distKm ? ' · ' + distKm : ''}</div>
+          </div>
+        </div>
+        ${desc ? `<div class="desc">${desc}</div>` : ''}
+        <div class="stats">
+          <span>⭐ ${rating || '—'} (${count})</span>
+          ${coordLine ? `<span>·</span>${coordLine}` : ''}
+        </div>
+        <button class="btn white contact-seller" data-seller="${safeText(v.Vendor_Name || 'Seller')}" data-product="General Inquiry">Message</button>
+      </div>
+    `;
+  }
+
+  function renderSellerRow(containerId, vendors) {
+    const el = document.getElementById(containerId);
+    if (!Array.isArray(vendors) || vendors.length === 0) {
+      el.innerHTML = `<div class="card" style="padding:12px">No sellers found.</div>`;
+      return;
+    }
+    el.innerHTML = vendors.map(sellerCardHTML).join('');
+    el.querySelectorAll('.contact-seller').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const seller = btn.dataset.seller || 'Seller';
+        openChat({ seller, product: 'General Inquiry' });
       });
-      const dots = Array.from(controls.querySelectorAll('.dot'));
+    });
+  }
 
-      function showSlide(index) {
-        index = (index + slides.length) % slides.length;
-        slides.forEach((s,i) => s.classList.toggle('active', i === index));
-        dots.forEach((d,i) => d.classList.toggle('active', i === index));
-        current = index;
+  function renderProducts(products) {
+    const grid = document.getElementById('productGrid');
+    if (!Array.isArray(products) || products.length === 0) {
+      grid.innerHTML = `<div class="card" style="padding:12px">No products in this category yet.</div>`;
+      return;
+    }
+    grid.innerHTML = products.map(p => `
+      <div class="product">
+        <img src="${p.image_url || '../images/pottery4.webp'}" alt="${safeText(p.title||'Product')}" onerror="this.src='../images/pottery4.webp'">
+        <div class="txt">${safeText(p.title || 'Untitled product')}</div>
+        <div class="muted" style="font-size:13px">${safeText(p.Vendor_Name || '')}</div>
+        <div style="font-weight:700;color:var(--accent)">৳${Number(p.price_bdt ?? 0)}</div>
+        <div style="display:flex; gap:8px; margin-top:6px">
+          <button class="btn white contact-seller" data-product="${safeText(p.title || 'Product')}" data-seller="${safeText(p.Vendor_Name || 'Seller')}">Contact seller</button>
+          <button class="btn dark add-wishlist" data-productid="${p.product_id}">Add to wishlist</button>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.contact-seller').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const seller = btn.dataset.seller || 'Seller';
+        const product = btn.dataset.product || 'Product';
+        openChat({ seller, product });
+      });
+    });
+  }
+
+  // ---------- API helpers ----------
+  async function fetchJson(url) {
+    const res = await fetch(url);
+    try { return await res.json(); } catch { return null; }
+  }
+  const toList = j => (j && (j.items ?? j.data)) || [];
+  const normalizeVendors = list => list.map(v => ({
+    ...v,
+    distance_km: Number(v.distance_km ?? NaN),
+    avg_rating_cat: Number(v.avg_rating_cat ?? v.avg_rating ?? NaN),
+  }));
+  const sortNearby = vs => vs.sort((a,b) => {
+    const ad = Number.isFinite(a.distance_km) ? a.distance_km : Infinity;
+    const bd = Number.isFinite(b.distance_km) ? b.distance_km : Infinity;
+    return ad - bd;
+  });
+  const sortTop = vs => vs.sort((a,b) => {
+    const ar = Number.isFinite(b.avg_rating_cat) ? b.avg_rating_cat : -Infinity;
+    const br = Number.isFinite(a.avg_rating_cat) ? a.avg_rating_cat : -Infinity;
+    if (ar !== br) return ar - br; // desc
+    const ad = Number.isFinite(a.distance_km) ? a.distance_km : Infinity;
+    const bd = Number.isFinite(b.distance_km) ? b.distance_km : Infinity;
+    return ad - bd;
+  });
+
+  async function cascade(urlBuilder, radii) {
+    for (const r of radii) {
+      const url = urlBuilder(r);
+      const json = await fetchJson(url);
+      const list = toList(json);
+      if (list.length) return { list, radiusUsed: r };
+    }
+    return { list: [], radiusUsed: radii[radii.length - 1] };
+  }
+
+  // ---------- main loader (no notice usage) ----------
+  async function loadAll({ coords, catId }) {
+    const nearby = await cascade(
+      (r)=>`${API_BASE}/api/recommendations/vendors?latitude=${coords.lat}&longitude=${coords.lng}&product_category_id=${catId}&radiusKm=${r}&limit=24`,
+      [25, 50, 100, 300]
+    );
+
+    const top = await cascade(
+      (r)=>`${API_BASE}/api/recommendations/vendors?latitude=${coords.lat}&longitude=${coords.lng}&product_category_id=${catId}&radiusKm=${r}&limit=48`,
+      [300, 600, 1000]
+    );
+
+    const prods = await cascade(
+      (r)=>`${API_BASE}/api/recommendations/products?latitude=${coords.lat}&longitude=${coords.lng}&product_category_id=${catId}&radiusKm=${r}&limit=12`,
+      [50, 100, 300, 600, 1000]
+    );
+
+    let nearbyList = nearby.list;
+    let topList    = top.list;
+    let prodList   = prods.list;
+
+    // Fallback to Dhaka only for missing BOTH seller lists
+    if (nearbyList.length === 0 && topList.length === 0) {
+      const dhaka = { lat: 23.8103, lng: 90.4125 };
+      const dhNearby = await cascade(
+        (r)=>`${API_BASE}/api/recommendations/vendors?latitude=${dhaka.lat}&longitude=${dhaka.lng}&product_category_id=${catId}&radiusKm=${r}&limit=24`,
+        [25, 50, 100, 300]
+      );
+      const dhTop = await cascade(
+        (r)=>`${API_BASE}/api/recommendations/vendors?latitude=${dhaka.lat}&longitude=${dhaka.lng}&product_category_id=${catId}&radiusKm=${r}&limit=48`,
+        [300, 600, 1000]
+      );
+      if (prodList.length === 0) {
+        const dhProds = await cascade(
+          (r)=>`${API_BASE}/api/recommendations/products?latitude=${dhaka.lat}&longitude=${dhaka.lng}&product_category_id=${catId}&radiusKm=${r}&limit=12`,
+          [50, 100, 300, 600, 1000]
+        );
+        prodList = dhProds.list;
       }
+      nearbyList = dhNearby.list;
+      topList = dhTop.list;
+    }
 
-      function next() { showSlide(current + 1); }
-      function prev() { showSlide(current - 1); }
+    const nearbyNorm = sortNearby(normalizeVendors(nearbyList)).slice(0, 12);
+    const topNorm    = sortTop(normalizeVendors(topList)).slice(0, 12);
 
-      // autoplay
-      function startAutoplay() {
-        stopAutoplay();
-        timer = setInterval(next, autoplayInterval);
-      }
-      function stopAutoplay() {
-        if (timer) { clearInterval(timer); timer = null; }
-      }
-      startAutoplay();
+    renderSellerRow('sellerListNearby', nearbyNorm);
+    renderSellerRow('sellerListTop', topNorm);
+    renderProducts(prodList);
+  }
 
-      // arrows
-      nextBtn.addEventListener('click', () => { next(); resetAutoplay(); });
-      prevBtn.addEventListener('click', () => { prev(); resetAutoplay(); });
+  // ---------- boot ----------
+  (async function boot() {
+    const rawCat = getQueryInt('cat', 4);
+    const catId = (Number.isFinite(rawCat) && rawCat > 0) ? rawCat : 4;
+    const coords = await getCoords();
+    await loadAll({ coords, catId });
+  })();
+</script>
 
-      // dots click
-      dots.forEach(dot => {
-        dot.addEventListener('click', (e) => {
-          showSlide(Number(dot.dataset.index));
-          resetAutoplay();
-        });
-      });
-
-      // pause on hover/focus
-      hero.addEventListener('mouseenter', stopAutoplay);
-      hero.addEventListener('mouseleave', startAutoplay);
-      hero.addEventListener('focusin', stopAutoplay);
-      hero.addEventListener('focusout', startAutoplay);
-
-      function resetAutoplay() { stopAutoplay(); setTimeout(startAutoplay, 2000); }
-
-      // touch support
-      hero.addEventListener('touchstart', e => {
-        startX = e.touches[0].clientX;
-        moved = 0;
-      }, {passive:true});
-      hero.addEventListener('touchmove', e => {
-        const dx = e.touches[0].clientX - startX;
-        moved = dx;
-      }, {passive:true});
-      hero.addEventListener('touchend', e => {
-        if (Math.abs(moved) > 50) {
-          if (moved > 0) prev(); else next();
-          resetAutoplay();
-        }
-      });
-
-      // mouse drag for desktop
-      hero.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.clientX;
-        hero.classList.add('dragging');
-      });
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        moved = e.clientX - startX;
-      });
-      window.addEventListener('mouseup', (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        hero.classList.remove('dragging');
-        if (Math.abs(moved) > 60) {
-          if (moved > 0) prev(); else next();
-          resetAutoplay();
-        }
-        moved = 0;
-      });
-
-      // keyboard arrows
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') { prev(); resetAutoplay(); }
-        if (e.key === 'ArrowRight') { next(); resetAutoplay(); }
-        if (e.key === 'Escape') closeChat();
-      });
-
-      // pre-load images (non-blocking)
-      slides.forEach(s => {
-        const url = (s.style.backgroundImage || '').replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-        if (url) {
-          const img = new Image(); img.src = url;
-        }
-      });
-    })();
-
-    /* ===== Chat modal logic (used by both 'Message' and 'Contact the seller!') ===== */
-    (function(){
-      const chatModal = document.getElementById('chatModal');
-      const chatSeller = document.getElementById('chatSeller');
-      const chatProduct = document.getElementById('chatProduct');
-      const chatMessage = document.getElementById('chatMessage');
-      const chatStatus = document.getElementById('chatStatus');
-      const chatCloseBtn = document.getElementById('chatCloseBtn');
-      const chatSend = document.getElementById('chatSend');
-      const chatCancel = document.getElementById('chatCancel');
-
-      // open chat helper
-      function openChat({ seller = '—', product = '—' } = {}) {
-        chatSeller.textContent = seller;
-        chatProduct.textContent = product;
-        chatMessage.value = `Hi ${seller}, I'm interested in "${product}". Can I know more?`;
-        chatStatus.style.display = 'none';
-        chatModal.classList.add('active');
-        chatMessage.focus();
-      }
-
-      // close
-      function closeChat() {
-        chatModal.classList.remove('active');
-      }
-
-      // wire message buttons (nearby sellers)
-      document.querySelectorAll('.message-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const seller = btn.dataset.seller || btn.textContent.trim() || 'Seller';
-          openChat({ seller, product: 'General Inquiry' });
-        });
-      });
-
-      // wire product contact buttons
-      document.querySelectorAll('.contact-seller').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const seller = btn.dataset.seller || 'Seller';
-          const product = btn.dataset.product || 'Product';
-          openChat({ seller, product });
-        });
-      });
-
-      // support header contact support button
-      document.getElementById('contactSupportBtn').addEventListener('click', () => {
-        openChat({ seller: 'Nibash Support', product: 'Support' });
-      });
-
-      // modal actions
-      chatCloseBtn.addEventListener('click', closeChat);
-      chatCancel.addEventListener('click', closeChat);
-
-      chatSend.addEventListener('click', () => {
-        // simulate sending
-        chatStatus.textContent = 'Message sent ✔';
-        chatStatus.style.display = 'block';
-        // small delay then close
-        setTimeout(() => {
-          closeChat();
-        }, 900);
-      });
-
-      // close when clicking outside content
-      chatModal.addEventListener('click', (e) => {
-        if (e.target === chatModal) closeChat();
-      });
-
-      // make closeChat available globally for keyboard ESC used earlier
-      window.closeChat = closeChat;
-    })();
-  </script>
 </body>
 </html>
