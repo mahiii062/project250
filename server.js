@@ -51,8 +51,9 @@ app.use('/api/products', requireVendor, productsRouter);
 app.use('/api/services', requireVendor, servicesRouter);
 
 // ============ PUBLIC ROUTES ============
-app.use('/api/lookups', lookupsRouter);
 
+app.use('/api/lookups', lookupsRouter);
+app.use('/api/recommendations', recommendationsRouter);  
 // === NEW: Ratings (customer-auth required) ===
 // Customers can rate vendors/products. Kept separate from vendor-only routers.
 // Requires a valid customer JWT so users must be logged in to rate.
