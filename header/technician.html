@@ -109,7 +109,7 @@
     }
 
     .sidebar a::after {
-      content: "🍂";
+      content: "▶";
       font-size: 1rem;
       opacity: 0.5;
       pointer-events: none;
@@ -273,6 +273,17 @@
       font-weight: 600;
     }
 
+    .vendor-id {
+      display: inline-block;
+      background: var(--soft);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
     .meta {
       margin: 0 0 6px 0;
       font-size: 0.9rem;
@@ -424,7 +435,7 @@
         <div class="hero-text-overlay" aria-live="polite">
           <h1>Find Trusted Home Service Professionals</h1>
           <p>
-            Electricians, Plumbers & Painters — highest rated, near you, and easy to contact.
+            Electricians, Plumbers & Painters – highest rated, near you, and easy to contact.
             Connect with skilled professionals for all your home service needs.
           </p>
         </div>
@@ -437,12 +448,10 @@
   Service Type:
   <select id="categoryFilter">
     <option value="">All Services</option>
-    <option value="electrician">Electrician</option>
-    <option value="plumber">Plumber</option>
-    <option value="painter">Painter</option>
-    <option value="interior_design">Interior Designer</option>
-    <!-- Add more categories based on your actual data -->
-    
+    <option value="Electrician">Electrician</option>
+    <option value="Plumber">Plumber</option>
+    <option value="Painter">Painter</option>
+    <option value="Interior Designer">Interior Designer</option>
   </select>
   </label>
 
@@ -507,69 +516,68 @@
 
     // Search technicians
     async function searchTechnicians() {
-  try {
-    const container = document.getElementById("techniciansList");
-    container.innerHTML = '<p class="loading">🔍 Searching technicians...</p>';
+      try {
+        const container = document.getElementById("techniciansList");
+        container.innerHTML = '<p class="loading">🔍 Searching technicians...</p>';
 
-    const category = document.getElementById("categoryFilter").value;
-    const radius = document.getElementById("radiusInput").value || 5;
+        const category = document.getElementById("categoryFilter").value;
+        const radius = document.getElementById("radiusInput").value || 5;
 
-    let query = `/api/recommendations/nearby-technicians?latitude=${currentLat}&longitude=${currentLng}&radiusKm=${radius}&limit=50`;
-    if (category) query += `&category=${category}`;
+        let query = `/api/recommendations/nearby-technicians?latitude=${currentLat}&longitude=${currentLng}&radiusKm=${radius}&limit=50`;
+        if (category) query += `&category=${encodeURIComponent(category)}`;
 
-    console.log("📍 Request:", `${API_BASE}${query}`);
-    
-    const res = await fetch(`${API_BASE}${query}`, {
-      headers: { "Authorization": `Bearer ${CUSTOMER_TOKEN}` }
-    });
-    
-    const json = await res.json();
-    console.log("📦 Response:", json);
-    
-    if (!res.ok) throw new Error(json.error || "Failed to fetch technicians");
+        console.log("🔍 Request:", `${API_BASE}${query}`);
+        
+        const res = await fetch(`${API_BASE}${query}`, {
+          headers: { "Authorization": `Bearer ${CUSTOMER_TOKEN}` }
+        });
+        
+        const json = await res.json();
+        console.log("📦 Response:", json);
+        
+        if (!res.ok) throw new Error(json.error || "Failed to fetch technicians");
 
-    // Handle both response structures
-    const technicians = json.data || json.items || [];
+        const technicians = json.data || json.items || [];
 
-    // Sort
-    const sortBy = document.getElementById("sortBy").value;
-    if (sortBy === "rating") {
-      technicians.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    } else {
-      // Default sort by distance
-      technicians.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+        // Sort
+        const sortBy = document.getElementById("sortBy").value;
+        if (sortBy === "rating") {
+          technicians.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        } else {
+          technicians.sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+        }
+
+        renderTechnicians(technicians);
+      } catch (e) {
+        console.error("Search error:", e);
+        document.getElementById("techniciansList").innerHTML = 
+          `<p class="error">❌ Error: ${e.message}</p>`;
+      }
     }
-
-    renderTechnicians(technicians);
-  } catch (e) {
-    console.error("Search error:", e);
-    document.getElementById("techniciansList").innerHTML = 
-      `<p class="error">❌ Error: ${e.message}</p>`;
-  }
-}
 
     function renderTechnicians(technicians) {
       const container = document.getElementById("techniciansList");
 
       if (!technicians || technicians.length === 0) {
-        container.innerHTML = '<p class="empty">😐 No technicians found in your area. Try increasing the search radius.</p>';
+        container.innerHTML = '<p class="empty">😕 No technicians found in your area. Try increasing the search radius.</p>';
         return;
       }
 
       container.innerHTML = technicians.map(tech => {
         const logo = tech.logo_url || "../images/logo2.png";
         const rating = tech.rating || 0;
-        const stars = "★".repeat(Math.round(rating)) + "✩".repeat(5 - Math.round(rating));
+        const stars = "★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating));
         
         const servicesText = tech.services && tech.services.length > 0
           ? tech.services.map(s => s.category || s.title).join(", ")
-          : "Services available";
+          : tech.job_type || "Services available";
 
         return `
           <div class="service-card">
             <div class="card-top">
               <img src="${logo}" alt="${escapeHtml(tech.name)}" onerror="this.src='../images/logo2.png'" />
               <div class="card-info">
+                <span class="vendor-id">ID: ${tech.vendor_id}</span>
                 <h3>${escapeHtml(tech.name)}</h3>
                 <p class="meta">📍 ${escapeHtml(tech.location)} (${tech.distance} km)</p>
                 <p class="rating">${stars} <span class="rating-num">${Number(rating).toFixed(1)}</span></p>
