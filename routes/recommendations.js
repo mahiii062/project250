@@ -239,11 +239,9 @@ r.get("/nearby-technicians", async (req, res) => {
     const queryParams = [lat, lng, lat]; // For distance calculation
 
     if (category) {
-      // Use the 'category' varchar column for filtering
-      whereClause += ` AND s.category = ?`;
-      queryParams.push(category);
-    }
-
+  whereClause += ` AND v.job_type = ?`;
+  queryParams.push(category);
+}
     // Add radius and limit to params
     queryParams.push(radius, maxLimit);
 
