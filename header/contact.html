@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact - Nibash</title>
+    <title>Contact Us - Nibash</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background: #f8f8f8;
+            background: linear-gradient(180deg, #ffffff, #f7f7f7);
             color: #333;
         }
 
@@ -20,7 +20,7 @@
             align-items: center;
             padding: 10px 40px;
             background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
         .logo {
@@ -39,26 +39,122 @@
         .logo-text {
             font-size: 22px;
             font-weight: 600;
-            color: #E89C7C;
+            color: #e68c6e;
         }
 
         .logout-btn {
-            background: #E89C7C;
+            background: #e68c6e;
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
+            transition: 0.3s;
         }
 
-        .content {
-            max-width: 600px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        .logout-btn:hover {
+            background: #d87252;
+        }
+
+        h1 {
             text-align: center;
+            margin-top: 40px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .contact-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .contact-box {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            transition: 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+
+        .contact-box:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        .contact-box h3 {
+            color: #e68c6e;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .contact-info {
+            font-size: 15px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            text-align: center;
+            color: #555;
+        }
+
+        .contact-info a {
+            color: #e68c6e;
+            text-decoration: none;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        input,
+        textarea {
+            background: #fafafa;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #e68c6e;
+            box-shadow: 0 0 0 2px rgba(230, 140, 110, 0.2);
+        }
+
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        button {
+            background: #e68c6e;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #d87252;
+        }
+
+        .success-message {
+            text-align: center;
+            color: #22c55e;
+            font-weight: 500;
+            margin-top: 15px;
+            display: none;
         }
     </style>
 </head>
@@ -72,10 +168,82 @@
         <button class="logout-btn" onclick="location.href='../index.html'">Log Out</button>
     </header>
 
-    <div class="content">
-        <h2>Contact Us</h2>
-        <p>No contact info yet.</p>
+    <h1>Contact Our Team</h1>
+
+    <div class="contact-container">
+        <!-- Maisha -->
+        <div class="contact-box">
+            <h3>Syeda Maisha Anika</h3>
+            <div class="contact-info">
+                📧 <a href="mailto:maisha@example.com">maishaproni@gmail.com</a><br>
+                📞 +880 1606-440177
+            </div>
+            <form action="https://formspree.io/f/xpwovarg" method="POST" onsubmit="showSuccessMessage(event)">
+                <input type="hidden" name="recipient" value="Maisha">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message..." required></textarea>
+                <button type="submit">Send Message</button>
+                <p class="success-message">✅ Message sent successfully!</p>
+            </form>
+        </div>
+
+        <!-- Mahi -->
+        <div class="contact-box">
+            <h3>Mahi A Rashed Mashfik</h3>
+            <div class="contact-info">
+                📧 <a href="mailto:mahi.mashfik@gmail.com">mahi.mashfik@gmail.com</a><br>
+                📞 +880 1521-754254
+            </div>
+            <form action="https://formspree.io/f/xpwovarg" method="POST" onsubmit="showSuccessMessage(event)">
+                <input type="hidden" name="recipient" value="Mahi A Rashed Mashfik">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message..." required></textarea>
+                <button type="submit">Send Message</button>
+                <p class="success-message">✅ Message sent successfully!</p>
+            </form>
+        </div>
+
+        <!-- Neelima -->
+        <div class="contact-box">
+            <h3>Neelima Mustak Richi</h3>
+            <div class="contact-info">
+                📧 <a href="mailto:neelima@example.com">neelimaaaaaa@gmail.com</a><br>
+                📞 +880 1845-972327
+            </div>
+            <form action="https://formspree.io/f/xpwovarg" method="POST" onsubmit="showSuccessMessage(event)">
+                <input type="hidden" name="recipient" value="Neelima">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message..." required></textarea>
+                <button type="submit">Send Message</button>
+                <p class="success-message">✅ Message sent successfully!</p>
+            </form>
+        </div>
     </div>
+
+    <script>
+        function showSuccessMessage(event) {
+            event.preventDefault();
+            const form = event.target;
+            const successMsg = form.querySelector(".success-message");
+
+            fetch(form.action, {
+                method: form.method,
+                body: new FormData(form),
+                headers: { 'Accept': 'application/json' }
+            }).then(response => {
+                if (response.ok) {
+                    form.reset();
+                    successMsg.style.display = "block";
+                    setTimeout(() => successMsg.style.display = "none", 4000);
+                } else {
+                    alert("Something went wrong. Please try again.");
+                }
+            }).catch(() => alert("Network error. Please try again."));
+        }
+    </script>
 </body>
 
 </html>

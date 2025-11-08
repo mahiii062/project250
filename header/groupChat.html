@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Chat - Nibash</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/groupChat.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="chat-main-header">
+        <div class="logo" onclick="window.location.href='../index.html'">
+            <img src="../images/mainLogo.png" alt="Nibash Logo" class="logo-img">
+            Nibash
+        </div>
+        <div class="header-actions">
+            <button class="header-btn" onclick="window.location.href='../index.html'">
+                <i class="fas fa-home"></i> Home
+            </button>
+            <button class="header-btn" id="userMenuBtn" onclick="toggleUserMenu()">
+                <i class="fas fa-user-circle"></i> <span id="userName">User</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- User Menu Dropdown -->
+    <div class="user-menu" id="userMenu">
+        <div class="user-menu-item" onclick="window.location.href='../users/customer.html'">
+            <i class="fas fa-user"></i> My Profile
+        </div>
+        <div class="user-menu-item" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Sidebar with Groups List -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-comments"></i> My Groups</h2>
+                <button class="new-group-btn" onclick="openNewGroupModal()">
+                    <i class="fas fa-plus"></i> Create New Group
+                </button>
+            </div>
+
+            <!-- Mobile toggle -->
+            <button class="mobile-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="groups-list" id="groupsList">
+                <div class="loading">Loading groups...</div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header" id="chatHeader" style="display: none;">
+                <div class="chat-info">
+                    <h3 id="groupName">Group Name</h3>
+                    <p id="groupMembers">0 members</p>
+                </div>
+                <div class="chat-actions">
+                    <button class="icon-btn" onclick="showGroupDetails()" title="Group Info">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="icon-btn" onclick="openAddMembersModal()" title="Add Members">
+                        <i class="fas fa-user-plus"></i>
+                    </button>
+                    <button class="icon-btn" onclick="refreshMessages()" title="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="messages-container" id="messagesContainer">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Select a group to start chatting</h3>
+                    <p>Or create a new group to connect with service providers</p>
+                </div>
+            </div>
+
+            <div class="message-input-area" id="messageInputArea" style="display: none;">
+                <button class="attach-btn" onclick="handleAttachment()" title="Attach file">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <input type="text" class="message-input" id="messageInput" placeholder="Type your message..."
+                    onkeypress="handleKeyPress(event)">
+                <button class="emoji-btn" onclick="toggleEmojiPicker()" title="Add emoji">
+                    <i class="fas fa-smile"></i>
+                </button>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Group Modal -->
+    <div class="modal" id="newGroupModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-users"></i> Create New Group</h3>
+                <button class="modal-close" onclick="closeNewGroupModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Group Name *</label>
+                    <input type="text" id="newGroupName" placeholder="e.g., Home Renovation Team" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="newGroupDescription" rows="3" placeholder="What is this group for?"
+                        maxlength="500"></textarea>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-user-plus"></i> Add Members</label>
+                    <div class="search-box">
+                        <input type="text" id="userSearch" placeholder="Search by name or profession..."
+                            oninput="searchUsers()">
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                    </div>
+                    <div class="user-list" id="userList"></div>
+                </div>
+                <div class="selected-members" id="selectedMembers"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeNewGroupModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button class="btn btn-primary" onclick="createGroup()">
+                    <i class="fas fa-check"></i> Create Group
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Details Modal -->
+    <div class="modal" id="groupDetailsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-info-circle"></i> Group Details</h3>
+                <button class="modal-close" onclick="closeGroupDetailsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="group-detail-section">
+                    <h4>Group Name</h4>
+                    <p id="detailGroupName">-</p>
+                </div>
+                <div class="group-detail-section">
+                    <h4>Description</h4>
+                    <p id="detailGroupDescription">-</p>
+                </div>
+                <div class="group-detail-section">
+                    <h4>Created By</h4>
+                    <p id="detailGroupCreator">-</p>
+                </div>
+                <div class="group-detail-section">
+                    <h4>Members (<span id="detailMemberCount">0</span>)</h4>
+                    <div class="members-list" id="detailMembersList"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="leaveGroup()">
+                    <i class="fas fa-sign-out-alt"></i> Leave Group
+                </button>
+                <button class="btn btn-secondary" onclick="closeGroupDetailsModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="../js/groupChat.js"></script>
+</body>
+
+</html>

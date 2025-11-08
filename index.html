@@ -7,6 +7,7 @@
     <title>Nibash - Make Your Home Yours</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/chatbot.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -22,11 +23,16 @@
             <a href="header/interiorDesigner.html">Interior Designers</a>
             <a href="header/furniture.html">Furniture</a>
             <a href="header/painting.html">Painting</a>
-            <a href="header/deshiMritshilpo.html">দেশীয় মৃৎশিল্প</a>
+            <a href="header/deshiMritshilpo.html">দেশীয় মৃৎশিল্প</a>
             <a href="header/technician.html">Technician</a>
             <a href="header/decoration.html">Decoration Items</a>
             <a href="header/blog.html">Blogs</a>
             <a href="header/contact.html">Contact Us</a>
+
+            <!-- NEW: Group Chat Link -->
+            <a href="header/groupChat.html" class="group-chat-link">
+                <i class="fas fa-comments"></i> Group Chat
+            </a>
 
             <!-- Search icon + input -->
             <div class="search-container">
@@ -161,6 +167,23 @@
         </div>
     </section>
 
+    <!-- NEW: Group Chat Feature Highlight -->
+    <section class="group-chat-promo">
+        <div class="promo-content">
+            <div class="promo-text">
+                <h2>Connect with Service Providers</h2>
+                <p>Create group chats to discuss your project with interior designers, painters, technicians, and more!
+                </p>
+                <button onclick="window.location.href='header/groupChat.html'" class="promo-btn">
+                    <i class="fas fa-comments"></i> Start Group Chat
+                </button>
+            </div>
+            <div class="promo-image">
+                <i class="fas fa-users-cog" style="font-size: 120px; color: #667eea;"></i>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer>
         <p>
@@ -173,6 +196,98 @@
         <p>©2023 Nibash. All Rights Reserved.</p>
     </footer>
 
+    <!-- Add this style for the new Group Chat promo section -->
+    <style>
+        .group-chat-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .group-chat-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .group-chat-promo {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 60px 20px;
+            margin: 40px 0;
+        }
+
+        .promo-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .promo-text h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .promo-text p {
+            font-size: 18px;
+            color: #4a5568;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .promo-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .promo-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .promo-image {
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .promo-content {
+                grid-template-columns: 1fr;
+            }
+
+            .promo-text h2 {
+                font-size: 28px;
+            }
+
+            .promo-image {
+                display: none;
+            }
+        }
+    </style>
 
     <!-- Existing site logic -->
     <script>
@@ -192,7 +307,9 @@
             "decoration items": "header/architect.html",
             "blogs": "header/blog.html",
             "contact": "header/contact.html",
-            "deshi mritshilpo": "header/deshiMritshilpo.html"
+            "deshi mritshilpo": "header/deshiMritshilpo.html",
+            "group chat": "header/groupChat.html",
+            "chat": "header/groupChat.html"
         };
 
         function showSuggestions(query) {
@@ -245,8 +362,7 @@
             }
         }
     </script>
-
-
+    <script src="js/chatbot.js"></script>
 </body>
 
 </html>
