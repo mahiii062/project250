@@ -1,18 +1,167 @@
+// Demo version with hardcoded data
 // Global variables
 let currentGroupId = null;
 let selectedMembers = [];
 let allGroups = [];
-let currentUserId = null;
+let currentUserId = 1; // Hardcoded current user
 let messageRefreshInterval = null;
 let groupRefreshInterval = null;
 
+// Hardcoded demo data
+const DEMO_USERS = [
+    { id: 1, name: 'John Doe', profession: 'Plumber', email: 'john@example.com' },
+    { id: 2, name: 'Jane Smith', profession: 'Electrician', email: 'jane@example.com' },
+    { id: 3, name: 'Bob Wilson', profession: 'Carpenter', email: 'bob@example.com' },
+    { id: 4, name: 'Alice Brown', profession: 'Painter', email: 'alice@example.com' },
+    { id: 5, name: 'Charlie Davis', profession: 'HVAC Technician', email: 'charlie@example.com' },
+    { id: 6, name: 'Diana Miller', profession: 'Landscaper', email: 'diana@example.com' }
+];
+
+const DEMO_GROUPS = [
+    {
+        id: 1,
+        name: 'Home Renovation Project',
+        description: 'Discussing the kitchen renovation',
+        created_by: 1,
+        creator_name: 'John Doe',
+        member_count: 4,
+        last_message: 'When can you start the electrical work?',
+        last_message_time: new Date(Date.now() - 3600000).toISOString(),
+        unread_count: 2,
+        members: [1, 2, 3, 4]
+    },
+    {
+        id: 2,
+        name: 'Garden Makeover',
+        description: 'Planning the backyard transformation',
+        created_by: 1,
+        creator_name: 'John Doe',
+        member_count: 3,
+        last_message: 'I can start next Monday',
+        last_message_time: new Date(Date.now() - 7200000).toISOString(),
+        unread_count: 0,
+        members: [1, 6, 4]
+    },
+    {
+        id: 3,
+        name: 'HVAC Installation',
+        description: 'New AC system installation',
+        created_by: 1,
+        creator_name: 'John Doe',
+        member_count: 2,
+        last_message: 'Got the parts ordered',
+        last_message_time: new Date(Date.now() - 86400000).toISOString(),
+        unread_count: 1,
+        members: [1, 5]
+    }
+];
+
+const DEMO_MESSAGES = {
+    1: [
+        {
+            id: 1,
+            group_id: 1,
+            sender_id: 1,
+            sender_name: 'John Doe',
+            message: 'Hi everyone! Thanks for joining this group.',
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            read_count: 3
+        },
+        {
+            id: 2,
+            group_id: 1,
+            sender_id: 2,
+            sender_name: 'Jane Smith',
+            message: 'Happy to help with the electrical work!',
+            created_at: new Date(Date.now() - 72000000).toISOString(),
+            read_count: 2
+        },
+        {
+            id: 3,
+            group_id: 1,
+            sender_id: 3,
+            sender_name: 'Bob Wilson',
+            message: 'I can handle all the carpentry. When do we start?',
+            created_at: new Date(Date.now() - 54000000).toISOString(),
+            read_count: 2
+        },
+        {
+            id: 4,
+            group_id: 1,
+            sender_id: 1,
+            sender_name: 'John Doe',
+            message: 'Great! I was thinking we could start next week.',
+            created_at: new Date(Date.now() - 36000000).toISOString(),
+            read_count: 2
+        },
+        {
+            id: 5,
+            group_id: 1,
+            sender_id: 2,
+            sender_name: 'Jane Smith',
+            message: 'When can you start the electrical work?',
+            created_at: new Date(Date.now() - 3600000).toISOString(),
+            read_count: 0
+        }
+    ],
+    2: [
+        {
+            id: 6,
+            group_id: 2,
+            sender_id: 1,
+            sender_name: 'John Doe',
+            message: 'Looking forward to transforming the backyard!',
+            created_at: new Date(Date.now() - 172800000).toISOString(),
+            read_count: 2
+        },
+        {
+            id: 7,
+            group_id: 2,
+            sender_id: 6,
+            sender_name: 'Diana Miller',
+            message: 'I have some great ideas for the landscaping.',
+            created_at: new Date(Date.now() - 144000000).toISOString(),
+            read_count: 1
+        },
+        {
+            id: 8,
+            group_id: 2,
+            sender_id: 6,
+            sender_name: 'Diana Miller',
+            message: 'I can start next Monday',
+            created_at: new Date(Date.now() - 7200000).toISOString(),
+            read_count: 1
+        }
+    ],
+    3: [
+        {
+            id: 9,
+            group_id: 3,
+            sender_id: 5,
+            sender_name: 'Charlie Davis',
+            message: 'I reviewed the space. We\'ll need a 3-ton unit.',
+            created_at: new Date(Date.now() - 172800000).toISOString(),
+            read_count: 1
+        },
+        {
+            id: 10,
+            group_id: 3,
+            sender_id: 5,
+            sender_name: 'Charlie Davis',
+            message: 'Got the parts ordered',
+            created_at: new Date(Date.now() - 86400000).toISOString(),
+            read_count: 0
+        }
+    ]
+};
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-    checkAuth();
+    setupDemo();
     loadGroups();
 
-    // Set up auto-refresh
-    groupRefreshInterval = setInterval(loadGroups, 10000); // Refresh groups every 10 seconds
+    // Set up auto-refresh (reduced frequency for demo)
+    groupRefreshInterval = setInterval(loadGroups, 30000);
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', (e) => {
@@ -22,24 +171,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Check authentication
-async function checkAuth() {
-    try {
-        const response = await fetch('/api/auth/check');
-        const data = await response.json();
+// Setup demo
+function setupDemo() {
+    currentUserId = 1;
+    document.getElementById('userName').textContent = DEMO_USERS[0].name;
 
-        if (data.authenticated) {
-            currentUserId = data.userId;
-            document.getElementById('userName').textContent = data.userName || 'User';
-        } else {
-            // Redirect to login if not authenticated
-            window.location.href = '../users/user.html';
-        }
-    } catch (error) {
-        console.error('Auth check failed:', error);
-        // For development, set a default user
-        currentUserId = 1;
-        document.getElementById('userName').textContent = 'Test User';
+    // Add demo badge
+    const userName = document.getElementById('userName');
+    if (!userName.querySelector('.demo-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'demo-badge';
+        badge.textContent = 'DEMO';
+        badge.style.cssText = 'background: #f56565; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 8px;';
+        userName.appendChild(badge);
     }
 }
 
@@ -48,16 +192,12 @@ function toggleUserMenu() {
     document.getElementById('userMenu').classList.toggle('active');
 }
 
-// Logout function
+// Logout function (demo version)
 function logout() {
-    fetch('/api/auth/logout', { method: 'POST' })
-        .then(() => {
-            window.location.href = '../index.html';
-        })
-        .catch(error => {
-            console.error('Logout failed:', error);
-            window.location.href = '../index.html';
-        });
+    showToast('Demo mode - logout simulated', 'info');
+    setTimeout(() => {
+        window.location.reload();
+    }, 1000);
 }
 
 // Toggle sidebar for mobile
@@ -65,21 +205,10 @@ function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('active');
 }
 
-// Load all groups
-async function loadGroups() {
-    try {
-        const response = await fetch('/api/groups');
-        const data = await response.json();
-
-        if (data.success) {
-            allGroups = data.groups;
-            displayGroups(data.groups);
-        }
-    } catch (error) {
-        console.error('Error loading groups:', error);
-        document.getElementById('groupsList').innerHTML =
-            '<div class="loading" style="color: #e53e3e;">Failed to load groups. Please refresh.</div>';
-    }
+// Load all groups (demo version)
+function loadGroups() {
+    allGroups = [...DEMO_GROUPS];
+    displayGroups(allGroups);
 }
 
 // Display groups in sidebar
@@ -111,7 +240,7 @@ function displayGroups(groups) {
 }
 
 // Select a group and load its messages
-async function selectGroup(groupId) {
+function selectGroup(groupId) {
     currentGroupId = groupId;
 
     // Close sidebar on mobile
@@ -125,19 +254,10 @@ async function selectGroup(groupId) {
     displayGroups(allGroups);
 
     // Load group details
-    try {
-        const response = await fetch(`/api/groups/${groupId}`);
-        const data = await response.json();
-
-        if (data.success) {
-            document.getElementById('groupName').textContent = data.group.name;
-            document.getElementById('groupMembers').textContent = `${data.members.length} members`;
-
-            // Store group details for later use
-            window.currentGroupDetails = data;
-        }
-    } catch (error) {
-        console.error('Error loading group details:', error);
+    const group = DEMO_GROUPS.find(g => g.id === groupId);
+    if (group) {
+        document.getElementById('groupName').textContent = group.name;
+        document.getElementById('groupMembers').textContent = `${group.member_count} members`;
     }
 
     // Load messages
@@ -149,26 +269,15 @@ async function selectGroup(groupId) {
     }
     messageRefreshInterval = setInterval(() => {
         if (currentGroupId === groupId) {
-            loadMessages(groupId, true); // Silent refresh
+            loadMessages(groupId, true);
         }
-    }, 3000);
+    }, 5000);
 }
 
-// Load messages for a group
-async function loadMessages(groupId, silent = false) {
-    try {
-        const response = await fetch(`/api/groups/${groupId}/messages?limit=100`);
-        const data = await response.json();
-
-        if (data.success) {
-            displayMessages(data.messages);
-        }
-    } catch (error) {
-        if (!silent) {
-            console.error('Error loading messages:', error);
-            showToast('Failed to load messages', 'error');
-        }
-    }
+// Load messages for a group (demo version)
+function loadMessages(groupId, silent = false) {
+    const messages = DEMO_MESSAGES[groupId] || [];
+    displayMessages(messages);
 }
 
 // Display messages
@@ -209,33 +318,41 @@ function displayMessages(messages) {
     }
 }
 
-// Send a message
-async function sendMessage() {
+// Send a message (demo version)
+function sendMessage() {
     const input = document.getElementById('messageInput');
     const message = input.value.trim();
 
     if (!message || !currentGroupId) return;
 
-    try {
-        const response = await fetch(`/api/groups/${currentGroupId}/messages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            input.value = '';
-            loadMessages(currentGroupId);
-            loadGroups(); // Refresh groups to update last message
-        } else {
-            showToast('Failed to send message', 'error');
-        }
-    } catch (error) {
-        console.error('Error sending message:', error);
-        showToast('Failed to send message', 'error');
+    // Add message to demo data
+    if (!DEMO_MESSAGES[currentGroupId]) {
+        DEMO_MESSAGES[currentGroupId] = [];
     }
+
+    const newMessage = {
+        id: Date.now(),
+        group_id: currentGroupId,
+        sender_id: currentUserId,
+        sender_name: DEMO_USERS[0].name,
+        message: message,
+        created_at: new Date().toISOString(),
+        read_count: 0
+    };
+
+    DEMO_MESSAGES[currentGroupId].push(newMessage);
+
+    // Update last message in group
+    const group = DEMO_GROUPS.find(g => g.id === currentGroupId);
+    if (group) {
+        group.last_message = message;
+        group.last_message_time = new Date().toISOString();
+    }
+
+    input.value = '';
+    loadMessages(currentGroupId);
+    displayGroups(allGroups);
+    showToast('Message sent (demo)', 'success');
 }
 
 // Handle Enter key press in message input
@@ -250,7 +367,7 @@ function handleKeyPress(event) {
 function refreshMessages() {
     if (currentGroupId) {
         loadMessages(currentGroupId);
-        showToast('Messages refreshed', 'success');
+        showToast('Messages refreshed (demo)', 'success');
     }
 }
 
@@ -270,10 +387,10 @@ function closeNewGroupModal() {
     document.getElementById('newGroupModal').classList.remove('active');
 }
 
-// Search users
+// Search users (demo version)
 let searchTimeout;
-async function searchUsers() {
-    const query = document.getElementById('userSearch').value.trim();
+function searchUsers() {
+    const query = document.getElementById('userSearch').value.trim().toLowerCase();
 
     clearTimeout(searchTimeout);
 
@@ -282,18 +399,14 @@ async function searchUsers() {
         return;
     }
 
-    searchTimeout = setTimeout(async () => {
-        try {
-            const response = await fetch(`/api/users/search?query=${encodeURIComponent(query)}`);
-            const data = await response.json();
-
-            if (data.success) {
-                displayUserList(data.users);
-            }
-        } catch (error) {
-            console.error('Error searching users:', error);
-            document.getElementById('userList').innerHTML = '<div style="padding: 15px; text-align: center; color: #e53e3e;">Search failed. Please try again.</div>';
-        }
+    searchTimeout = setTimeout(() => {
+        const filtered = DEMO_USERS.filter(user =>
+            user.id !== currentUserId &&
+            (user.name.toLowerCase().includes(query) ||
+                user.profession.toLowerCase().includes(query) ||
+                user.email.toLowerCase().includes(query))
+        );
+        displayUserList(filtered);
     }, 300);
 }
 
@@ -306,22 +419,20 @@ function displayUserList(users) {
         return;
     }
 
-    userList.innerHTML = users
-        .filter(user => user.id !== currentUserId) // Don't show current user
-        .map(user => {
-            const isAdded = selectedMembers.some(m => m.userId === user.id);
-            return `
-                <div class="user-item">
-                    <div class="user-info">
-                        <h4>${escapeHtml(user.name)}</h4>
-                        <p><i class="fas fa-briefcase"></i> ${escapeHtml(user.profession || 'No profession specified')}</p>
-                    </div>
-                    <button class="add-btn ${isAdded ? 'added' : ''}" onclick="toggleMember(${user.id}, '${escapeHtml(user.name)}', '${escapeHtml(user.profession || '')}')">
-                        ${isAdded ? '<i class="fas fa-check"></i> Added' : '<i class="fas fa-plus"></i> Add'}
-                    </button>
+    userList.innerHTML = users.map(user => {
+        const isAdded = selectedMembers.some(m => m.userId === user.id);
+        return `
+            <div class="user-item">
+                <div class="user-info">
+                    <h4>${escapeHtml(user.name)}</h4>
+                    <p><i class="fas fa-briefcase"></i> ${escapeHtml(user.profession)}</p>
                 </div>
-            `;
-        }).join('');
+                <button class="add-btn ${isAdded ? 'added' : ''}" onclick="toggleMember(${user.id}, '${escapeHtml(user.name)}', '${escapeHtml(user.profession)}')">
+                    ${isAdded ? '<i class="fas fa-check"></i> Added' : '<i class="fas fa-plus"></i> Add'}
+                </button>
+            </div>
+        `;
+    }).join('');
 }
 
 // Toggle member selection
@@ -335,7 +446,7 @@ function toggleMember(userId, name, profession) {
     }
 
     displaySelectedMembers();
-    searchUsers(); // Refresh the list to update button states
+    searchUsers();
 }
 
 // Display selected members
@@ -349,7 +460,7 @@ function displaySelectedMembers() {
 
     container.innerHTML = selectedMembers.map((member, index) => `
         <div class="member-tag">
-            ${escapeHtml(member.name)} ${member.profession ? `- ${escapeHtml(member.profession)}` : ''}
+            ${escapeHtml(member.name)} - ${escapeHtml(member.profession)}
             <button onclick="removeMember(${index})" title="Remove">×</button>
         </div>
     `).join('');
@@ -362,8 +473,8 @@ function removeMember(index) {
     searchUsers();
 }
 
-// Create a new group
-async function createGroup() {
+// Create a new group (demo version)
+function createGroup() {
     const name = document.getElementById('newGroupName').value.trim();
     const description = document.getElementById('newGroupDescription').value.trim();
 
@@ -377,66 +488,54 @@ async function createGroup() {
         return;
     }
 
-    try {
-        const response = await fetch('/api/groups', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name,
-                description,
-                members: selectedMembers
-            })
-        });
+    const newGroup = {
+        id: DEMO_GROUPS.length + 1,
+        name: name,
+        description: description,
+        created_by: currentUserId,
+        creator_name: DEMO_USERS[0].name,
+        member_count: selectedMembers.length + 1,
+        last_message: null,
+        last_message_time: new Date().toISOString(),
+        unread_count: 0,
+        members: [currentUserId, ...selectedMembers.map(m => m.userId)]
+    };
 
-        const data = await response.json();
+    DEMO_GROUPS.unshift(newGroup);
+    DEMO_MESSAGES[newGroup.id] = [];
 
-        if (data.success) {
-            closeNewGroupModal();
-            showToast('Group created successfully!', 'success');
-            loadGroups();
-            // Auto-select the new group
-            setTimeout(() => selectGroup(data.groupId), 500);
-        } else {
-            showToast(data.error || 'Failed to create group', 'error');
-        }
-    } catch (error) {
-        console.error('Error creating group:', error);
-        showToast('Failed to create group', 'error');
-    }
+    closeNewGroupModal();
+    showToast('Group created successfully (demo)!', 'success');
+    loadGroups();
+    setTimeout(() => selectGroup(newGroup.id), 500);
 }
 
-// Show group details modal
-async function showGroupDetails() {
+// Show group details modal (demo version)
+function showGroupDetails() {
     if (!currentGroupId) return;
 
-    try {
-        const response = await fetch(`/api/groups/${currentGroupId}`);
-        const data = await response.json();
+    const group = DEMO_GROUPS.find(g => g.id === currentGroupId);
+    if (!group) return;
 
-        if (data.success) {
-            document.getElementById('detailGroupName').textContent = data.group.name;
-            document.getElementById('detailGroupDescription').textContent = data.group.description || 'No description';
-            document.getElementById('detailGroupCreator').textContent = data.group.creator_name;
-            document.getElementById('detailMemberCount').textContent = data.members.length;
+    document.getElementById('detailGroupName').textContent = group.name;
+    document.getElementById('detailGroupDescription').textContent = group.description || 'No description';
+    document.getElementById('detailGroupCreator').textContent = group.creator_name;
+    document.getElementById('detailMemberCount').textContent = group.member_count;
 
-            // Display members
-            const membersList = document.getElementById('detailMembersList');
-            membersList.innerHTML = data.members.map(member => `
-                <div class="member-item">
-                    <div class="member-avatar">${getInitials(member.name)}</div>
-                    <div class="member-details">
-                        <h5>${escapeHtml(member.name)} ${member.role === 'admin' ? '<i class="fas fa-crown" style="color: #f6ad55;"></i>' : ''}</h5>
-                        <p>${escapeHtml(member.profession || 'No profession specified')}</p>
-                    </div>
-                </div>
-            `).join('');
+    // Display members
+    const members = DEMO_USERS.filter(u => group.members.includes(u.id));
+    const membersList = document.getElementById('detailMembersList');
+    membersList.innerHTML = members.map(member => `
+        <div class="member-item">
+            <div class="member-avatar">${getInitials(member.name)}</div>
+            <div class="member-details">
+                <h5>${escapeHtml(member.name)} ${member.id === group.created_by ? '<i class="fas fa-crown" style="color: #f6ad55;"></i>' : ''}</h5>
+                <p>${escapeHtml(member.profession)}</p>
+            </div>
+        </div>
+    `).join('');
 
-            document.getElementById('groupDetailsModal').classList.add('active');
-        }
-    } catch (error) {
-        console.error('Error loading group details:', error);
-        showToast('Failed to load group details', 'error');
-    }
+    document.getElementById('groupDetailsModal').classList.add('active');
 }
 
 // Close group details modal
@@ -444,58 +543,40 @@ function closeGroupDetailsModal() {
     document.getElementById('groupDetailsModal').classList.remove('active');
 }
 
-// Open add members modal
-function openAddMembersModal() {
-    // Reuse the new group modal but with different context
-    openNewGroupModal();
-    document.getElementById('newGroupName').parentElement.style.display = 'none';
-    document.getElementById('newGroupDescription').parentElement.style.display = 'none';
-}
-
-// Leave group
-async function leaveGroup() {
+// Leave group (demo version)
+function leaveGroup() {
     if (!currentGroupId) return;
 
-    if (!confirm('Are you sure you want to leave this group?')) return;
+    if (!confirm('Are you sure you want to leave this group? (Demo mode)')) return;
 
-    try {
-        const response = await fetch(`/api/groups/${currentGroupId}/leave`, {
-            method: 'DELETE'
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            closeGroupDetailsModal();
-            showToast('Left group successfully', 'success');
-            currentGroupId = null;
-            document.getElementById('chatHeader').style.display = 'none';
-            document.getElementById('messageInputArea').style.display = 'none';
-            document.getElementById('messagesContainer').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon"><i class="fas fa-comments"></i></div>
-                    <h3>Select a group to start chatting</h3>
-                    <p>Or create a new group to connect with service providers</p>
-                </div>
-            `;
-            loadGroups();
-        } else {
-            showToast('Failed to leave group', 'error');
-        }
-    } catch (error) {
-        console.error('Error leaving group:', error);
-        showToast('Failed to leave group', 'error');
+    const groupIndex = DEMO_GROUPS.findIndex(g => g.id === currentGroupId);
+    if (groupIndex > -1) {
+        DEMO_GROUPS.splice(groupIndex, 1);
     }
+
+    closeGroupDetailsModal();
+    showToast('Left group successfully (demo)', 'success');
+    currentGroupId = null;
+    document.getElementById('chatHeader').style.display = 'none';
+    document.getElementById('messageInputArea').style.display = 'none';
+    document.getElementById('messagesContainer').innerHTML = `
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-comments"></i></div>
+            <h3>Select a group to start chatting</h3>
+            <p>Or create a new group to connect with service providers</p>
+        </div>
+    `;
+    loadGroups();
 }
 
 // Handle attachment (placeholder)
 function handleAttachment() {
-    showToast('File attachment feature coming soon!', 'info');
+    showToast('File attachment feature coming soon! (Demo)', 'info');
 }
 
 // Toggle emoji picker (placeholder)
 function toggleEmojiPicker() {
-    showToast('Emoji picker coming soon!', 'info');
+    showToast('Emoji picker coming soon! (Demo)', 'info');
 }
 
 // Show toast notification
