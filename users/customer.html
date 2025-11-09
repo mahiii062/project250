@@ -8,6 +8,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="../css/customer.css">
+
+  <style>
+    /* Simple small group chat button */
+    .group-chat-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff !important;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .group-chat-btn i {
+      margin-right: 5px;
+    }
+
+    .group-chat-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+  </style>
 </head>
 
 <body>
@@ -27,6 +49,12 @@
       <a href="../header/painting.html">Paintings</a>
       <a href="../header/blog.html">Blogs</a>
       <a href="../header/contact.html">Contact Us</a>
+
+      <!-- 🆕 Small Group Chat Button -->
+      <a href="../header/groupChat.html" class="group-chat-btn">
+        <i class="fas fa-comments"></i> Chat
+      </a>
+
       <a href="customerDashboard.html" class="profile">
         <i class="fas fa-user-circle"></i>
       </a>
