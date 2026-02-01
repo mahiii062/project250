@@ -4,6 +4,15 @@ import db from "../config/db.js";
 
 const router = express.Router();
 
+// Helper: standardized schema-missing response
+function handleSchemaMissing(res, e) {
+  if (e && e.message && e.message.includes('Unknown column')) {
+    console.error('Schema error (missing column):', e.message);
+    return res.status(500).json({ ok: false, error: 'Database schema missing required column(s). Please run migrations or restart the server after ensuring schema updates.' });
+  }
+  return null;
+}
+
 /** helper: build dynamic UPDATE SETs safely */
 function buildUpdateSet(obj) {
   const cols = [];
@@ -70,8 +79,8 @@ router.get("/me", async (req, res) => {
     }
 
     return res.json({ ok: true, data: vendorData });
-  } catch (e) {
-    console.error("GET /me error:", e);
+  } catch (e) {    const schemaResp = handleSchemaMissing(res, e);
+    if (schemaResp) return schemaResp;    console.error("GET /me error:", e);
     return res.status(500).json({ ok: false, error: e.message });
   }
 });
@@ -180,6 +189,8 @@ router.patch("/me", async (req, res) => {
 
     return res.json({ ok: true, data: vendorData });
   } catch (e) {
+    const schemaResp = handleSchemaMissing(res, e);
+    if (schemaResp) return schemaResp;
     console.error("PATCH /me error:", e);
     return res.status(500).json({ ok: false, error: e.message });
   }
@@ -215,6 +226,8 @@ router.patch("/me/type", async (req, res) => {
 
     return res.json({ ok: true, data: { vendor_id, vendor_type } });
   } catch (e) {
+    const schemaResp = handleSchemaMissing(res, e);
+    if (schemaResp) return schemaResp;
     console.error("PATCH /me/type error:", e);
     return res.status(500).json({ ok: false, error: e.message });
   }
@@ -248,6 +261,8 @@ router.post('/me/verify', async (req, res) => {
 
     return res.json({ ok: true, message: 'your profile has been submitted for verification' });
   } catch (e) {
+    const schemaResp = handleSchemaMissing(res, e);
+    if (schemaResp) return schemaResp;
     console.error('/me/verify error', e);
     return res.status(500).json({ ok: false, error: e.message });
   }
@@ -360,6 +375,8 @@ router.patch("/me/location", async (req, res) => {
 
     return res.json({ ok: true, data: vendorData });
   } catch (e) {
+    const schemaResp = handleSchemaMissing(res, e);
+    if (schemaResp) return schemaResp;
     console.error("PATCH /me/location error:", e);
     return res.status(500).json({ ok: false, error: e.message });
   }

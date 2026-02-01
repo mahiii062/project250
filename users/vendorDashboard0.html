@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vendor Dashboard - Nibash (Gated)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/vendorDashboard.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <style>
+    .hidden { display: none !important; }
+    .muted { color: #6b7280; }
+    .row-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .status { font-size: 0.9rem; }
+    .products-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); gap:16px; }
+    .product-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; overflow: hidden; }
+    .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
+    .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; background:#fff; margin-bottom:16px; }
+    .form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
+    .form-field { display:flex; flex-direction:column; gap:6px; }
+    .form-field.col-span-2 { grid-column: span 2 / span 2; }
+    .btn { padding:8px 14px; border-radius:10px; border:1px solid #11182710; cursor:pointer; background:#f3f4f6; transition: all 0.2s ease; }
+    .btn.primary { background:#111827; color:#fff; }
+    .btn.primary:hover { background:#1f2937; }
+    .type-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin:12px 0; }
+    .type-card { border:1px solid #e5e7eb; border-radius:14px; padding:12px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
+    .type-card input { margin-top:4px; }
+    .gated { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+    .gated.ready { opacity: 1; pointer-events: auto; }
+    .dialog-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding: 20px; z-index:1000; overflow-y:auto; }
+    .dialog { width: 100%; max-width: 760px; background:#fff; border-radius:16px; border:1px solid #e5e7eb; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 28px; }
+    .dialog header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; }
+    .dialog footer { display:flex; gap:8px; justify-content:flex-end; margin-top: 16px; }
+    .vendor-logo { width: 56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#111827; color:#fff; font-weight:600; font-size:20px; overflow:hidden; }
+    /* Verification dialog improvements */
+    .verify-hint { margin:8px 0 16px; color:#6b7280; font-size:0.95rem; line-height:1.5; }
+    .upload-row { display:flex; gap:8px; align-items:center; margin-top: 4px; }
+    .file-name { font-size:0.9rem; color:#374151; margin-left:8px; }
+    #verifyDialogMessage { font-weight:600; margin-top:12px; }
+    .dialog .disabled { opacity:0.6; pointer-events:none; }
+    .vendor-logo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; padding: 10px 16px; border-bottom: 1px solid #e5e7eb; background:#fff; position: sticky; top:0; z-index:5; }
+    .dashboard-container { display:grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 56px); }
+    .sidebar { border-right:1px solid #e5e7eb; padding: 16px; }
+    .sidebar ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .sidebar li { padding:8px 10px; border-radius:8px; cursor:pointer; }
+    .sidebar li.active, .sidebar li:hover { background:#f3f4f6; }
+    .vendor-info { display:flex; gap:16px; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; border-radius:16px; padding:16px; margin-bottom:16px; }
+    .vendor-details { flex:1; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px 16px; }
+    .vendor-actions { display:flex; gap:8px; }
+    #mapContainer { width:100%; height:400px; border-radius:12px; margin:12px 0; border:1px solid #e5e7eb; }
+    
+    /* Improved verification photo section */
+    .photo-section { margin: 12px 0; }
+    .photo-upload-area { border: 2px dashed #d1d5db; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease; margin-top: 8px; }
+    .photo-upload-area:hover { border-color: #111827; background: #f9fafb; }
+    .photo-upload-area i { font-size: 2rem; color: #9ca3af; margin-bottom: 8px; }
+    .photo-upload-area p { margin: 0; color: #6b7280; font-size: 0.9rem; }
+    .photo-preview-container { margin-top: 12px; }
+    .photo-preview { width: 100%; max-height: 240px; border-radius: 12px; object-fit: cover; display: block; }
+    .camera-section { margin-top: 12px; }
+    .camera-preview { width: 100%; border-radius: 12px; margin-bottom: 8px; max-height: 240px; object-fit: cover; }
+    .camera-controls { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
+    .btn.secondary { background: #e5e7eb; color: #111827; }
+    .btn.secondary:hover { background: #d1d5db; }
+    .btn.danger { background: #ef4444; color: white; }
+    .btn.danger:hover { background: #dc2626; }
+    .btn.success { background: #10b981; color: white; }
+    .btn.success:hover { background: #059669; }
+    .btn.small { padding: 6px 12px; font-size: 0.85rem; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.verified { background: #d1fae5; color: #065f46; }
+    .status-badge.unverified { background: #f3f4f6; color: #4b5563; }
+    .file-upload-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .file-upload-row input[type="file"] { flex: 1; }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="logo">
+      <img src="../images/mainLogo.png" alt="Nibash Logo" />
+      <span class="logo-text">Nibash</span>
+    </div>
+    <div class="nav-actions">
+      <a href="../index.html">Home</a>
+      <a href="customerDashboard.html">Customer</a>
+      <button class="logout-btn" id="logoutBtn">Log Out</button>
+    </div>
+  </header>
+
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <h3>My Account</h3>
+      <ul>
+        <li class="active">Profile</li>
+        <li>Location</li>
+        <li>Products</li>
+        <li>Orders</li>
+        <li>Analytics</li>
+        <li>Messages</li>
+        <li>Settings</li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <section class="vendor-info">
+        <div class="vendor-logo" id="companyLogoBox">V</div>
+        <div class="vendor-details">
+          <p><strong>Company Name:</strong> <span id="companyName">—</span></p>
+          <p><strong>Contact:</strong> <span id="companyPhone">—</span></p>
+          <p><strong>Location:</strong> <span id="companyLocation">—</span></p>
+          <p><strong>Email:</strong> <span id="companyEmail">—</span></p>
+          <p><strong>Job Type:</strong> <span id="companyJobType">—</span></p>
+          <p><strong>Service Radius:</strong> <span id="companyServiceRadius">—</span> km</p>
+          <p><strong>WhatsApp:</strong> <span id="companyWhatsapp">—</span></p>
+          <p><strong>Shop Address:</strong> <span id="companyShopAddress">—</span></p>
+          <p><strong>Service Areas:</strong> <span id="companyServiceAreas">—</span></p>
+          <p><strong>Job Description:</strong> <span id="companyJobDesc">—</span></p>
+        </div>
+        <div class="vendor-actions">
+          <button class="btn" id="editInfoBtn">Update Info</button>
+        </div>
+      </section>
+
+      <section class="card" id="verificationCard">
+        <h3>🔒 Vendor Verification</h3>
+        <p class="muted" id="verifyHint">Get verified to increase trust. Submit your documents for manual review.</p>
+        <p class="muted">Status: <strong id="verifyStatus">—</strong></p>
+        <div class="row-actions" id="verifyActions">
+          <button class="btn primary" id="openVerifyBtn">Request Verification</button>
+        </div>
+        <p id="verifyMessage" class="status muted" style="margin-top:8px;"></p>
+      </section>
+
+      <section class="card">
+        <h3>📍 Manage Your Location</h3>
+        <p class="muted">Set your business location so customers can find you nearby.</p>
+        <div id="mapContainer"></div>
+        <div class="form-grid" style="margin-top: 12px;">
+          <input type="text" id="locationName" placeholder="Business Location" style="grid-column: span 2;" />
+          <button class="btn secondary" id="useCurrentLocationBtn">📍 Use Current Location</button>
+          <button class="btn primary" id="saveLocationBtn">Save Location</button>
+        </div>
+        <p id="locationStatus" class="status" style="margin-top: 8px;"></p>
+      </section>
+
+      <section class="card" id="typeGate">
+        <h3>Vendor Type</h3>
+        <p class="muted">Classify your business to tailor your dashboard and listing form.</p>
+
+        <div class="type-grid">
+          <label class="type-card">
+            <input type="radio" name="vendorType" value="seller" />
+            <div>
+              <strong>Seller</strong>
+              <p>Furniture • Painting • Decoration • দেশীয় মৃতশিল্প</p>
+            </div>
+          </label>
+
+          <label class="type-card">
+            <input type="radio" name="vendorType" value="service" />
+            <div>
+              <strong>Service Provider</strong>
+              <p>Interior Designer • Electrician • Plumber • Painter</p>
+            </div>
+          </label>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn primary" id="saveTypeBtn" type="button">Save Type</button>
+          <span id="typeStatus" class="status muted"></span>
+        </div>
+      </section>
+
+      <!-- CREATE LISTING -->
+      <section class="card gated hidden" id="createListingSection">
+        <h3 id="createHeader">Create Listing</h3>
+        <p class="muted" id="formHint">Choose your vendor type above to reveal the right fields.</p>
+
+        <div class="form-grid">
+          <label class="form-field col-span-2">
+            <span>Title *</span>
+            <input id="listingTitle" type="text" placeholder="e.g., Oak Study Desk" />
+          </label>
+
+          <label class="form-field col-span-2">
+            <span>Description *</span>
+            <textarea id="listingDesc" rows="3" placeholder="Describe your product/service..."></textarea>
+          </label>
+        </div>
+
+        <!-- SELLER FIELDS -->
+        <div id="sellerFields" class="form-grid hidden">
+          <label class="form-field">
+            <span>Category *</span>
+            <select id="productCategory">
+              <option value="">Select a category</option>
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Price (BDT) *</span>
+            <input id="productPrice" type="number" min="0" step="1" placeholder="e.g., 4500" />
+          </label>
+
+          <label class="form-field">
+            <span>Stock *</span>
+            <input id="productStock" type="number" min="0" step="1" placeholder="e.g., 10" />
+          </label>
+
+          <label class="form-field col-span-2">
+            <span>Image URL (optional)</span>
+            <input id="productImage" type="url" placeholder="https://..." />
+          </label>
+        </div>
+
+        <!-- SERVICE FIELDS -->
+        <div id="serviceFields" class="form-grid hidden">
+          <label class="form-field">
+            <span>Project Type *</span>
+            <select id="serviceCategory">
+              <option value="">Select a project type</option>
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Rate (BDT) *</span>
+            <input id="serviceRate" type="number" min="0" step="1" placeholder="e.g., 1200" />
+          </label>
+
+          <label class="form-field">
+            <span>Billing *</span>
+            <select id="serviceBilling">
+              <option value="fixed">Fixed</option>
+              <option value="hourly">Hourly</option>
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span>Service Area *</span>
+            <input id="serviceArea" type="text" placeholder="e.g., Dhaka, BD" />
+          </label>
+
+          <label class="form-field col-span-2">
+            <span>Project Photo (Image URL)</span>
+            <input id="serviceImage" type="url" placeholder="https://..." />
+          </label>
+        </div>
+
+        <div class="row-actions">
+          <button class="btn secondary" id="clearFormBtn" type="button">Clear</button>
+          <button class="btn primary" id="createListingBtn" type="button">Save Listing</button>
+          <span id="createStatus" class="status muted"></span>
+        </div>
+      </section>
+
+      <!-- MY LISTINGS -->
+      <section class="card gated hidden" id="myListingsSection">
+        <h3 id="myItemsHeader">My Listings</h3>
+        <div class="row-actions" style="margin: 8px 0 12px;">
+          <label class="form-field" style="min-width:240px;">
+            <span id="filterLabel">Filter by category</span>
+            <select id="categoryFilter"></select>
+          </label>
+        </div>
+        <div id="listingsContainer" class="products-grid"></div>
+        <p class="muted" id="noListings" style="display:none;">No items yet. Create one above.</p>
+      </section>
+    </main>
+  </div>
+
+  <div class="dialog-backdrop" id="editDialog">
+    <div class="dialog">
+      <header>
+        <h3>Update Vendor Info</h3>
+        <button class="btn secondary small" id="closeEditBtn">✕</button>
+      </header>
+      <div class="form-grid">
+        <label class="form-field">
+          <span>Company Name *</span>
+          <input id="editCompanyName" type="text" />
+        </label>
+        <label class="form-field">
+          <span>Phone *</span>
+          <input id="editCompanyPhone" type="text" />
+        </label>
+        <label class="form-field">
+          <span>Location *</span>
+          <input id="editCompanyLocation" type="text" placeholder="e.g., Dhaka, BD" />
+        </label>
+        <label class="form-field">
+          <span>Email *</span>
+          <input id="editCompanyEmail" type="email" />
+        </label>
+        <label class="form-field">
+          <span>Job Type *</span>
+          <select id="editJobType">
+            <option value="">Select job type</option>
+            <option>Interior Designer</option>
+            <option>Electrician</option>
+            <option>Plumber</option>
+            <option>Painter</option>
+            <option>Carpenter</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label class="form-field">
+          <span>WhatsApp Message Link</span>
+          <input id="editWhatsappLink" type="url" placeholder="https://wa.me/..." />
+        </label>
+        <label class="form-field">
+          <span>Service Radius (km)</span>
+          <input id="editServiceRadius" type="number" min="1" max="100" placeholder="e.g., 5" />
+        </label>
+        <label class="form-field">
+          <span>Visiting Card URL</span>
+          <input id="editVisitingCard" type="url" placeholder="https://..." />
+        </label>
+        <label class="form-field col-span-2">
+          <span>Shop/Office Address</span>
+          <textarea id="editShopAddress" rows="2" placeholder="Full shop or office address..."></textarea>
+        </label>
+        <label class="form-field col-span-2">
+          <span>Service Areas</span>
+          <textarea id="editServiceLocations" rows="2" placeholder="Enter areas you serve, separated by commas (e.g., Gulshan, Banani, Dhanmondi)"></textarea>
+          <small class="muted">Separate multiple locations with commas</small>
+        </label>
+        <label class="form-field col-span-2">
+          <span>Vendor Description</span>
+          <textarea id="editJobDescription" rows="3"
+            placeholder="Short description about your services/skills"></textarea>
+        </label>
+        <label class="form-field col-span-2">
+          <span>Logo URL (optional)</span>
+          <input id="editLogoUrl" type="url" placeholder="https://..." />
+        </label>
+      </div>
+      <footer>
+        <span id="editStatus" class="status muted" style="margin-right:auto"></span>
+        <button class="btn secondary" id="resetEditBtn" type="button">Reset</button>
+        <button class="btn primary" id="saveEditBtn" type="button">Save Changes</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="dialog-backdrop" id="verifyDialog" style="display:none;">
+    <div class="dialog">
+      <header>
+        <h3>Request Verification</h3>
+        <button class="btn secondary small" id="closeVerifyBtn">✕</button>
+      </header>
+      <p class="verify-hint">Provide your NID or passport number and a live selfie. Optional documents (trade license, training certificate) can be uploaded as images or PDF.</p>
+      
+      <div class="form-grid" style="gap:16px;">
+        <label class="form-field col-span-2">
+          <span>NID Number (or Passport) *</span>
+          <input id="verifyNid" type="text" placeholder="1234567890" />
+        </label>
+
+        <!-- Live Photo Section - camera-first (upload button removed) -->
+        <div class="form-field col-span-2 photo-section">
+          <span>Live Photo / Selfie *</span>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button class="btn secondary" id="useCameraBtn" type="button">Use Camera</button>
+          </div>
+          <input id="verifyLivePhotoFile" type="file" accept="image/*" style="display: none;" />
+
+          <!-- Photo Preview -->
+          <div class="photo-preview-container" id="photoPreviewContainer" style="display: none; margin-top:8px;">
+            <img id="livePhotoPreview" class="photo-preview" src="" alt="Photo preview" />
+            <div style="display: flex; gap: 8px; margin-top: 8px; justify-content: center;">
+              <button class="btn danger small" id="removePhotoBtn">Remove Photo</button>
+            </div>
+          </div>
+
+          <!-- Camera Section -->
+          <div class="camera-section" id="cameraContainer" style="display: none; margin-top:8px;">
+            <video id="verifyVideo" autoplay playsinline class="camera-preview"></video>
+            <div class="camera-controls">
+              <button class="btn success small" id="capturePhotoBtn">Capture Photo</button>
+              <button class="btn secondary small" id="closeCameraBtn">Close Camera</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trade License (no file) -->
+        <label class="form-field">
+          <span>Trade License (optional)</span>
+          <input id="verifyTrade" type="text" placeholder="Trade license number" />
+        </label>
+
+        <!-- Training Certificate -->
+        <label class="form-field">
+          <span>Training Certificate (optional)</span>
+          <div class="file-upload-row">
+            <input id="verifyTrainingFile" type="file" accept=".pdf,image/*" />
+          </div>
+        </label>
+      </div>
+
+      <p id="verifyDialogMessage" class="status" style="margin-top:16px; text-align: center;"></p>
+
+      <footer>
+        <span id="verifyStatusMsg" class="status muted" style="margin-right:auto"></span>
+        <button class="btn secondary" id="resetVerifyBtn" type="button">Reset</button>
+        <button class="btn primary" id="submitVerifyBtn" type="button">Submit Request</button>
+      </footer>
+    </div>
+  </div> 
+
+  <script>
+    /* =======================
+       AUTH & GLOBALS
+    ======================= */
+    const API_BASE = "http://localhost:5555";
+    const VENDOR_TOKEN = localStorage.getItem("vendorToken");
+    const VENDOR_ID = Number(localStorage.getItem("vendorId"));
+
+    if (!VENDOR_ID || !VENDOR_TOKEN) {
+      alert("❌ Not authenticated");
+      window.location.href = "../index.html";
+    }
+
+    let map = null;
+    let vendorMarker = null;
+    let currentLat = 23.8103;
+    let currentLng = 90.4125;
+    let VENDOR_PROFILE = null;
+    let cameraStream = null;
+    let capturedBlob = null;
+
+    /* =======================
+       API HELPER
+    ======================= */
+    async function apiCall(path, method = "GET", body = null) {
+      const res = await fetch(`${API_BASE}${path}`, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${VENDOR_TOKEN}`
+        },
+        body: body ? JSON.stringify(body) : null
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Request failed");
+      return json.data || json;
+    }
+
+    /* =======================
+       REVERSE GEOCODING
+    ======================= */
+    async function getLocationName(lat, lng) {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        );
+        const data = await res.json();
+        return data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      } catch {
+        return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      }
+    }
+
+    /* =======================
+       MAP
+    ======================= */
+    function initMap() {
+      if (map) return;
+
+      map = L.map("mapContainer").setView([currentLat, currentLng], 13);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19
+      }).addTo(map);
+
+      vendorMarker = L.marker([currentLat, currentLng]).addTo(map);
+
+      map.on("click", async (e) => {
+        currentLat = e.latlng.lat;
+        currentLng = e.latlng.lng;
+        vendorMarker.setLatLng([currentLat, currentLng]);
+
+        const place = await getLocationName(currentLat, currentLng);
+        document.getElementById("locationName").value = place;
+      });
+
+      setTimeout(() => map.invalidateSize(), 100);
+    }
+
+    /* =======================
+       VERIFICATION DIALOG FUNCTIONS
+    ======================= */
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(t => t.stop());
+        cameraStream = null;
+        const video = document.getElementById("verifyVideo");
+        if (video) video.srcObject = null;
+      }
+      document.getElementById("cameraContainer").style.display = "none";
+    }
+
+    function showCamera() {
+      const cameraContainer = document.getElementById("cameraContainer");
+      const photoPreviewContainer = document.getElementById("photoPreviewContainer");
+      const video = document.getElementById("verifyVideo");
+      
+      photoPreviewContainer.style.display = "none";
+      cameraContainer.style.display = "block";
+      
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(stream => {
+          cameraStream = stream;
+          video.srcObject = stream;
+        })
+        .catch(err => {
+          alert("Could not access camera. Please check permissions.");
+          cameraContainer.style.display = "none";
+          console.error("Camera error:", err);
+        });
+    }
+
+    function capturePhoto() {
+      const video = document.getElementById("verifyVideo");
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      canvas.toBlob(blob => {
+        capturedBlob = blob;
+        const url = URL.createObjectURL(blob);
+        document.getElementById("livePhotoPreview").src = url;
+        document.getElementById("photoPreviewContainer").style.display = "block";
+        document.getElementById("cameraContainer").style.display = "none";
+        stopCamera();
+      }, "image/jpeg", 0.9);
+    }
+
+    function setupVerificationDialog() {
+      const verifyDialog = document.getElementById("verifyDialog");
+      const closeVerifyBtn = document.getElementById("closeVerifyBtn");
+      const openVerifyBtn = document.getElementById("openVerifyBtn");
+      const resetVerifyBtn = document.getElementById("resetVerifyBtn");
+      const submitVerifyBtn = document.getElementById("submitVerifyBtn");
+      const livePhotoInput = document.getElementById("verifyLivePhotoFile");
+      const removePhotoBtn = document.getElementById("removePhotoBtn");
+      const useCameraBtn = document.getElementById("useCameraBtn");
+      const capturePhotoBtn = document.getElementById("capturePhotoBtn");
+      const closeCameraBtn = document.getElementById("closeCameraBtn");
+      const verifyDialogMessageEl = document.getElementById("verifyDialogMessage");
+      const verificationKey = `verification_pending_${VENDOR_ID}`;
+
+      // Open verification dialog (button may not exist when status != unverified)
+      if (openVerifyBtn) {
+        openVerifyBtn.addEventListener("click", () => {
+          const pending = localStorage.getItem(verificationKey);
+          verifyDialog.style.display = "flex";
+          
+          if (pending) {
+            const data = JSON.parse(pending);
+            verifyDialogMessageEl.textContent = `⏳ Request submitted on ${new Date(data.requested_at).toLocaleString()}`;
+            verifyDialogMessageEl.style.color = "#92400e";
+            disableVerificationInputs(true);
+            submitVerifyBtn.style.display = "none";
+            resetVerifyBtn.disabled = true;
+
+          } else {
+            verifyDialogMessageEl.textContent = "";
+            disableVerificationInputs(false);
+            submitVerifyBtn.style.display = "inline-block";
+            resetVerifyBtn.disabled = false;
+
+          }
+        });
+      }
+
+      // Close dialog
+      closeVerifyBtn.addEventListener("click", () => {
+        verifyDialog.style.display = "none";
+        stopCamera();
+        resetVerificationForm();
+      });
+
+
+
+      // File input change
+      livePhotoInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          if (file.size > 5 * 1024 * 1024) {
+            alert("File size must be less than 5MB");
+            return;
+          }
+          capturedBlob = file;
+          const url = URL.createObjectURL(file);
+          document.getElementById("livePhotoPreview").src = url;
+          document.getElementById("photoPreviewContainer").style.display = "block";
+        }
+      });
+
+      // Remove photo
+      removePhotoBtn.addEventListener("click", () => {
+        capturedBlob = null;
+        document.getElementById("livePhotoPreview").src = "";
+        document.getElementById("photoPreviewContainer").style.display = "none";
+        livePhotoInput.value = "";
+      });
+
+      // Use camera
+      if (useCameraBtn) useCameraBtn.addEventListener("click", showCamera);
+
+      // Capture photo
+      capturePhotoBtn.addEventListener("click", capturePhoto);
+
+      // Close camera
+      closeCameraBtn.addEventListener("click", () => {
+        stopCamera();
+        document.getElementById("photoPreviewContainer").style.display = "block";
+      });
+
+      // Reset form
+      resetVerifyBtn.addEventListener("click", resetVerificationForm);
+
+      // Submit verification
+      submitVerifyBtn.addEventListener("click", submitVerification);
+    }
+
+    function disableVerificationInputs(disabled) {
+      const ids = ["verifyNid", "verifyTrade", "verifyTrainingFile", "useCameraBtn"];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = disabled;
+      });
+
+      const useBtn = document.getElementById("useCameraBtn");
+      if (disabled) {
+        if (useBtn) { useBtn.style.pointerEvents = "none"; useBtn.style.opacity = "0.6"; }
+        stopCamera();
+      } else {
+        if (useBtn) { useBtn.style.pointerEvents = "auto"; useBtn.style.opacity = "1"; }
+      }
+    }
+
+    // Update UI when vendor type changes or is set
+    function updateVendorTypeUI(vendorType) {
+      const createSection = document.getElementById('createListingSection');
+      const sellerFields = document.getElementById('sellerFields');
+
+      if (!vendorType) {
+        // hide listing section until vendor type set
+        if (createSection) createSection.classList.add('hidden');
+        if (sellerFields) sellerFields.classList.add('hidden');
+        return;
+      }
+
+      // show listing section
+      if (createSection) createSection.classList.remove('hidden');
+
+      if (vendorType === 'seller') {
+        if (sellerFields) sellerFields.classList.remove('hidden');
+      } else {
+        if (sellerFields) sellerFields.classList.add('hidden');
+      }
+    }
+
+    function resetVerificationForm() {
+      const verificationKey = `verification_pending_${VENDOR_ID}`;
+      const pending = localStorage.getItem(verificationKey);
+      
+      if (pending) {
+        document.getElementById("verifyStatusMsg").textContent = "⏳ A request is pending; cannot reset now.";
+        return;
+      }
+      
+      document.getElementById("verifyNid").value = "";
+      document.getElementById("verifyTrade").value = "";
+      document.getElementById("verifyTrainingFile").value = "";
+      document.getElementById("verifyStatusMsg").textContent = "";
+      document.getElementById("verifyDialogMessage").textContent = "";
+      
+      capturedBlob = null;
+      document.getElementById("livePhotoPreview").src = "";
+      document.getElementById("photoPreviewContainer").style.display = "none";
+
+      stopCamera();
+    }
+
+    async function submitVerification() {
+      try {
+        const nid = document.getElementById("verifyNid").value.trim();
+        const tradeId = document.getElementById("verifyTrade").value.trim();
+        const trainingFile = document.getElementById("verifyTrainingFile").files[0] || null;
+
+        if (!nid || !capturedBlob) {
+          document.getElementById("verifyStatusMsg").textContent = "Please provide both NID and a selfie photo.";
+          return;
+        }
+
+        document.getElementById("verifyStatusMsg").textContent = "💾 Submitting...";
+        const submitBtn = document.getElementById('submitVerifyBtn');
+        if (submitBtn) submitBtn.disabled = true;
+
+        // Frontend-only: simulate submission
+        setTimeout(() => {
+          const payload = { 
+            requested_at: new Date().toISOString(), 
+            nid: nid 
+          };
+          
+          if (trainingFile) payload.training_file_name = trainingFile.name;
+          
+          localStorage.setItem(`verification_pending_${VENDOR_ID}`, JSON.stringify(payload));
+
+          // Update UI
+          document.getElementById("verifyDialogMessage").textContent = "✅ Your verification request has been submitted!";
+          document.getElementById("verifyDialogMessage").style.color = "#065f46";
+          disableVerificationInputs(true);
+          if (submitBtn) submitBtn.style.display = 'none';
+          document.getElementById("verifyStatusMsg").textContent = "";
+          
+          // Update main verification card
+          document.getElementById("verifyStatus").textContent = "Pending review";
+          document.getElementById("verifyActions").innerHTML = `<span class="muted">Requested on ${new Date().toLocaleString()}</span>`;
+          
+          if (submitBtn) submitBtn.disabled = false;
+        }, 800);
+
+      } catch (e) {
+        document.getElementById("verifyStatusMsg").textContent = `❌ ${e.message}`;
+        document.getElementById("verifyStatusMsg").style.color = "crimson";
+        submitVerifyBtn.disabled = false;
+      }
+    }
+
+    /* =======================
+       LOAD PROFILE
+    ======================= */
+    async function loadVendorProfile() {
+      const me = await apiCall("/api/vendors/me");
+      VENDOR_PROFILE = me;
+
+      document.getElementById("companyName").textContent = me.company_name || "—";
+      document.getElementById("companyPhone").textContent = me.phone || "—";
+      document.getElementById("companyLocation").textContent = me.location || "—";
+      document.getElementById("companyEmail").textContent = me.email || "—";
+      document.getElementById("companyJobType").textContent = (me.job_type || "—").replace(/_/g, " ");
+      document.getElementById("companyJobDesc").textContent = me.Vendor_description || "—";
+
+      if (me.latitude && me.longitude) {
+        currentLat = parseFloat(me.latitude);
+        currentLng = parseFloat(me.longitude);
+      }
+
+      document.getElementById("editCompanyName").value = me.company_name || "";
+      document.getElementById("editCompanyPhone").value = me.phone || "";
+      document.getElementById("editCompanyLocation").value = me.location || "";
+      document.getElementById("editCompanyEmail").value = me.email || "";
+      document.getElementById("editJobType").value = me.job_type || "";
+      document.getElementById("editJobDescription").value = me.Vendor_description || "";
+      document.getElementById("editLogoUrl").value = me.logo_url || "";
+
+      // Set vendor type radio (if available) and update listing visibility
+      const preferredType = me.vendor_type || localStorage.getItem('vendorType') || '';
+      if (preferredType) {
+        const radio = document.querySelector(`input[name="vendorType"][value="${preferredType}"]`);
+        if (radio) radio.checked = true;
+        localStorage.setItem('vendorType', preferredType);
+        updateVendorTypeUI(preferredType);
+        setGateVisibility(preferredType);
+        // Load lookups and listings for this vendor type
+        try {
+          await loadLookups(preferredType);
+          await renderListings();
+        } catch (e) {
+          console.error('Error loading lookups/listings after profile load:', e);
+        }
+      } else {
+        updateVendorTypeUI('');
+      }
+
+      initMap();
+      vendorMarker.setLatLng([currentLat, currentLng]);
+      map.setView([currentLat, currentLng], 13);
+      document.getElementById("locationName").value = me.location || "";
+
+      // Verification UI
+      const verificationKey = `verification_pending_${VENDOR_ID}`;
+      let vStatus = me.verification_status || "unverified";
+      const pendingLocal = localStorage.getItem(verificationKey);
+      
+      if (vStatus === "unverified" && pendingLocal) {
+        vStatus = "pending";
+        me.verification_requested_at = JSON.parse(pendingLocal).requested_at;
+      }
+      
+      let statusText, statusClass;
+      if (vStatus === "pending") {
+        statusText = "Pending review";
+        statusClass = "pending";
+      } else if (vStatus === "verified") {
+        statusText = "Verified";
+        statusClass = "verified";
+      } else {
+        statusText = "Unverified";
+        statusClass = "unverified";
+      }
+      
+      document.getElementById("verifyStatus").innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+      
+      const verifyActions = document.getElementById("verifyActions");
+      if (vStatus === "unverified") {
+        verifyActions.innerHTML = '<button class="btn primary" id="openVerifyBtn">Request Verification</button>';
+      } else if (vStatus === "pending") {
+        const requestedAt = me.verification_requested_at ? new Date(me.verification_requested_at).toLocaleString() : new Date().toLocaleString();
+        verifyActions.innerHTML = `<span class="muted">Requested on ${requestedAt}</span>`;
+      } else if (vStatus === "verified") {
+        verifyActions.innerHTML = `<span class="status-badge verified">Verified ✅</span>`;
+      }
+
+      // Setup verification dialog
+      setupVerificationDialog();
+    }
+
+    /* =======================
+       LOCATION BUTTONS
+    ======================= */
+    document.getElementById("useCurrentLocationBtn").addEventListener("click", () => {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        currentLat = pos.coords.latitude;
+        currentLng = pos.coords.longitude;
+
+        vendorMarker.setLatLng([currentLat, currentLng]);
+        map.setView([currentLat, currentLng], 13);
+
+        const place = await getLocationName(currentLat, currentLng);
+        document.getElementById("locationName").value = place;
+
+        document.getElementById("locationStatus").textContent = "✅ Location detected";
+        document.getElementById("locationStatus").style.color = "green";
+      }, () => {
+        document.getElementById("locationStatus").textContent = "❌ Could not get location";
+        document.getElementById("locationStatus").style.color = "crimson";
+      });
+    });
+
+    document.getElementById("saveLocationBtn").addEventListener("click", async () => {
+      const locationName = document.getElementById("locationName").value.trim();
+      if (!locationName) {
+        document.getElementById("locationStatus").textContent = "❌ Please enter a location name";
+        document.getElementById("locationStatus").style.color = "crimson";
+        return;
+      }
+
+      try {
+        document.getElementById("locationStatus").textContent = "💾 Saving location...";
+        
+        await apiCall("/api/vendors/me/location", "PATCH", {
+          latitude: currentLat,
+          longitude: currentLng,
+          location_name: locationName
+        });
+
+        document.getElementById("locationStatus").textContent = "✅ Location saved";
+        document.getElementById("locationStatus").style.color = "green";
+        loadVendorProfile();
+      } catch (e) {
+        document.getElementById("locationStatus").textContent = `❌ ${e.message}`;
+        document.getElementById("locationStatus").style.color = "crimson";
+      }
+    });
+
+    /* =======================
+       EDIT VENDOR INFO
+    ======================= */
+    document.getElementById("editInfoBtn").addEventListener("click", () => {
+      document.getElementById("editDialog").style.display = "flex";
+    });
+
+    document.getElementById("closeEditBtn").addEventListener("click", () => {
+      document.getElementById("editDialog").style.display = "none";
+    });
+
+    document.getElementById("saveEditBtn").addEventListener("click", async () => {
+      try {
+        const data = {
+          company_name: document.getElementById("editCompanyName").value.trim(),
+          phone: document.getElementById("editCompanyPhone").value.trim(),
+          location: document.getElementById("editCompanyLocation").value.trim(),
+          email: document.getElementById("editCompanyEmail").value.trim(),
+          job_type: document.getElementById("editJobType").value.trim(),
+          Vendor_description: document.getElementById("editJobDescription").value.trim(),
+          logo_url: document.getElementById("editLogoUrl").value.trim() || null,
+        };
+
+        if (!data.company_name || !data.phone || !data.location || !data.email || !data.job_type) {
+          throw new Error("All required fields must be filled");
+        }
+
+        const status = document.getElementById("editStatus");
+        status.textContent = "💾 Saving...";
+
+        await apiCall("/api/vendors/me", "PATCH", data);
+
+        status.textContent = "✅ Saved";
+        status.style.color = "green";
+
+        setTimeout(() => {
+          document.getElementById("editDialog").style.display = "none";
+          loadVendorProfile();
+        }, 600);
+
+      } catch (e) {
+        document.getElementById("editStatus").textContent = `❌ ${e.message}`;
+        document.getElementById("editStatus").style.color = "crimson";
+      }
+    });
+
+    document.getElementById("resetEditBtn").addEventListener("click", () => {
+      if (VENDOR_PROFILE) {
+        document.getElementById("editCompanyName").value = VENDOR_PROFILE.company_name || "";
+        document.getElementById("editCompanyPhone").value = VENDOR_PROFILE.phone || "";
+        document.getElementById("editCompanyLocation").value = VENDOR_PROFILE.location || "";
+        document.getElementById("editCompanyEmail").value = VENDOR_PROFILE.email || "";
+        document.getElementById("editJobType").value = VENDOR_PROFILE.job_type || "";
+        document.getElementById("editJobDescription").value = VENDOR_PROFILE.Vendor_description || "";
+        document.getElementById("editLogoUrl").value = VENDOR_PROFILE.logo_url || "";
+      }
+    });
+
+    // Save vendor type (radio selection)
+    const saveTypeBtn = document.getElementById('saveTypeBtn');
+    if (saveTypeBtn) {
+      saveTypeBtn.addEventListener('click', async () => {
+        try {
+          const selected = document.querySelector('input[name="vendorType"]:checked');
+          if (!selected) {
+            document.getElementById('typeStatus').textContent = '❌ Please select a vendor type';
+            document.getElementById('typeStatus').style.color = 'crimson';
+            return;
+          }
+
+          const vendor_type = selected.value;
+          document.getElementById('typeStatus').textContent = '💾 Saving...';
+
+          await apiCall('/api/vendors/me/type', 'PATCH', { vendor_type });
+
+          document.getElementById('typeStatus').textContent = '✅ Saved';
+          document.getElementById('typeStatus').style.color = 'green';
+          updateVendorTypeUI(vendor_type);
+
+          setTimeout(() => { document.getElementById('typeStatus').textContent = ''; }, 1500);
+        } catch (e) {
+          document.getElementById('typeStatus').textContent = `❌ ${e.message}`;
+          document.getElementById('typeStatus').style.color = 'crimson';
+        }
+      });
+    }
+
+    /* =======================
+       LOGOUT
+    ======================= */
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      if (confirm("Are you sure you want to log out?")) {
+        localStorage.clear();
+        window.location.href = "../index.html";
+      }
+    });
+
+    /* =======================
+       INIT
+    ======================= */
+    loadVendorProfile();
+  </script>
+
+</body>
+
+</html>

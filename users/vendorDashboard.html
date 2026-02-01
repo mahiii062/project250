@@ -14,8 +14,9 @@
     .muted { color: #6b7280; }
     .row-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
     .status { font-size: 0.9rem; }
-    .products-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(160px,1fr)); gap:16px; }
-    .product-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; overflow: hidden; }
+    .products-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+    .product-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; overflow: hidden; transition: transform 0.2s; }
+    .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
     .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; background:#fff; margin-bottom:16px; }
     .form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
@@ -25,12 +26,31 @@
     .btn.primary { background:#111827; color:#fff; }
     .btn.primary:hover { background:#1f2937; }
     .type-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin:12px 0; }
-    .type-card { border:1px solid #e5e7eb; border-radius:14px; padding:12px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; }
+    .type-card { border:1px solid #e5e7eb; border-radius:14px; padding:12px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; transition: all 0.2s ease; }
+    .type-card:hover { border-color:#111827; background:#f9fafb; }
+    .type-card.active { border-color:#111827; background:#f3f4f6; }
     .type-card input { margin-top:4px; }
     .gated { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
     .gated.ready { opacity: 1; pointer-events: auto; }
     .dialog-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding: 20px; z-index:1000; overflow-y:auto; }
-    .dialog { width: 100%; max-width: 760px; background:#fff; border-radius:16px; border:1px solid #e5e7eb; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 28px; }
+    /* Keep dialogs accessible on short/tall screens */
+    @media (max-height: 640px) {
+      .dialog-backdrop { align-items: flex-start; padding-top: 28px; padding-bottom: 28px; }
+    }
+
+    .dialog { width: 100%; max-width: 720px; box-sizing: border-box; background:#fff; border-radius:14px; border:1px solid #e5e7eb; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 20px; max-height: calc(100vh - 48px); overflow-y: auto; }
+
+    /* Ensure dialog media content scales and doesn't overflow */
+    .dialog img, .dialog video, .photo-preview img, .camera-preview { width: 100%; height: auto; max-height: 420px; object-fit: cover; border-radius: 8px; }
+    .camera-preview { max-height: 320px; }
+
+    /* Footer and header stay usable on small dialogs */
+    .dialog header, .dialog footer { flex-shrink: 0; }
+
+    /* Slight padding reduction on very small screens */
+    @media (max-width: 420px) {
+      .dialog { padding: 12px; border-radius: 12px; }
+    }
     .dialog header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; }
     .dialog footer { display:flex; gap:8px; justify-content:flex-end; margin-top: 16px; }
     .vendor-logo { width: 56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#111827; color:#fff; font-weight:600; font-size:20px; overflow:hidden; }
@@ -76,6 +96,15 @@
     .status-badge.unverified { background: #f3f4f6; color: #4b5563; }
     .file-upload-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
     .file-upload-row input[type="file"] { flex: 1; }
+    
+    /* Listing card styles */
+    .listing-price { font-weight: 600; color: #111827; margin-top: 4px; }
+    .listing-stock { font-size: 0.85rem; color: #6b7280; }
+    .listing-actions { display: flex; gap: 8px; margin-top: 8px; }
+    .listing-card { position: relative; }
+    .listing-status { position: absolute; top: 10px; right: 10px; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; }
+    .listing-status.active { background: #d1fae5; color: #065f46; }
+    .listing-status.inactive { background: #f3f4f6; color: #6b7280; }
   </style>
 </head>
 
@@ -118,7 +147,7 @@
           <p><strong>Service Radius:</strong> <span id="companyServiceRadius">—</span> km</p>
           <p><strong>WhatsApp:</strong> <span id="companyWhatsapp">—</span></p>
           <p><strong>Shop Address:</strong> <span id="companyShopAddress">—</span></p>
-          <p><strong>Service Areas:</strong> <span id="companyServiceAreas">—</span></p>
+          <!-- <p><strong>Service Areas:</strong> <span id="companyServiceAreas">—</span></p> -->
           <p><strong>Job Description:</strong> <span id="companyJobDesc">—</span></p>
         </div>
         <div class="vendor-actions">
@@ -264,7 +293,9 @@
         <div class="row-actions" style="margin: 8px 0 12px;">
           <label class="form-field" style="min-width:240px;">
             <span id="filterLabel">Filter by category</span>
-            <select id="categoryFilter"></select>
+            <select id="categoryFilter">
+              <option value="">All categories</option>
+            </select>
           </label>
         </div>
         <div id="listingsContainer" class="products-grid"></div>
@@ -334,10 +365,26 @@
           <textarea id="editJobDescription" rows="3"
             placeholder="Short description about your services/skills"></textarea>
         </label>
+
+        <label class="form-field">
+          <span>Shop Address (optional)</span>
+          <input id="editShopAddress" type="text" placeholder="Shop / Branch address" />
+        </label>
+
+        <label class="form-field">
+          <span>Service Areas (comma separated)</span>
+          <input id="editServiceAreas" type="text" placeholder="e.g., Dhaka, Chattogram" />
+        </label>
+
+        <label class="form-field">
+          <span>Visiting Card URL (optional)</span>
+          <input id="editVisitingCardUrl" type="url" placeholder="https://..." />
+        </label>
+
         <label class="form-field col-span-2">
           <span>Logo URL (optional)</span>
           <input id="editLogoUrl" type="url" placeholder="https://..." />
-        </label>
+        </label> 
       </div>
       <footer>
         <span id="editStatus" class="status muted" style="margin-right:auto"></span>
@@ -410,7 +457,7 @@
         <button class="btn primary" id="submitVerifyBtn" type="button">Submit Request</button>
       </footer>
     </div>
-  </div> 
+  </div>
 
   <script>
     /* =======================
@@ -432,6 +479,7 @@
     let VENDOR_PROFILE = null;
     let cameraStream = null;
     let capturedBlob = null;
+    let currentListings = [];
 
     /* =======================
        API HELPER
@@ -449,6 +497,380 @@
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Request failed");
       return json.data || json;
+    }
+
+    /* =======================
+       VENDOR TYPE MANAGEMENT
+    ======================= */
+    function setGateVisibility(type) {
+      const createSection = document.getElementById('createListingSection');
+      const listingsSection = document.getElementById('myListingsSection');
+      const sellerFields = document.getElementById('sellerFields');
+      const serviceFields = document.getElementById('serviceFields');
+      
+      // Reset all visibility
+      if (createSection) createSection.classList.add('hidden');
+      if (listingsSection) listingsSection.classList.add('hidden');
+      if (sellerFields) sellerFields.classList.add('hidden');
+      if (serviceFields) serviceFields.classList.add('hidden');
+      
+      if (type === 'seller' || type === 'service') {
+        // Show the sections
+        if (createSection) createSection.classList.remove('hidden');
+        if (listingsSection) listingsSection.classList.remove('hidden');
+        
+        // Add ready class for transition
+        setTimeout(() => {
+          if (createSection) createSection.classList.add('ready');
+          if (listingsSection) listingsSection.classList.add('ready');
+        }, 10);
+        
+        // Update form headers and fields based on type
+        updateFormForType(type);
+        
+        // Load appropriate lookups
+        loadLookups(type).then(() => {
+          // Load listings after lookups are loaded
+          renderListings();
+        });
+      }
+    }
+
+    function updateFormForType(type) {
+      const sellerFields = document.getElementById('sellerFields');
+      const serviceFields = document.getElementById('serviceFields');
+      const createHeader = document.getElementById('createHeader');
+      const myItemsHeader = document.getElementById('myItemsHeader');
+      const filterLabel = document.getElementById('filterLabel');
+      const formHint = document.getElementById('formHint');
+      
+      if (type === 'seller') {
+        if (sellerFields) sellerFields.classList.remove('hidden');
+        if (serviceFields) serviceFields.classList.add('hidden');
+        if (createHeader) createHeader.textContent = 'Create Product Listing';
+        if (myItemsHeader) myItemsHeader.textContent = 'My Products';
+        if (filterLabel) filterLabel.textContent = 'Filter by category';
+        if (formHint) formHint.textContent = 'Add products to sell on Nibash.';
+      } else if (type === 'service') {
+        if (sellerFields) sellerFields.classList.add('hidden');
+        if (serviceFields) serviceFields.classList.remove('hidden');
+        if (createHeader) createHeader.textContent = 'Create Service Project';
+        if (myItemsHeader) myItemsHeader.textContent = 'My Projects';
+        if (filterLabel) filterLabel.textContent = 'Filter by project type';
+        if (formHint) formHint.textContent = 'Create service packages for customers.';
+      }
+    }
+
+    // Helper: parse service areas stored as array, JSON string, or comma-separated string
+    function parseServiceAreas(val) {
+      try {
+        if (!val) return [];
+        if (Array.isArray(val)) return val.map(x => String(x).trim()).filter(Boolean);
+        if (typeof val === 'string') {
+          const s = val.trim();
+          if (s.startsWith('[') || s.startsWith('{')) {
+            try {
+              const parsed = JSON.parse(s);
+              if (Array.isArray(parsed)) return parsed.map(x => String(x).trim()).filter(Boolean);
+              if (typeof parsed === 'object') return Object.values(parsed).map(x => String(x).trim()).filter(Boolean);
+            } catch (e) {
+              // fallthrough to CSV parsing
+            }
+          }
+          return s.split(',').map(x => x.trim()).filter(Boolean);
+        }
+        return [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    /* =======================
+       LOOKUPS & CATEGORIES
+    ======================= */
+    async function loadLookups(type) {
+      try {
+        if (type === 'seller') {
+          // Load product categories
+          const prodCats = await apiCall("/api/lookups/product-categories");
+          const prodSelect = document.getElementById("productCategory");
+          if (prodSelect) {
+            prodSelect.innerHTML = '<option value="">Select a category</option>' +
+              prodCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+          }
+          
+          // Update filter dropdown
+          const filter = document.getElementById('categoryFilter');
+          if (filter) {
+            filter.innerHTML = '<option value="">All categories</option>' +
+              prodCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+          }
+        } else if (type === 'service') {
+          // Load service categories
+          const servCats = await apiCall("/api/lookups/service-categories");
+          const servSelect = document.getElementById("serviceCategory");
+          if (servSelect) {
+            servSelect.innerHTML = '<option value="">Select a project type</option>' +
+              servCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+          }
+          
+          // Update filter dropdown
+          const filter = document.getElementById('categoryFilter');
+          if (filter) {
+            filter.innerHTML = '<option value="">All project types</option>' +
+              servCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
+          }
+        }
+      } catch (e) {
+        console.error("Error loading lookups:", e);
+      }
+    }
+
+    /* =======================
+       LISTINGS MANAGEMENT
+    ======================= */
+    async function renderListings() {
+      try {
+        const type = localStorage.getItem("vendorType");
+        const container = document.getElementById("listingsContainer");
+        const noListings = document.getElementById("noListings");
+        
+        if (!container) return;
+        
+        if (!type) {
+          container.innerHTML = "";
+          if (noListings) {
+            noListings.style.display = "block";
+            noListings.textContent = "Choose vendor type to view items.";
+          }
+          return;
+        }
+
+        let listings = [];
+        if (type === "seller") {
+          listings = await apiCall(`/api/products?vendor_id=${VENDOR_ID}`);
+        } else if (type === "service") {
+          listings = await apiCall(`/api/services?vendor_id=${VENDOR_ID}`);
+        }
+        
+        currentListings = listings || [];
+        
+        // Apply category filter
+        const filterValue = document.getElementById('categoryFilter')?.value;
+        let filteredListings = currentListings;
+        if (filterValue) {
+          filteredListings = currentListings.filter(item => {
+            if (type === 'seller') {
+              return item.category_slug === filterValue;
+            } else {
+              return item.service_category_slug === filterValue;
+            }
+          });
+        }
+
+        container.innerHTML = "";
+        
+        if (!filteredListings || filteredListings.length === 0) {
+          if (noListings) {
+            noListings.style.display = "block";
+            noListings.textContent = type === "seller" ? "No products yet. Create one above." : "No projects yet. Create one above.";
+          }
+          return;
+        }
+        
+        if (noListings) noListings.style.display = "none";
+
+        filteredListings.forEach((item) => {
+          const card = document.createElement("div");
+          card.className = "product-card listing-card";
+          
+          const img = item.image_url || "../images/placeholder.jpg";
+          let category = "";
+          let priceInfo = "";
+          let details = "";
+          
+          if (type === "seller") {
+            category = item.category_slug || "Product";
+            priceInfo = `<div class="listing-price">৳${item.price_bdt != null ? item.price_bdt : '—'}</div>`;
+            details = `<div class="listing-stock">Stock: ${item.stock != null ? item.stock : '—'}</div>`;
+          } else {
+            category = item.service_category_slug || "Service";
+            const svcPrice = item.price != null ? item.price : (item.rate_bdt != null ? item.rate_bdt : null);
+            const billingLabel = item.billing ? ` ${item.billing}` : '';
+            priceInfo = `<div class="listing-price">৳${svcPrice != null ? svcPrice : '—'}${billingLabel}</div>`;
+            details = `<div class="listing-stock">Area: ${item.service_area || 'Not specified'}</div>`;
+          }
+          
+          card.innerHTML = `
+            <div class="listing-status ${item.is_active !== false ? 'active' : 'inactive'}">
+              ${item.is_active !== false ? 'Active' : 'Inactive'}
+            </div>
+            <img src="${img}" alt="${item.title}" onerror="this.src='../images/placeholder.jpg'">
+            <p><strong>${item.title}</strong></p>
+            <p class="muted">${category.replace(/_/g, " ")}</p>
+            ${priceInfo}
+            ${details}
+            <div class="listing-actions">
+              <button class="btn small secondary" onclick="editListing('${item.id}', '${type}')">Edit</button>
+              <button class="btn small danger" onclick="deleteListing('${item.id}', '${type}')">Delete</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (e) {
+        console.error("Error loading listings:", e);
+        const container = document.getElementById("listingsContainer");
+        if (container) {
+          container.innerHTML = '<p class="muted">Error loading listings. Please try again.</p>';
+        }
+      }
+    }
+
+    function editListing(id, type) {
+      alert(`Edit functionality for ${type} ID: ${id} - To be implemented with backend API`);
+      // You would typically open a dialog here with the item data
+    }
+
+    async function deleteListing(id, type) {
+      if (!confirm("Are you sure you want to delete this listing?")) return;
+      
+      try {
+        const endpoint = type === 'seller' ? `/api/products/${id}` : `/api/services/${id}`;
+        await apiCall(endpoint, 'DELETE');
+        
+        // Remove from currentListings
+        currentListings = currentListings.filter(item => item.id !== id);
+        
+        // Re-render
+        renderListings();
+        
+        // Show success message
+        const createStatus = document.getElementById('createStatus');
+        if (createStatus) {
+          createStatus.textContent = '✅ Listing deleted';
+          createStatus.style.color = 'green';
+          setTimeout(() => createStatus.textContent = '', 3000);
+        }
+      } catch (e) {
+        console.error("Error deleting listing:", e);
+        alert('Failed to delete listing: ' + e.message);
+      }
+    }
+
+    /* =======================
+       CREATE LISTING
+    ======================= */
+    document.getElementById("createListingBtn").addEventListener("click", async () => {
+      try {
+        const type = localStorage.getItem("vendorType");
+        if (!type) {
+          throw new Error("Please select a vendor type first");
+        }
+
+        const title = document.getElementById("listingTitle").value.trim();
+        const description = document.getElementById("listingDesc").value.trim();
+        if (!title || !description) {
+          throw new Error("Title and description are required");
+        }
+
+        const createStatus = document.getElementById("createStatus");
+        createStatus.textContent = "💾 Saving...";
+        createStatus.style.color = "inherit";
+
+        let body = { 
+          title, 
+          description,
+          vendor_id: VENDOR_ID 
+        };
+
+        if (type === "seller") {
+          body.category_slug = document.getElementById("productCategory").value;
+          body.price_bdt = parseInt(document.getElementById("productPrice").value);
+          body.stock = parseInt(document.getElementById("productStock").value);
+          body.image_url = document.getElementById("productImage").value.trim() || null;
+          
+          if (!body.category_slug || !body.price_bdt || isNaN(body.price_bdt) || !body.stock || isNaN(body.stock)) {
+            throw new Error("Please fill all product fields correctly");
+          }
+          
+          await apiCall("/api/products", "POST", body);
+          createStatus.textContent = "✅ Product created successfully!";
+          
+        } else if (type === "service") {
+          body.service_category_slug = document.getElementById("serviceCategory").value;
+          body.rate_bdt = parseInt(document.getElementById("serviceRate").value);
+          body.billing = document.getElementById("serviceBilling").value;
+          body.service_area = document.getElementById("serviceArea").value.trim();
+          body.image_url = document.getElementById("serviceImage").value.trim() || null;
+          
+          if (!body.service_category_slug || !body.rate_bdt || isNaN(body.rate_bdt) || !body.billing || !body.service_area) {
+            throw new Error("Please fill all service fields correctly");
+          }
+          
+          await apiCall("/api/services", "POST", body);
+          createStatus.textContent = "✅ Service project created successfully!";
+        }
+
+        createStatus.style.color = "green";
+        
+        // Clear form
+        document.getElementById("listingTitle").value = "";
+        document.getElementById("listingDesc").value = "";
+        
+        // Reload listings
+        await renderListings();
+        
+        // Reset status after 3 seconds
+        setTimeout(() => {
+          createStatus.textContent = "";
+        }, 3000);
+        
+      } catch (e) {
+        const createStatus = document.getElementById("createStatus");
+        createStatus.textContent = `❌ ${e.message}`;
+        createStatus.style.color = "crimson";
+      }
+    });
+
+    /* =======================
+       INITIALIZE VENDOR TYPE
+    ======================= */
+    function initializeVendorType() {
+      // Load saved vendor type from localStorage
+      const savedType = localStorage.getItem('vendorType');
+      
+      // Set radio button if type exists
+      if (savedType) {
+        const radio = document.querySelector(`input[name="vendorType"][value="${savedType}"]`);
+        if (radio) {
+          radio.checked = true;
+          // Activate the type card visually
+          const typeCard = radio.closest('.type-card');
+          if (typeCard) {
+            document.querySelectorAll('.type-card').forEach(card => card.classList.remove('active'));
+            typeCard.classList.add('active');
+          }
+        }
+        
+        // Show the gated sections
+        setGateVisibility(savedType);
+      }
+      
+      // Add change listeners to radio buttons
+      document.querySelectorAll('input[name="vendorType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const type = e.target.value;
+          localStorage.setItem('vendorType', type);
+          
+          // Update active state
+          document.querySelectorAll('.type-card').forEach(card => card.classList.remove('active'));
+          const typeCard = e.target.closest('.type-card');
+          if (typeCard) typeCard.classList.add('active');
+          
+          // Update UI
+          setGateVisibility(type);
+        });
+      });
     }
 
     /* =======================
@@ -557,27 +979,29 @@
       const verifyDialogMessageEl = document.getElementById("verifyDialogMessage");
       const verificationKey = `verification_pending_${VENDOR_ID}`;
 
-      // Open verification dialog
-      openVerifyBtn.addEventListener("click", () => {
-        const pending = localStorage.getItem(verificationKey);
-        verifyDialog.style.display = "flex";
-        
-        if (pending) {
-          const data = JSON.parse(pending);
-          verifyDialogMessageEl.textContent = `⏳ Request submitted on ${new Date(data.requested_at).toLocaleString()}`;
-          verifyDialogMessageEl.style.color = "#92400e";
-          disableVerificationInputs(true);
-          submitVerifyBtn.style.display = "none";
-          resetVerifyBtn.disabled = true;
+      // Open verification dialog (button may not exist when status != unverified)
+      if (openVerifyBtn) {
+        openVerifyBtn.addEventListener("click", () => {
+          const pending = localStorage.getItem(verificationKey);
+          verifyDialog.style.display = "flex";
+          
+          if (pending) {
+            const data = JSON.parse(pending);
+            verifyDialogMessageEl.textContent = `⏳ Request submitted on ${new Date(data.requested_at).toLocaleString()}`;
+            verifyDialogMessageEl.style.color = "#92400e";
+            disableVerificationInputs(true);
+            submitVerifyBtn.style.display = "none";
+            resetVerifyBtn.disabled = true;
 
-        } else {
-          verifyDialogMessageEl.textContent = "";
-          disableVerificationInputs(false);
-          submitVerifyBtn.style.display = "inline-block";
-          resetVerifyBtn.disabled = false;
+          } else {
+            verifyDialogMessageEl.textContent = "";
+            disableVerificationInputs(false);
+            submitVerifyBtn.style.display = "inline-block";
+            resetVerifyBtn.disabled = false;
 
-        }
-      });
+          }
+        });
+      }
 
       // Close dialog
       closeVerifyBtn.addEventListener("click", () => {
@@ -719,70 +1143,120 @@
        LOAD PROFILE
     ======================= */
     async function loadVendorProfile() {
-      const me = await apiCall("/api/vendors/me");
-      VENDOR_PROFILE = me;
+      try {
+        const me = await apiCall("/api/vendors/me");
+        VENDOR_PROFILE = me;
 
-      document.getElementById("companyName").textContent = me.company_name || "—";
-      document.getElementById("companyPhone").textContent = me.phone || "—";
-      document.getElementById("companyLocation").textContent = me.location || "—";
-      document.getElementById("companyEmail").textContent = me.email || "—";
-      document.getElementById("companyJobType").textContent = (me.job_type || "—").replace(/_/g, " ");
-      document.getElementById("companyJobDesc").textContent = me.Vendor_description || "—";
+        document.getElementById("companyName").textContent = me.company_name || "—";
+        document.getElementById("companyPhone").textContent = me.phone || "—";
+        document.getElementById("companyLocation").textContent = me.location || "—";
+        document.getElementById("companyEmail").textContent = me.email || "—";
+        document.getElementById("companyJobType").textContent = (me.job_type || "—").replace(/_/g, " ");
+        document.getElementById("companyJobDesc").textContent = me.Vendor_description || "—";
 
-      if (me.latitude && me.longitude) {
-        currentLat = parseFloat(me.latitude);
-        currentLng = parseFloat(me.longitude);
+        if (me.latitude && me.longitude) {
+          currentLat = parseFloat(me.latitude);
+          currentLng = parseFloat(me.longitude);
+        }
+
+        document.getElementById("editCompanyName").value = me.company_name || "";
+        document.getElementById("editCompanyPhone").value = me.phone || "";
+        document.getElementById("editCompanyLocation").value = me.location || "";
+        document.getElementById("editCompanyEmail").value = me.email || "";
+        document.getElementById("editJobType").value = me.job_type || "";
+        document.getElementById("editJobDescription").value = me.Vendor_description || "";
+        document.getElementById("editLogoUrl").value = me.logo_url || "";
+
+        // Populate additional profile/edit fields
+        if (document.getElementById("editShopAddress")) document.getElementById("editShopAddress").value = me.shop_address || "";
+        const sAreas = parseServiceAreas(me.service_locations);
+        if (document.getElementById("editServiceAreas")) document.getElementById("editServiceAreas").value = sAreas.join(', ');
+        if (document.getElementById("editVisitingCard")) document.getElementById("editVisitingCard").value = me.visiting_card_url || "";
+        if (document.getElementById("editVisitingCardUrl")) document.getElementById("editVisitingCardUrl").value = me.visiting_card_url || "";
+        // if (document.getElementById("companyServiceAreas")) document.getElementById("companyServiceAreas").textContent = sAreas.length ? sAreas.join(', ') : '—';
+        if (document.getElementById("editServiceRadius")) document.getElementById("editServiceRadius").value = me.service_radius_km != null ? me.service_radius_km : "";
+        if (document.getElementById("editWhatsappLink")) document.getElementById("editWhatsappLink").value = me.whatsapp_link || "";
+
+        // Update profile display fields
+        if (document.getElementById("companyShopAddress")) document.getElementById("companyShopAddress").textContent = me.shop_address || "—";
+        if (document.getElementById("companyServiceAreas")) {
+          const sAreas = Array.isArray(me.service_locations) ? me.service_locations : (typeof me.service_locations === 'string' && me.service_locations ? JSON.parse(me.service_locations) : []);
+          document.getElementById("companyServiceAreas").textContent = (sAreas && sAreas.length) ? sAreas.join(', ') : "—";
+        }
+        if (document.getElementById("companyServiceRadius")) document.getElementById("companyServiceRadius").textContent = (me.service_radius_km != null ? `${me.service_radius_km}` : '—');
+        if (document.getElementById("companyWhatsapp")) {
+          const wa = me.whatsapp_link;
+          const waEl = document.getElementById("companyWhatsapp");
+          if (wa) {
+            let href = wa;
+            if (!href.startsWith('http')) {
+              const digits = wa.replace(/\D/g, '');
+              if (digits) href = `https://wa.me/${digits}`;
+            }
+            waEl.innerHTML = `<a href="${href}" target="_blank" rel="noopener noreferrer">${wa}</a>`;
+          } else {
+            waEl.textContent = '—';
+          }
+        }
+        if (document.getElementById("companyVisitingCard")) {
+          if (me.visiting_card_url) document.getElementById("companyVisitingCard").innerHTML = `<a href="${me.visiting_card_url}" target="_blank">View</a>`;
+          else document.getElementById("companyVisitingCard").textContent = "—";
+        }
+
+        // Initialize vendor type from profile
+        const vendorType = me.vendor_type || localStorage.getItem('vendorType');
+        if (vendorType) {
+          localStorage.setItem('vendorType', vendorType);
+        }
+
+        initMap();
+        if (vendorMarker) {
+          vendorMarker.setLatLng([currentLat, currentLng]);
+          map.setView([currentLat, currentLng], 13);
+        }
+        document.getElementById("locationName").value = me.location || "";
+
+        // Verification UI
+        const verificationKey = `verification_pending_${VENDOR_ID}`;
+        let vStatus = me.verification_status || "unverified";
+        const pendingLocal = localStorage.getItem(verificationKey);
+        
+        if (vStatus === "unverified" && pendingLocal) {
+          vStatus = "pending";
+          me.verification_requested_at = JSON.parse(pendingLocal).requested_at;
+        }
+        
+        let statusText, statusClass;
+        if (vStatus === "pending") {
+          statusText = "Pending review";
+          statusClass = "pending";
+        } else if (vStatus === "verified") {
+          statusText = "Verified";
+          statusClass = "verified";
+        } else {
+          statusText = "Unverified";
+          statusClass = "unverified";
+        }
+        
+        document.getElementById("verifyStatus").innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
+        
+        const verifyActions = document.getElementById("verifyActions");
+        if (vStatus === "unverified") {
+          verifyActions.innerHTML = '<button class="btn primary" id="openVerifyBtn">Request Verification</button>';
+        } else if (vStatus === "pending") {
+          const requestedAt = me.verification_requested_at ? new Date(me.verification_requested_at).toLocaleString() : new Date().toLocaleString();
+          verifyActions.innerHTML = `<span class="muted">Requested on ${requestedAt}</span>`;
+        } else if (vStatus === "verified") {
+          verifyActions.innerHTML = `<span class="status-badge verified">Verified ✅</span>`;
+        }
+
+        // Setup verification dialog
+        setupVerificationDialog();
+        
+      } catch (e) {
+        console.error("Error loading profile:", e);
+        alert("Failed to load vendor profile: " + e.message);
       }
-
-      document.getElementById("editCompanyName").value = me.company_name || "";
-      document.getElementById("editCompanyPhone").value = me.phone || "";
-      document.getElementById("editCompanyLocation").value = me.location || "";
-      document.getElementById("editCompanyEmail").value = me.email || "";
-      document.getElementById("editJobType").value = me.job_type || "";
-      document.getElementById("editJobDescription").value = me.Vendor_description || "";
-      document.getElementById("editLogoUrl").value = me.logo_url || "";
-
-      initMap();
-      vendorMarker.setLatLng([currentLat, currentLng]);
-      map.setView([currentLat, currentLng], 13);
-      document.getElementById("locationName").value = me.location || "";
-
-      // Verification UI
-      const verificationKey = `verification_pending_${VENDOR_ID}`;
-      let vStatus = me.verification_status || "unverified";
-      const pendingLocal = localStorage.getItem(verificationKey);
-      
-      if (vStatus === "unverified" && pendingLocal) {
-        vStatus = "pending";
-        me.verification_requested_at = JSON.parse(pendingLocal).requested_at;
-      }
-      
-      let statusText, statusClass;
-      if (vStatus === "pending") {
-        statusText = "Pending review";
-        statusClass = "pending";
-      } else if (vStatus === "verified") {
-        statusText = "Verified";
-        statusClass = "verified";
-      } else {
-        statusText = "Unverified";
-        statusClass = "unverified";
-      }
-      
-      document.getElementById("verifyStatus").innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
-      
-      const verifyActions = document.getElementById("verifyActions");
-      if (vStatus === "unverified") {
-        verifyActions.innerHTML = '<button class="btn primary" id="openVerifyBtn">Request Verification</button>';
-      } else if (vStatus === "pending") {
-        const requestedAt = me.verification_requested_at ? new Date(me.verification_requested_at).toLocaleString() : new Date().toLocaleString();
-        verifyActions.innerHTML = `<span class="muted">Requested on ${requestedAt}</span>`;
-      } else if (vStatus === "verified") {
-        verifyActions.innerHTML = `<span class="status-badge verified">Verified ✅</span>`;
-      }
-
-      // Setup verification dialog
-      setupVerificationDialog();
     }
 
     /* =======================
@@ -793,8 +1267,8 @@
         currentLat = pos.coords.latitude;
         currentLng = pos.coords.longitude;
 
-        vendorMarker.setLatLng([currentLat, currentLng]);
-        map.setView([currentLat, currentLng], 13);
+        if (vendorMarker) vendorMarker.setLatLng([currentLat, currentLng]);
+        if (map) map.setView([currentLat, currentLng], 13);
 
         const place = await getLocationName(currentLat, currentLng);
         document.getElementById("locationName").value = place;
@@ -846,6 +1320,11 @@
 
     document.getElementById("saveEditBtn").addEventListener("click", async () => {
       try {
+        const svcAreas = (document.getElementById("editServiceAreas")?.value || "").split(',').map(s => s.trim()).filter(Boolean);
+        const radiusRaw = document.getElementById("editServiceRadius") ? String(document.getElementById("editServiceRadius").value).trim() : '';
+        const service_radius_km = radiusRaw !== '' ? parseInt(radiusRaw, 10) : null;
+        if (service_radius_km !== null && (isNaN(service_radius_km) || service_radius_km < 0)) throw new Error("Invalid service radius");
+
         const data = {
           company_name: document.getElementById("editCompanyName").value.trim(),
           phone: document.getElementById("editCompanyPhone").value.trim(),
@@ -853,6 +1332,11 @@
           email: document.getElementById("editCompanyEmail").value.trim(),
           job_type: document.getElementById("editJobType").value.trim(),
           Vendor_description: document.getElementById("editJobDescription").value.trim(),
+          shop_address: document.getElementById("editShopAddress")?.value.trim() || null,
+          service_locations: svcAreas,
+          visiting_card_url: (document.getElementById("editVisitingCard")?.value || document.getElementById("editVisitingCardUrl")?.value || '').trim() || null,
+          service_radius_km,
+          whatsapp_link: document.getElementById("editWhatsappLink")?.value.trim() || null,
           logo_url: document.getElementById("editLogoUrl").value.trim() || null,
         };
 
@@ -887,8 +1371,72 @@
         document.getElementById("editCompanyEmail").value = VENDOR_PROFILE.email || "";
         document.getElementById("editJobType").value = VENDOR_PROFILE.job_type || "";
         document.getElementById("editJobDescription").value = VENDOR_PROFILE.Vendor_description || "";
+        document.getElementById("editShopAddress").value = VENDOR_PROFILE.shop_address || "";
+        document.getElementById("editServiceAreas").value = Array.isArray(VENDOR_PROFILE.service_locations) ? VENDOR_PROFILE.service_locations.join(', ') : (VENDOR_PROFILE.service_locations || "");
+        if (document.getElementById("editVisitingCard")) document.getElementById("editVisitingCard").value = VENDOR_PROFILE.visiting_card_url || "";
+        if (document.getElementById("editVisitingCardUrl")) document.getElementById("editVisitingCardUrl").value = VENDOR_PROFILE.visiting_card_url || "";
+        document.getElementById("editServiceRadius").value = VENDOR_PROFILE.service_radius_km != null ? VENDOR_PROFILE.service_radius_km : "";
+        if (document.getElementById("editWhatsappLink")) document.getElementById("editWhatsappLink").value = VENDOR_PROFILE.whatsapp_link || "";
         document.getElementById("editLogoUrl").value = VENDOR_PROFILE.logo_url || "";
       }
+    });
+
+    /* =======================
+       SAVE VENDOR TYPE
+    ======================= */
+    document.getElementById("saveTypeBtn").addEventListener("click", async () => {
+      try {
+        const selected = document.querySelector('input[name="vendorType"]:checked');
+        if (!selected) {
+          document.getElementById('typeStatus').textContent = '❌ Please select a vendor type';
+          document.getElementById('typeStatus').style.color = 'crimson';
+          return;
+        }
+
+        const vendor_type = selected.value;
+        document.getElementById('typeStatus').textContent = '💾 Saving...';
+
+        await apiCall('/api/vendors/me/type', 'PATCH', { vendor_type });
+        
+        // Save to localStorage
+        localStorage.setItem('vendorType', vendor_type);
+        
+        document.getElementById('typeStatus').textContent = '✅ Vendor type saved!';
+        document.getElementById('typeStatus').style.color = 'green';
+        
+        // Update UI
+        setGateVisibility(vendor_type);
+        
+        setTimeout(() => {
+          document.getElementById('typeStatus').textContent = '';
+        }, 3000);
+        
+      } catch (e) {
+        document.getElementById('typeStatus').textContent = `❌ ${e.message}`;
+        document.getElementById('typeStatus').style.color = 'crimson';
+      }
+    });
+
+    /* =======================
+       CLEAR FORM
+    ======================= */
+    document.getElementById("clearFormBtn").addEventListener("click", () => {
+      document.getElementById("listingTitle").value = "";
+      document.getElementById("listingDesc").value = "";
+      document.getElementById("productPrice").value = "";
+      document.getElementById("productStock").value = "";
+      document.getElementById("productImage").value = "";
+      document.getElementById("serviceRate").value = "";
+      document.getElementById("serviceArea").value = "";
+      document.getElementById("serviceImage").value = "";
+      document.getElementById("createStatus").textContent = "";
+    });
+
+    /* =======================
+       CATEGORY FILTER
+    ======================= */
+    document.getElementById('categoryFilter')?.addEventListener('change', () => {
+      renderListings();
     });
 
     /* =======================
@@ -902,11 +1450,23 @@
     });
 
     /* =======================
-       INIT
+       INITIALIZATION
     ======================= */
-    loadVendorProfile();
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initialize vendor type UI
+      initializeVendorType();
+      
+      // Load profile
+      loadVendorProfile();
+      
+      // Setup filter change listener
+      const filter = document.getElementById('categoryFilter');
+      if (filter) {
+        filter.addEventListener('change', () => {
+          renderListings();
+        });
+      }
+    });
   </script>
-
 </body>
-
 </html>
