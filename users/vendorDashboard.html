@@ -10,101 +10,509 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
-    .hidden { display: none !important; }
-    .muted { color: #6b7280; }
-    .row-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    .status { font-size: 0.9rem; }
-    .products-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
-    .product-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; overflow: hidden; transition: transform 0.2s; }
-    .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .product-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; }
-    .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; background:#fff; margin-bottom:16px; }
-    .form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
-    .form-field { display:flex; flex-direction:column; gap:6px; }
-    .form-field.col-span-2 { grid-column: span 2 / span 2; }
-    .btn { padding:8px 14px; border-radius:10px; border:1px solid #11182710; cursor:pointer; background:#f3f4f6; transition: all 0.2s ease; }
-    .btn.primary { background:#111827; color:#fff; }
-    .btn.primary:hover { background:#1f2937; }
-    .type-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin:12px 0; }
-    .type-card { border:1px solid #e5e7eb; border-radius:14px; padding:12px; display:flex; gap:10px; align-items:flex-start; cursor:pointer; transition: all 0.2s ease; }
-    .type-card:hover { border-color:#111827; background:#f9fafb; }
-    .type-card.active { border-color:#111827; background:#f3f4f6; }
-    .type-card input { margin-top:4px; }
-    .gated { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
-    .gated.ready { opacity: 1; pointer-events: auto; }
-    .dialog-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; padding: 20px; z-index:1000; overflow-y:auto; }
-    /* Keep dialogs accessible on short/tall screens */
-    @media (max-height: 640px) {
-      .dialog-backdrop { align-items: flex-start; padding-top: 28px; padding-bottom: 28px; }
+    .hidden {
+      display: none !important;
     }
 
-    .dialog { width: 100%; max-width: 720px; box-sizing: border-box; background:#fff; border-radius:14px; border:1px solid #e5e7eb; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 20px; max-height: calc(100vh - 48px); overflow-y: auto; }
+    .muted {
+      color: #6b7280;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status {
+      font-size: 0.9rem;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .product-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      background: #fff;
+      margin-bottom: 16px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-field.col-span-2 {
+      grid-column: span 2 / span 2;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid #11182710;
+      cursor: pointer;
+      background: #f3f4f6;
+      transition: all 0.2s ease;
+    }
+
+    .btn.primary {
+      background: #111827;
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: #1f2937;
+    }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .type-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .type-card:hover {
+      border-color: #111827;
+      background: #f9fafb;
+    }
+
+    .type-card.active {
+      border-color: #111827;
+      background: #f3f4f6;
+    }
+
+    .type-card input {
+      margin-top: 4px;
+    }
+
+    .gated {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+
+    .gated.ready {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dialog-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    /* Keep dialogs accessible on short/tall screens */
+    @media (max-height: 640px) {
+      .dialog-backdrop {
+        align-items: flex-start;
+        padding-top: 28px;
+        padding-bottom: 28px;
+      }
+    }
+
+    .dialog {
+      width: 100%;
+      max-width: 720px;
+      box-sizing: border-box;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      max-height: calc(100vh - 48px);
+      overflow-y: auto;
+    }
 
     /* Ensure dialog media content scales and doesn't overflow */
-    .dialog img, .dialog video, .photo-preview img, .camera-preview { width: 100%; height: auto; max-height: 420px; object-fit: cover; border-radius: 8px; }
-    .camera-preview { max-height: 320px; }
+    .dialog img,
+    .dialog video,
+    .photo-preview img,
+    .camera-preview {
+      width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .camera-preview {
+      max-height: 320px;
+    }
 
     /* Footer and header stay usable on small dialogs */
-    .dialog header, .dialog footer { flex-shrink: 0; }
+    .dialog header,
+    .dialog footer {
+      flex-shrink: 0;
+    }
 
     /* Slight padding reduction on very small screens */
     @media (max-width: 420px) {
-      .dialog { padding: 12px; border-radius: 12px; }
+      .dialog {
+        padding: 12px;
+        border-radius: 12px;
+      }
     }
-    .dialog header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px; }
-    .dialog footer { display:flex; gap:8px; justify-content:flex-end; margin-top: 16px; }
-    .vendor-logo { width: 56px; height:56px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#111827; color:#fff; font-weight:600; font-size:20px; overflow:hidden; }
+
+    .dialog header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .dialog footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 16px;
+    }
+
+    .vendor-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111827;
+      color: #fff;
+      font-weight: 600;
+      font-size: 20px;
+      overflow: hidden;
+    }
+
     /* Verification dialog improvements */
-    .verify-hint { margin:8px 0 16px; color:#6b7280; font-size:0.95rem; line-height:1.5; }
-    .upload-row { display:flex; gap:8px; align-items:center; margin-top: 4px; }
-    .file-name { font-size:0.9rem; color:#374151; margin-left:8px; }
-    #verifyDialogMessage { font-weight:600; margin-top:12px; }
-    .dialog .disabled { opacity:0.6; pointer-events:none; }
-    .vendor-logo img { width:100%; height:100%; object-fit:cover; display:block; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; padding: 10px 16px; border-bottom: 1px solid #e5e7eb; background:#fff; position: sticky; top:0; z-index:5; }
-    .dashboard-container { display:grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 56px); }
-    .sidebar { border-right:1px solid #e5e7eb; padding: 16px; }
-    .sidebar ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
-    .sidebar li { padding:8px 10px; border-radius:8px; cursor:pointer; }
-    .sidebar li.active, .sidebar li:hover { background:#f3f4f6; }
-    .vendor-info { display:flex; gap:16px; align-items:center; justify-content:space-between; border:1px solid #e5e7eb; border-radius:16px; padding:16px; margin-bottom:16px; }
-    .vendor-details { flex:1; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px 16px; }
-    .vendor-actions { display:flex; gap:8px; }
-    #mapContainer { width:100%; height:400px; border-radius:12px; margin:12px 0; border:1px solid #e5e7eb; }
-    
+    .verify-hint {
+      margin: 8px 0 16px;
+      color: #6b7280;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .upload-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .file-name {
+      font-size: 0.9rem;
+      color: #374151;
+      margin-left: 8px;
+    }
+
+    #verifyDialogMessage {
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    .dialog .disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .vendor-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: calc(100vh - 56px);
+    }
+
+    .sidebar {
+      border-right: 1px solid #e5e7eb;
+      padding: 16px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar li {
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .sidebar li.active,
+    .sidebar li:hover {
+      background: #f3f4f6;
+    }
+
+    .vendor-info {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .vendor-details {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 16px;
+    }
+
+    .vendor-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    #mapContainer {
+      width: 100%;
+      height: 400px;
+      border-radius: 12px;
+      margin: 12px 0;
+      border: 1px solid #e5e7eb;
+    }
+
     /* Improved verification photo section */
-    .photo-section { margin: 12px 0; }
-    .photo-upload-area { border: 2px dashed #d1d5db; border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease; margin-top: 8px; }
-    .photo-upload-area:hover { border-color: #111827; background: #f9fafb; }
-    .photo-upload-area i { font-size: 2rem; color: #9ca3af; margin-bottom: 8px; }
-    .photo-upload-area p { margin: 0; color: #6b7280; font-size: 0.9rem; }
-    .photo-preview-container { margin-top: 12px; }
-    .photo-preview { width: 100%; max-height: 240px; border-radius: 12px; object-fit: cover; display: block; }
-    .camera-section { margin-top: 12px; }
-    .camera-preview { width: 100%; border-radius: 12px; margin-bottom: 8px; max-height: 240px; object-fit: cover; }
-    .camera-controls { display: flex; gap: 8px; justify-content: center; margin-top: 8px; }
-    .btn.secondary { background: #e5e7eb; color: #111827; }
-    .btn.secondary:hover { background: #d1d5db; }
-    .btn.danger { background: #ef4444; color: white; }
-    .btn.danger:hover { background: #dc2626; }
-    .btn.success { background: #10b981; color: white; }
-    .btn.success:hover { background: #059669; }
-    .btn.small { padding: 6px 12px; font-size: 0.85rem; }
-    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
-    .status-badge.pending { background: #fef3c7; color: #92400e; }
-    .status-badge.verified { background: #d1fae5; color: #065f46; }
-    .status-badge.unverified { background: #f3f4f6; color: #4b5563; }
-    .file-upload-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
-    .file-upload-row input[type="file"] { flex: 1; }
-    
+    .photo-section {
+      margin: 12px 0;
+    }
+
+    .photo-upload-area {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+
+    .photo-upload-area:hover {
+      border-color: #111827;
+      background: #f9fafb;
+    }
+
+    .photo-upload-area i {
+      font-size: 2rem;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+
+    .photo-upload-area p {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .photo-preview-container {
+      margin-top: 12px;
+    }
+
+    .photo-preview {
+      width: 100%;
+      max-height: 240px;
+      border-radius: 12px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .camera-section {
+      margin-top: 12px;
+    }
+
+    .camera-preview {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      max-height: 240px;
+      object-fit: cover;
+    }
+
+    .camera-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .btn.secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn.secondary:hover {
+      background: #d1d5db;
+    }
+
+    .btn.danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn.danger:hover {
+      background: #dc2626;
+    }
+
+    .btn.success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn.success:hover {
+      background: #059669;
+    }
+
+    .btn.small {
+      padding: 6px 12px;
+      font-size: 0.85rem;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-badge.verified {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-badge.unverified {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .file-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .file-upload-row input[type="file"] {
+      flex: 1;
+    }
+
     /* Listing card styles */
-    .listing-price { font-weight: 600; color: #111827; margin-top: 4px; }
-    .listing-stock { font-size: 0.85rem; color: #6b7280; }
-    .listing-actions { display: flex; gap: 8px; margin-top: 8px; }
-    .listing-card { position: relative; }
-    .listing-status { position: absolute; top: 10px; right: 10px; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; }
-    .listing-status.active { background: #d1fae5; color: #065f46; }
-    .listing-status.inactive { background: #f3f4f6; color: #6b7280; }
+    .listing-price {
+      font-weight: 600;
+      color: #111827;
+      margin-top: 4px;
+    }
+
+    .listing-stock {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .listing-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .listing-card {
+      position: relative;
+    }
+
+    .listing-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .listing-status.active {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .listing-status.inactive {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
   </style>
 </head>
 
@@ -145,7 +553,7 @@
           <p><strong>Email:</strong> <span id="companyEmail">—</span></p>
           <p><strong>Job Type:</strong> <span id="companyJobType">—</span></p>
           <p><strong>Service Radius:</strong> <span id="companyServiceRadius">—</span> km</p>
-          <p><strong>WhatsApp:</strong> <span id="companyWhatsapp">—</span></p>
+          <p><strong>Contact me in WhatsApp:</strong> <span id="companyWhatsapp">—</span></p>
           <p><strong>Shop Address:</strong> <span id="companyShopAddress">—</span></p>
           <!-- <p><strong>Service Areas:</strong> <span id="companyServiceAreas">—</span></p> -->
           <p><strong>Job Description:</strong> <span id="companyJobDesc">—</span></p>
@@ -341,7 +749,7 @@
         </label>
         <label class="form-field">
           <span>WhatsApp Message Link</span>
-          <input id="editWhatsappLink" type="url" placeholder="https://wa.me/..." />
+          <input id="editWhatsappLink" type="url" placeholder="Wa.me/Your number with country code.." />
         </label>
         <label class="form-field">
           <span>Service Radius (km)</span>
@@ -357,7 +765,8 @@
         </label>
         <label class="form-field col-span-2">
           <span>Service Areas</span>
-          <textarea id="editServiceLocations" rows="2" placeholder="Enter areas you serve, separated by commas (e.g., Gulshan, Banani, Dhanmondi)"></textarea>
+          <textarea id="editServiceLocations" rows="2"
+            placeholder="Enter areas you serve, separated by commas (e.g., Gulshan, Banani, Dhanmondi)"></textarea>
           <small class="muted">Separate multiple locations with commas</small>
         </label>
         <label class="form-field col-span-2">
@@ -384,7 +793,7 @@
         <label class="form-field col-span-2">
           <span>Logo URL (optional)</span>
           <input id="editLogoUrl" type="url" placeholder="https://..." />
-        </label> 
+        </label>
       </div>
       <footer>
         <span id="editStatus" class="status muted" style="margin-right:auto"></span>
@@ -400,8 +809,9 @@
         <h3>Request Verification</h3>
         <button class="btn secondary small" id="closeVerifyBtn">✕</button>
       </header>
-      <p class="verify-hint">Provide your NID or passport number and a live selfie. Optional documents (trade license, training certificate) can be uploaded as images or PDF.</p>
-      
+      <p class="verify-hint">Provide your NID or passport number and a live selfie. Optional documents (trade license,
+        training certificate) can be uploaded as images or PDF.</p>
+
       <div class="form-grid" style="gap:16px;">
         <label class="form-field col-span-2">
           <span>NID Number (or Passport) *</span>
@@ -507,27 +917,27 @@
       const listingsSection = document.getElementById('myListingsSection');
       const sellerFields = document.getElementById('sellerFields');
       const serviceFields = document.getElementById('serviceFields');
-      
+
       // Reset all visibility
       if (createSection) createSection.classList.add('hidden');
       if (listingsSection) listingsSection.classList.add('hidden');
       if (sellerFields) sellerFields.classList.add('hidden');
       if (serviceFields) serviceFields.classList.add('hidden');
-      
+
       if (type === 'seller' || type === 'service') {
         // Show the sections
         if (createSection) createSection.classList.remove('hidden');
         if (listingsSection) listingsSection.classList.remove('hidden');
-        
+
         // Add ready class for transition
         setTimeout(() => {
           if (createSection) createSection.classList.add('ready');
           if (listingsSection) listingsSection.classList.add('ready');
         }, 10);
-        
+
         // Update form headers and fields based on type
         updateFormForType(type);
-        
+
         // Load appropriate lookups
         loadLookups(type).then(() => {
           // Load listings after lookups are loaded
@@ -543,7 +953,7 @@
       const myItemsHeader = document.getElementById('myItemsHeader');
       const filterLabel = document.getElementById('filterLabel');
       const formHint = document.getElementById('formHint');
-      
+
       if (type === 'seller') {
         if (sellerFields) sellerFields.classList.remove('hidden');
         if (serviceFields) serviceFields.classList.add('hidden');
@@ -598,7 +1008,7 @@
             prodSelect.innerHTML = '<option value="">Select a category</option>' +
               prodCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
           }
-          
+
           // Update filter dropdown
           const filter = document.getElementById('categoryFilter');
           if (filter) {
@@ -613,7 +1023,7 @@
             servSelect.innerHTML = '<option value="">Select a project type</option>' +
               servCats.map(c => `<option value="${c.slug}">${c.name}</option>`).join("");
           }
-          
+
           // Update filter dropdown
           const filter = document.getElementById('categoryFilter');
           if (filter) {
@@ -634,9 +1044,9 @@
         const type = localStorage.getItem("vendorType");
         const container = document.getElementById("listingsContainer");
         const noListings = document.getElementById("noListings");
-        
+
         if (!container) return;
-        
+
         if (!type) {
           container.innerHTML = "";
           if (noListings) {
@@ -652,9 +1062,9 @@
         } else if (type === "service") {
           listings = await apiCall(`/api/services?vendor_id=${VENDOR_ID}`);
         }
-        
+
         currentListings = listings || [];
-        
+
         // Apply category filter
         const filterValue = document.getElementById('categoryFilter')?.value;
         let filteredListings = currentListings;
@@ -669,7 +1079,7 @@
         }
 
         container.innerHTML = "";
-        
+
         if (!filteredListings || filteredListings.length === 0) {
           if (noListings) {
             noListings.style.display = "block";
@@ -677,18 +1087,18 @@
           }
           return;
         }
-        
+
         if (noListings) noListings.style.display = "none";
 
         filteredListings.forEach((item) => {
           const card = document.createElement("div");
           card.className = "product-card listing-card";
-          
+
           const img = item.image_url || "../images/placeholder.jpg";
           let category = "";
           let priceInfo = "";
           let details = "";
-          
+
           if (type === "seller") {
             category = item.category_slug || "Product";
             priceInfo = `<div class="listing-price">৳${item.price_bdt != null ? item.price_bdt : '—'}</div>`;
@@ -700,7 +1110,7 @@
             priceInfo = `<div class="listing-price">৳${svcPrice != null ? svcPrice : '—'}${billingLabel}</div>`;
             details = `<div class="listing-stock">Area: ${item.service_area || 'Not specified'}</div>`;
           }
-          
+
           card.innerHTML = `
             <div class="listing-status ${item.is_active !== false ? 'active' : 'inactive'}">
               ${item.is_active !== false ? 'Active' : 'Inactive'}
@@ -733,17 +1143,17 @@
 
     async function deleteListing(id, type) {
       if (!confirm("Are you sure you want to delete this listing?")) return;
-      
+
       try {
         const endpoint = type === 'seller' ? `/api/products/${id}` : `/api/services/${id}`;
         await apiCall(endpoint, 'DELETE');
-        
+
         // Remove from currentListings
         currentListings = currentListings.filter(item => item.id !== id);
-        
+
         // Re-render
         renderListings();
-        
+
         // Show success message
         const createStatus = document.getElementById('createStatus');
         if (createStatus) {
@@ -777,10 +1187,10 @@
         createStatus.textContent = "💾 Saving...";
         createStatus.style.color = "inherit";
 
-        let body = { 
-          title, 
+        let body = {
+          title,
           description,
-          vendor_id: VENDOR_ID 
+          vendor_id: VENDOR_ID
         };
 
         if (type === "seller") {
@@ -788,43 +1198,43 @@
           body.price_bdt = parseInt(document.getElementById("productPrice").value);
           body.stock = parseInt(document.getElementById("productStock").value);
           body.image_url = document.getElementById("productImage").value.trim() || null;
-          
+
           if (!body.category_slug || !body.price_bdt || isNaN(body.price_bdt) || !body.stock || isNaN(body.stock)) {
             throw new Error("Please fill all product fields correctly");
           }
-          
+
           await apiCall("/api/products", "POST", body);
           createStatus.textContent = "✅ Product created successfully!";
-          
+
         } else if (type === "service") {
           body.service_category_slug = document.getElementById("serviceCategory").value;
           body.rate_bdt = parseInt(document.getElementById("serviceRate").value);
           body.billing = document.getElementById("serviceBilling").value;
           body.service_area = document.getElementById("serviceArea").value.trim();
           body.image_url = document.getElementById("serviceImage").value.trim() || null;
-          
+
           if (!body.service_category_slug || !body.rate_bdt || isNaN(body.rate_bdt) || !body.billing || !body.service_area) {
             throw new Error("Please fill all service fields correctly");
           }
-          
+
           await apiCall("/api/services", "POST", body);
           createStatus.textContent = "✅ Service project created successfully!";
         }
 
         createStatus.style.color = "green";
-        
+
         // Clear form
         document.getElementById("listingTitle").value = "";
         document.getElementById("listingDesc").value = "";
-        
+
         // Reload listings
         await renderListings();
-        
+
         // Reset status after 3 seconds
         setTimeout(() => {
           createStatus.textContent = "";
         }, 3000);
-        
+
       } catch (e) {
         const createStatus = document.getElementById("createStatus");
         createStatus.textContent = `❌ ${e.message}`;
@@ -838,7 +1248,7 @@
     function initializeVendorType() {
       // Load saved vendor type from localStorage
       const savedType = localStorage.getItem('vendorType');
-      
+
       // Set radio button if type exists
       if (savedType) {
         const radio = document.querySelector(`input[name="vendorType"][value="${savedType}"]`);
@@ -851,22 +1261,22 @@
             typeCard.classList.add('active');
           }
         }
-        
+
         // Show the gated sections
         setGateVisibility(savedType);
       }
-      
+
       // Add change listeners to radio buttons
       document.querySelectorAll('input[name="vendorType"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
           const type = e.target.value;
           localStorage.setItem('vendorType', type);
-          
+
           // Update active state
           document.querySelectorAll('.type-card').forEach(card => card.classList.remove('active'));
           const typeCard = e.target.closest('.type-card');
           if (typeCard) typeCard.classList.add('active');
-          
+
           // Update UI
           setGateVisibility(type);
         });
@@ -931,10 +1341,10 @@
       const cameraContainer = document.getElementById("cameraContainer");
       const photoPreviewContainer = document.getElementById("photoPreviewContainer");
       const video = document.getElementById("verifyVideo");
-      
+
       photoPreviewContainer.style.display = "none";
       cameraContainer.style.display = "block";
-      
+
       navigator.mediaDevices.getUserMedia({ video: true, audio: false })
         .then(stream => {
           cameraStream = stream;
@@ -954,7 +1364,7 @@
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
+
       canvas.toBlob(blob => {
         capturedBlob = blob;
         const url = URL.createObjectURL(blob);
@@ -984,7 +1394,7 @@
         openVerifyBtn.addEventListener("click", () => {
           const pending = localStorage.getItem(verificationKey);
           verifyDialog.style.display = "flex";
-          
+
           if (pending) {
             const data = JSON.parse(pending);
             verifyDialogMessageEl.textContent = `⏳ Request submitted on ${new Date(data.requested_at).toLocaleString()}`;
@@ -1073,18 +1483,18 @@
     function resetVerificationForm() {
       const verificationKey = `verification_pending_${VENDOR_ID}`;
       const pending = localStorage.getItem(verificationKey);
-      
+
       if (pending) {
         document.getElementById("verifyStatusMsg").textContent = "⏳ A request is pending; cannot reset now.";
         return;
       }
-      
+
       document.getElementById("verifyNid").value = "";
       document.getElementById("verifyTrade").value = "";
       document.getElementById("verifyTrainingFile").value = "";
       document.getElementById("verifyStatusMsg").textContent = "";
       document.getElementById("verifyDialogMessage").textContent = "";
-      
+
       capturedBlob = null;
       document.getElementById("livePhotoPreview").src = "";
       document.getElementById("photoPreviewContainer").style.display = "none";
@@ -1109,13 +1519,13 @@
 
         // Frontend-only: simulate submission
         setTimeout(() => {
-          const payload = { 
-            requested_at: new Date().toISOString(), 
-            nid: nid 
+          const payload = {
+            requested_at: new Date().toISOString(),
+            nid: nid
           };
-          
+
           if (trainingFile) payload.training_file_name = trainingFile.name;
-          
+
           localStorage.setItem(`verification_pending_${VENDOR_ID}`, JSON.stringify(payload));
 
           // Update UI
@@ -1124,11 +1534,11 @@
           disableVerificationInputs(true);
           if (submitBtn) submitBtn.style.display = 'none';
           document.getElementById("verifyStatusMsg").textContent = "";
-          
+
           // Update main verification card
           document.getElementById("verifyStatus").textContent = "Pending review";
           document.getElementById("verifyActions").innerHTML = `<span class="muted">Requested on ${new Date().toLocaleString()}</span>`;
-          
+
           if (submitBtn) submitBtn.disabled = false;
         }, 800);
 
@@ -1220,12 +1630,12 @@
         const verificationKey = `verification_pending_${VENDOR_ID}`;
         let vStatus = me.verification_status || "unverified";
         const pendingLocal = localStorage.getItem(verificationKey);
-        
+
         if (vStatus === "unverified" && pendingLocal) {
           vStatus = "pending";
           me.verification_requested_at = JSON.parse(pendingLocal).requested_at;
         }
-        
+
         let statusText, statusClass;
         if (vStatus === "pending") {
           statusText = "Pending review";
@@ -1237,9 +1647,9 @@
           statusText = "Unverified";
           statusClass = "unverified";
         }
-        
+
         document.getElementById("verifyStatus").innerHTML = `<span class="status-badge ${statusClass}">${statusText}</span>`;
-        
+
         const verifyActions = document.getElementById("verifyActions");
         if (vStatus === "unverified") {
           verifyActions.innerHTML = '<button class="btn primary" id="openVerifyBtn">Request Verification</button>';
@@ -1252,7 +1662,7 @@
 
         // Setup verification dialog
         setupVerificationDialog();
-        
+
       } catch (e) {
         console.error("Error loading profile:", e);
         alert("Failed to load vendor profile: " + e.message);
@@ -1291,7 +1701,7 @@
 
       try {
         document.getElementById("locationStatus").textContent = "💾 Saving location...";
-        
+
         await apiCall("/api/vendors/me/location", "PATCH", {
           latitude: currentLat,
           longitude: currentLng,
@@ -1397,20 +1807,20 @@
         document.getElementById('typeStatus').textContent = '💾 Saving...';
 
         await apiCall('/api/vendors/me/type', 'PATCH', { vendor_type });
-        
+
         // Save to localStorage
         localStorage.setItem('vendorType', vendor_type);
-        
+
         document.getElementById('typeStatus').textContent = '✅ Vendor type saved!';
         document.getElementById('typeStatus').style.color = 'green';
-        
+
         // Update UI
         setGateVisibility(vendor_type);
-        
+
         setTimeout(() => {
           document.getElementById('typeStatus').textContent = '';
         }, 3000);
-        
+
       } catch (e) {
         document.getElementById('typeStatus').textContent = `❌ ${e.message}`;
         document.getElementById('typeStatus').style.color = 'crimson';
@@ -1455,10 +1865,10 @@
     window.addEventListener('DOMContentLoaded', () => {
       // Initialize vendor type UI
       initializeVendorType();
-      
+
       // Load profile
       loadVendorProfile();
-      
+
       // Setup filter change listener
       const filter = document.getElementById('categoryFilter');
       if (filter) {
@@ -1469,4 +1879,5 @@
     });
   </script>
 </body>
+
 </html>
